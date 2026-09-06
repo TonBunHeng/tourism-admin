@@ -64,7 +64,7 @@ export default function DashboardStats({ apiStats }) {
     {
       title: "Pending Verifications",
       value: apiStats?.pending_verifications !== undefined ? apiStats.pending_verifications.toLocaleString() : "2",
-      subtext: "Business & Guide requests",
+      subtext: "Business & Content Editor requests",
       change: "+0",
       trend: "up",
       icon: AlertCircle,

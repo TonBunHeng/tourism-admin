@@ -4,7 +4,7 @@ import tourism_app_icon from "../../../public/tourism_app_icon.png";
 import {
   LayoutGrid, MapPinned, Tags, Images, CalendarDays,
   Star, Heart, Trash2, Settings, LogOut,
-  Users, User, X, FileText, ShieldCheck, Bell, Globe
+  Users, User, X, FileText, ShieldCheck, Bell, Globe, Building2
 } from "lucide-react";
 import LogoutAlert from './LogoutAlert';
 import { isFullAdminRole, normalizeRole } from '../../services/authService';
@@ -54,11 +54,12 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
   const rawRole = user?.role || 'admin';
   const normRole = normalizeRole(rawRole);
   const isPrivileged = isFullAdminRole(rawRole);
+  const isSuperAdmin = normRole === 'super_admin';
 
   const displayRole = (() => {
     if (normRole === 'super_admin') return 'Super Admin';
     if (normRole === 'admin') return 'Admin';
-    if (normRole === 'guide_editor') return 'Guide / Editor';
+    if (normRole === 'guide_editor' || normRole === 'tourism_content_editor') return 'Tourism Content Editor';
     if (normRole === 'business_owner') return 'Business Owner';
     return 'User';
   })();
@@ -68,6 +69,9 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
     { name: "Dashboard", icon: LayoutGrid, path: "/dashboard" },
     { name: "Categories", icon: Tags, path: "/categories" },
     { name: "Places", icon: MapPinned, path: "/place" },
+    ...(isPrivileged ? [
+      { name: "Businesses", icon: Building2, path: "/businesses" },
+    ] : []),
     { name: "Provinces", icon: Globe, path: "/provinces" },
     { name: "Galleries", icon: Images, path: "/galleries" },
     { name: "Events", icon: CalendarDays, path: "/events" },
@@ -80,6 +84,8 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
     ...(isPrivileged ? [
       { name: "Reports", icon: FileText, path: "/reports" },
       { name: "Security Alerts", icon: ShieldCheck, path: "/security" },
+    ] : []),
+    ...(isSuperAdmin ? [
       { name: "Deletion Requests", icon: Trash2, path: "/deletion-requests" },
     ] : []),
   ];

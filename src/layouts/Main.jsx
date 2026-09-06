@@ -44,6 +44,7 @@ export default function Main() {
       "/dashboard": "Dashboard",
       "/place": "Places",
       "/places": "Places",
+      "/businesses": "Businesses",
       "/categories": "Categories",
       "/provinces": "Provinces",
       "/galleries": "Galleries",

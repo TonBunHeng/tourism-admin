@@ -33,7 +33,7 @@ export default function Users() {
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = normalizeRole(currentUser?.role) === 'super_admin';
 
-  const roles = ["All", "Super Admin", "Admin", "Business Owner", "Guide / Editor", "User"];
+  const roles = ["All", "Super Admin", "Admin", "Business Owner", "Tourism Content Editor", "User"];
   const statuses = ["All", "Active", "Inactive", "Suspended", "Online", "Offline"];
 
   const [formData, setFormData] = useState({

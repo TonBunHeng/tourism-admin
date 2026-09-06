@@ -17,7 +17,7 @@ import ProfileAchievements from './ProfileAchievements';
 import ProfileActivity from './ProfileActivity';
 import EditProfileModal from './EditProfileModal';
 import ImageCropModal from './ImageCropModal';
-import authService from '../../services/authService';
+import authService, { normalizeRole, isSuperAdminRole } from '../../services/authService';
 import dashboardService from '../../services/dashboardService';
 import placeService from '../../services/placeService';
 import reviewService from '../../services/reviewService';
@@ -207,42 +207,45 @@ export default function Profile() {
     { label: 'Total Photos', value: String(statsData.totalPhotos), subtext: 'Gallery uploads & media', icon: Image, color: 'text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)]', bg: 'bg-[var(--color-purple-badge-bg)] dark:bg-[var(--color-purple-badge-dark-bg)]' }
   ];
 
+  const currentRole = authService.getCurrentUser()?.role || userData.role || 'Admin';
+  const isSuperAdmin = isSuperAdminRole(currentRole) || normalizeRole(currentRole) === 'super_admin';
+
   const achievements = [
     {
       name: 'Explorer',
       description: 'Created 5+ places',
       icon: Globe,
-      unlocked: Number(statsData.totalPlaces || 0) >= 5
+      unlocked: isSuperAdmin || Number(statsData.totalPlaces || 0) >= 5
     },
     {
       name: 'Reviewer',
       description: 'Written 5+ reviews',
       icon: FileText,
-      unlocked: Number(statsData.totalReviews || 0) >= 5
+      unlocked: isSuperAdmin || Number(statsData.totalReviews || 0) >= 5
     },
     {
       name: 'Photographer',
       description: 'Uploaded 3+ photos',
       icon: Image,
-      unlocked: Number(statsData.totalPhotos || 0) >= 3
+      unlocked: isSuperAdmin || Number(statsData.totalPhotos || 0) >= 3
     },
     {
       name: 'Curator',
       description: 'Saved 2+ favorites',
       icon: Heart,
-      unlocked: Number(statsData.totalFavorites || 0) >= 2
+      unlocked: isSuperAdmin || Number(statsData.totalFavorites || 0) >= 2
     },
     {
       name: 'Event Host',
       description: 'Host 5+ events',
       icon: CalendarDays,
-      unlocked: false
+      unlocked: isSuperAdmin || false
     },
     {
       name: 'Ambassador',
       description: 'Verified Admin',
       icon: Sparkles,
-      unlocked: Boolean(userData.verified)
+      unlocked: isSuperAdmin || Boolean(userData.verified)
     }
   ];
 

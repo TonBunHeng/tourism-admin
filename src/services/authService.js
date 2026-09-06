@@ -5,7 +5,7 @@ export const normalizeRole = (role) => {
   const cleaned = String(role).toLowerCase().trim().replace(/[\s/-]+/g, '_');
   if (['super_admin', 'superadmin'].includes(cleaned)) return 'super_admin';
   if (['admin', 'administrator'].includes(cleaned)) return 'admin';
-  if (['guide_editor', 'guide', 'editor'].includes(cleaned)) return 'guide_editor';
+  if (['guide_editor', 'guide', 'editor', 'tourism_content_editor', 'content_editor'].includes(cleaned)) return 'guide_editor';
   if (['business_owner', 'business', 'owner'].includes(cleaned)) return 'business_owner';
   return cleaned;
 };
@@ -18,6 +18,11 @@ export const isAdminRole = (role) => {
 export const isFullAdminRole = (role) => {
   const norm = normalizeRole(role);
   return ['super_admin', 'admin'].includes(norm);
+};
+
+export const isSuperAdminRole = (role) => {
+  const norm = normalizeRole(role);
+  return norm === 'super_admin';
 };
 
 export const authService = {

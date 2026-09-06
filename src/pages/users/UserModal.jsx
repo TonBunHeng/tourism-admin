@@ -104,7 +104,7 @@ export default function UserModal({
 
   const availableRoles = [
     { value: "user", label: "User" },
-    { value: "guide_editor", label: "Guide / Editor" },
+    { value: "guide_editor", label: "Tourism Content Editor" },
     { value: "business_owner", label: "Business Owner" },
     { value: "admin", label: "Admin" },
     ...(isSuperAdmin ? [{ value: "super_admin", label: "Super Admin" }] : [])

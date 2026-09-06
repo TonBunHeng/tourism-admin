@@ -11,11 +11,14 @@ import CategoryModal from "./CategoryModal";
 import CategoryDetailsModal from "./CategoryDetailsModal";
 import categoryService from "../../services/categoryService";
 import deletionRequestService from "../../services/deletionRequestService";
+import authService, { isSuperAdminRole } from "../../services/authService";
 import { useAlert } from "../../context/AlertContext";
 
 export default function Categories() {
   const location = useLocation();
   const { showConfirm, showSuccess, showError } = useAlert();
+  const currentUser = authService.getCurrentUser();
+  const isSuperAdmin = isSuperAdminRole(currentUser?.role);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -88,9 +91,30 @@ export default function Categories() {
   const handleDelete = async (id) => {
     const category = categories.find(c => c.id === id);
     const categoryName = category?.name || `Category #${id}`;
+
+    if (isSuperAdmin) {
+      const confirmed = await showConfirm({
+        title: 'Delete Category',
+        message: `Are you sure you want to permanently delete category "${categoryName}"?\n\nThis action cannot be undone.`,
+        confirmText: 'Delete Permanently',
+        type: 'danger'
+      });
+
+      if (!confirmed) return;
+
+      try {
+        await categoryService.deleteCategory(id);
+        showSuccess(`Category "${categoryName}" has been permanently deleted.`, 'Category Deleted');
+        loadCategories();
+      } catch (e) {
+        showError(e.message || 'Failed to delete category.', 'Delete Failed');
+      }
+      return;
+    }
+
     const confirmed = await showConfirm({
       title: 'Submit Deletion Request',
-      message: `Are you sure you want to submit a deletion request for category "${categoryName}"?\n\nThis will be sent to Deletion Requests for administrator review and approval.`,
+      message: `Are you sure you want to submit a deletion request for category "${categoryName}"?\n\nThis will be submitted to the Super Administrator for review and approval.`,
       confirmText: 'Submit Deletion',
       type: 'danger'
     });
@@ -109,7 +133,7 @@ export default function Categories() {
           category: 'Category'
         }]
       });
-      showSuccess(`Deletion request for "${categoryName}" has been submitted to Deletion Requests.`, 'Request Submitted');
+      showSuccess(`Deletion request for "${categoryName}" has been submitted to Super Admin for approval.`, 'Request Submitted');
     } catch (e) {
       showError(e.message || "Failed to submit deletion request.", 'Submission Failed');
     }

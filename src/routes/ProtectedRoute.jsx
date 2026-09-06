@@ -9,7 +9,7 @@ import Forbidden from '../pages/error/Forbidden';
  * Enforces frontend authentication and role-based access.
  * Super Admin and Admin have full All Access to all protected routes.
  */
-export default function ProtectedRoute({ allowedRoles = ['super_admin', 'admin', 'guide_editor', 'Super Admin', 'Admin', 'Guide / Editor'] }) {
+export default function ProtectedRoute({ allowedRoles = ['super_admin', 'admin', 'guide_editor', 'Super Admin', 'Admin', 'Guide / Editor', 'Tourism Content Editor'] }) {
   const location = useLocation();
   const [isVerifying, setIsVerifying] = useState(true);
   const [authStatus, setAuthStatus] = useState({
@@ -20,8 +20,8 @@ export default function ProtectedRoute({ allowedRoles = ['super_admin', 'admin',
   const checkRolePermission = (role) => {
     if (!role) return false;
     const userNorm = normalizeRole(role);
-    // Super Admin and Admin get Full All Access to all protected routes
-    if (isFullAdminRole(userNorm)) return true;
+    // Super Admin gets Full All Access across the entire administrative portal
+    if (userNorm === 'super_admin') return true;
 
     const normalizedAllowed = (Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles])
       .map(r => normalizeRole(r));

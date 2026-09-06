@@ -88,8 +88,9 @@ export const formatRoleLabel = (role) => {
     'business_owner': 'Business Owner',
     'super_admin': 'Super Admin',
     'admin': 'Admin',
-    'guide_editor': 'Guide / Editor',
-    'guide': 'Guide',
+    'tourism_content_editor': 'Tourism Content Editor',
+    'guide_editor': 'Tourism Content Editor',
+    'guide': 'Tourism Content Editor',
     'editor': 'Editor',
     'user': 'User'
   };
@@ -112,7 +113,7 @@ export const getRoleColor = (role) => {
   if (norm === 'business_owner') {
     return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800';
   }
-  if (norm === 'guide_editor' || norm === 'guide' || norm === 'editor') {
+  if (norm === 'guide_editor' || norm === 'guide' || norm === 'editor' || norm === 'tourism_content_editor') {
     return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800';
   }
   return 'bg-[var(--color-neutral-badge-bg)] text-[var(--color-neutral-badge-text)] border-[var(--color-neutral-badge-border)] dark:bg-[var(--color-neutral-badge-dark-bg)] dark:text-[var(--color-neutral-badge-dark-text)] dark:border-[var(--color-neutral-badge-dark-border)]';

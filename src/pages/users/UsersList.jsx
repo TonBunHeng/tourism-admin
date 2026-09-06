@@ -53,7 +53,8 @@ export default function UsersList({
     switch (norm) {
       case 'super_admin': return 'Super Admin';
       case 'admin': return 'Admin';
-      case 'guide_editor': return 'Guide / Editor';
+      case 'guide_editor':
+      case 'tourism_content_editor': return 'Tourism Content Editor';
       case 'business_owner': return 'Business Owner';
       default: return 'User';
     }

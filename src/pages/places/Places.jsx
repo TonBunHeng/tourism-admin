@@ -22,11 +22,14 @@ import PlaceDetailsModal from './PlaceDetailsModal';
 import placeService from '../../services/placeService';
 import categoryService from '../../services/categoryService';
 import deletionRequestService from '../../services/deletionRequestService';
+import authService, { isSuperAdminRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
 
 export default function Places() {
   const location = useLocation();
   const { showConfirm, showSuccess, showError } = useAlert();
+  const currentUser = authService.getCurrentUser();
+  const isSuperAdmin = isSuperAdminRole(currentUser?.role);
   const [places, setPlaces] = useState([]);
   const [categoriesList, setCategoriesList] = useState(['All', 'Temple', 'Palace', 'Beach', 'Nature', 'Market', 'Farm']);
   const [isLoading, setIsLoading] = useState(true);
@@ -176,9 +179,30 @@ export default function Places() {
   const handleDelete = async (id) => {
     const place = places.find(p => p.id === id);
     const placeName = place?.name || `Place #${id}`;
+
+    if (isSuperAdmin) {
+      const confirmed = await showConfirm({
+        title: 'Delete Destination',
+        message: `Are you sure you want to permanently delete "${placeName}"?\n\nThis action cannot be undone.`,
+        confirmText: 'Delete Permanently',
+        type: 'danger'
+      });
+
+      if (!confirmed) return;
+
+      try {
+        await placeService.deletePlace(id);
+        showSuccess(`Destination "${placeName}" has been permanently deleted.`, 'Destination Deleted');
+        loadPlaces();
+      } catch (e) {
+        showError(e.message || 'Failed to delete destination.', 'Delete Failed');
+      }
+      return;
+    }
+
     const confirmed = await showConfirm({
       title: 'Submit Deletion Request',
-      message: `Are you sure you want to submit a deletion request for "${placeName}"?\n\nThis destination deletion will be submitted to Deletion Requests for review and approval.`,
+      message: `Are you sure you want to submit a deletion request for "${placeName}"?\n\nThis will be submitted to the Super Administrator for review and approval.`,
       confirmText: 'Submit Deletion',
       type: 'danger'
     });
@@ -197,7 +221,7 @@ export default function Places() {
           category: place?.category || 'Place',
         }]
       });
-      showSuccess(`Deletion request for "${placeName}" has been submitted to Deletion Requests.`, 'Request Submitted');
+      showSuccess(`Deletion request for "${placeName}" has been submitted to Super Admin for approval.`, 'Request Submitted');
     } catch (e) {
       showError(e.message || 'Failed to submit deletion request.', 'Submission Failed');
     }

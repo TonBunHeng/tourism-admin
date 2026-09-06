@@ -10,12 +10,15 @@ import ProvinceDetailsModal from './ProvinceDetailsModal';
 import ProvinceModal from './ProvinceModal';
 import provinceService from '../../services/provinceService';
 import deletionRequestService from '../../services/deletionRequestService';
+import authService, { isSuperAdminRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
 
 const PROVINCE_TYPES = ['All', 'Capital City', 'Province', 'Municipality'];
 
 export default function Provinces() {
   const { showConfirm, showSuccess, showError } = useAlert();
+  const currentUser = authService.getCurrentUser();
+  const isSuperAdmin = isSuperAdminRole(currentUser?.role);
   const [provinces, setProvinces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -111,9 +114,30 @@ export default function Provinces() {
     const targetId = typeof id === 'object' ? id.id : id;
     const province = provinces.find(p => String(p.id) === String(targetId)) || (typeof id === 'object' ? id : null);
     const provName = province?.name || `Province #${targetId}`;
+
+    if (isSuperAdmin) {
+      const confirmed = await showConfirm({
+        title: 'Delete Province',
+        message: `Are you sure you want to permanently delete province "${provName}"?\n\nThis action cannot be undone.`,
+        confirmText: 'Delete Permanently',
+        type: 'danger'
+      });
+
+      if (!confirmed) return;
+
+      try {
+        await provinceService.deleteProvince(targetId);
+        showSuccess(`Province "${provName}" has been permanently deleted.`, 'Province Deleted');
+        loadProvinces();
+      } catch (e) {
+        showError(e.message || 'Failed to delete province.', 'Delete Failed');
+      }
+      return;
+    }
+
     const confirmed = await showConfirm({
       title: 'Submit Deletion Request',
-      message: `Are you sure you want to submit a deletion request for province "${provName}"?\n\nThis will be sent to Deletion Requests for review and approval.`,
+      message: `Are you sure you want to submit a deletion request for province "${provName}"?\n\nThis will be submitted to the Super Administrator for review and approval.`,
       confirmText: 'Submit Deletion',
       type: 'danger'
     });
@@ -132,7 +156,7 @@ export default function Provinces() {
           category: 'Province'
         }]
       });
-      showSuccess(`Deletion request for "${provName}" has been submitted to Deletion Requests.`, 'Request Submitted');
+      showSuccess(`Deletion request for "${provName}" has been submitted to Super Admin for approval.`, 'Request Submitted');
     } catch (e) {
       showError(e.message || 'Failed to submit deletion request.', 'Submission Failed');
     }

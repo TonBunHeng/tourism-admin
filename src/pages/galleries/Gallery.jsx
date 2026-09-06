@@ -11,10 +11,13 @@ import GalleryPreviewModal from "./GalleryPreviewModal";
 import galleryService from "../../services/galleryService";
 import categoryService from "../../services/categoryService";
 import deletionRequestService from "../../services/deletionRequestService";
+import authService, { isSuperAdminRole } from "../../services/authService";
 import { useAlert } from "../../context/AlertContext";
 
 export default function Gallery() {
   const { showConfirm, showSuccess, showError } = useAlert();
+  const currentUser = authService.getCurrentUser();
+  const isSuperAdmin = isSuperAdminRole(currentUser?.role);
   const [mediaItems, setMediaItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -112,9 +115,30 @@ export default function Gallery() {
   const handleDelete = async (id) => {
     const item = mediaItems.find(m => m.id === id);
     const mediaTitle = item?.title || `Media #${id}`;
+
+    if (isSuperAdmin) {
+      const confirmed = await showConfirm({
+        title: 'Delete Media',
+        message: `Are you sure you want to permanently delete "${mediaTitle}"?\n\nThis action cannot be undone.`,
+        confirmText: 'Delete Permanently',
+        type: 'danger'
+      });
+
+      if (!confirmed) return;
+
+      try {
+        await galleryService.deleteMedia(id);
+        showSuccess(`Media "${mediaTitle}" has been permanently deleted.`, 'Media Deleted');
+        loadMedia();
+      } catch (e) {
+        showError(e.message || 'Failed to delete media.', 'Delete Failed');
+      }
+      return;
+    }
+
     const confirmed = await showConfirm({
       title: 'Submit Deletion Request',
-      message: `Are you sure you want to submit a deletion request for "${mediaTitle}"?\n\nThis will be sent to Deletion Requests for review and approval.`,
+      message: `Are you sure you want to submit a deletion request for "${mediaTitle}"?\n\nThis will be submitted to the Super Administrator for review and approval.`,
       confirmText: 'Submit Deletion',
       type: 'danger'
     });
@@ -133,7 +157,7 @@ export default function Gallery() {
           category: item?.category || 'Gallery'
         }]
       });
-      showSuccess(`Deletion request for "${mediaTitle}" has been submitted to Deletion Requests.`, 'Request Submitted');
+      showSuccess(`Deletion request for "${mediaTitle}" has been submitted to Super Admin for approval.`, 'Request Submitted');
     } catch (e) {
       showError(e.message || 'Failed to submit deletion request.', 'Submission Failed');
     }

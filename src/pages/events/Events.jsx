@@ -10,10 +10,13 @@ import EventModal, { calculateAutoStatus } from './EventModal';
 import EventDetailsModal from './EventDetailsModal';
 import eventService from '../../services/eventService';
 import deletionRequestService from '../../services/deletionRequestService';
+import authService, { isSuperAdminRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
 
 export default function Events() {
   const { showConfirm, showSuccess, showError } = useAlert();
+  const currentUser = authService.getCurrentUser();
+  const isSuperAdmin = isSuperAdminRole(currentUser?.role);
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
@@ -129,9 +132,30 @@ export default function Events() {
   const handleDelete = async (eventId) => {
     const event = events.find(e => e.id === eventId);
     const eventTitle = event?.title || `Event #${eventId}`;
+
+    if (isSuperAdmin) {
+      const confirmed = await showConfirm({
+        title: 'Delete Event',
+        message: `Are you sure you want to permanently delete "${eventTitle}"?\n\nThis action cannot be undone.`,
+        confirmText: 'Delete Permanently',
+        type: 'danger'
+      });
+
+      if (!confirmed) return;
+
+      try {
+        await eventService.deleteEvent(eventId);
+        showSuccess(`Event "${eventTitle}" has been permanently deleted.`, 'Event Deleted');
+        loadEvents();
+      } catch (e) {
+        showError(e.message || 'Failed to delete event.', 'Delete Failed');
+      }
+      return;
+    }
+
     const confirmed = await showConfirm({
       title: 'Submit Deletion Request',
-      message: `Are you sure you want to submit a deletion request for "${eventTitle}"?\n\nThis will be sent to Deletion Requests for review and approval.`,
+      message: `Are you sure you want to submit a deletion request for "${eventTitle}"?\n\nThis will be submitted to the Super Administrator for review and approval.`,
       confirmText: 'Submit Deletion',
       type: 'danger'
     });
@@ -150,7 +174,7 @@ export default function Events() {
           category: event?.category || 'Event'
         }]
       });
-      showSuccess(`Deletion request for "${eventTitle}" has been submitted to Deletion Requests.`, 'Request Submitted');
+      showSuccess(`Deletion request for "${eventTitle}" has been submitted to Super Admin for approval.`, 'Request Submitted');
     } catch (e) {
       showError(e.message || 'Failed to submit deletion request.', 'Submission Failed');
     }

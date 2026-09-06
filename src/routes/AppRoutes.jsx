@@ -27,10 +27,12 @@ import Profile from '../pages/profiles/Profile';
 import Reports from '../pages/reports/Reports';
 import Notifications from '../pages/notifications/Notifications';
 import Security from '../pages/security/Security';
+import Businesses from '../pages/businesses/Businesses';
 
 // Role Groups
-const ALL_ADMIN_ROLES = ['super_admin', 'admin', 'guide_editor', 'Super Admin', 'Admin', 'Guide / Editor'];
+const ALL_ADMIN_ROLES = ['super_admin', 'admin', 'guide_editor', 'Super Admin', 'Admin', 'Guide / Editor', 'Tourism Content Editor'];
 const PRIVILEGED_ADMIN_ROLES = ['super_admin', 'admin', 'Super Admin', 'Admin'];
+const SUPER_ADMIN_ONLY_ROLES = ['super_admin', 'Super Admin'];
 
 const AppRoutes = () => {
   return (
@@ -66,12 +68,18 @@ const AppRoutes = () => {
 
             {/* Privileged Pages: Super Admin and Admin Only */}
             <Route element={<ProtectedRoute allowedRoles={PRIVILEGED_ADMIN_ROLES} />}>
+              <Route path="/businesses" element={<Businesses />} />
+              <Route path="/business" element={<Navigate to="/businesses" replace />} />
               <Route path="/users" element={<Users />} />
               <Route path="/user" element={<Navigate to="/users" replace />} />
               <Route path="/reports" element={<Reports />} />
-              <Route path="/deletion-requests" element={<DeletionRequests />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/security" element={<Security />} />
+            </Route>
+
+            {/* Restricted Pages: Super Admin Only */}
+            <Route element={<ProtectedRoute allowedRoles={SUPER_ADMIN_ONLY_ROLES} />}>
+              <Route path="/deletion-requests" element={<DeletionRequests />} />
             </Route>
           </Route>
         </Route>
