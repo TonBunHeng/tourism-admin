@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  X, Building2, User, Mail, Phone, MapPin, FileCheck, CheckCircle2,
+  Building2, User, Mail, Phone, MapPin, FileCheck, CheckCircle2,
   AlertCircle, XCircle, ShieldAlert, Star, Calendar, Globe, FileText,
   Edit, RefreshCw, AlertTriangle
 } from 'lucide-react';
@@ -17,9 +17,32 @@ export default function BusinessDetailsModal({
 }) {
   const [activeTab, setActiveTab] = useState('overview');
 
+  useEffect(() => {
+    if (business) {
+      document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') onClose?.();
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = 'unset';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [business, onClose]);
+
   if (!business) return null;
 
   const status = String(business.verification_status || business.status || 'pending').toLowerCase();
+  const defaultFallbackImage = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800';
+  const businessImage =
+    business.image ||
+    business.image_url ||
+    business.cover_image ||
+    business.photo ||
+    business.thumbnail ||
+    (Array.isArray(business.images) ? business.images[0] : null) ||
+    defaultFallbackImage;
 
   const getStatusBadge = () => {
     switch (status) {
@@ -59,26 +82,22 @@ export default function BusinessDetailsModal({
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col relative border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] animate-alert-popup overflow-hidden"
+        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col relative border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] animate-alert-popup overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/50 relative">
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
-            aria-label="Close"
-          >
-            <X size={18} />
-          </button>
-
+        <div className="p-6 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/30 shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#003E83] text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-xs">
-              {business.logo ? (
-                <img src={business.logo} alt={business.name} className="w-full h-full object-cover rounded-full" />
-              ) : (
-                business.name ? business.name.charAt(0).toUpperCase() : 'B'
-              )}
+            <div className="w-12 h-12 rounded-full bg-[#003E83] text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-xs overflow-hidden border border-slate-200 dark:border-zinc-700">
+              <img
+                src={business.logo || businessImage}
+                alt={business.name}
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = defaultFallbackImage;
+                }}
+              />
             </div>
 
             <div className="flex-1 min-w-0">
@@ -128,6 +147,24 @@ export default function BusinessDetailsModal({
         <div className="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
           {activeTab === 'overview' && (
             <div className="space-y-4">
+              <div className="rounded-lg overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] h-48 w-full bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] relative group shadow-xs">
+                <img
+                  src={businessImage}
+                  alt={business.name}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = defaultFallbackImage;
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-70 pointer-events-none" />
+                <div className="absolute bottom-2.5 left-3 text-white">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-black/60 backdrop-blur-xs px-2.5 py-1 rounded text-white/90">
+                    Cover Picture
+                  </span>
+                </div>
+              </div>
+
               <div className="bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 p-4 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
                 <h4 className="font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] uppercase tracking-wider text-[11px] mb-1.5">
                   About Business Profile
@@ -147,6 +184,24 @@ export default function BusinessDetailsModal({
                   <span className="text-[var(--color-text-muted-light)] text-[10px] uppercase font-semibold">Province / Region</span>
                   <p className="font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">{business.province?.name || business.province || 'Siem Reap'}</p>
                 </div>
+
+                {business.price_tier && (
+                  <div className="p-3 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] space-y-1">
+                    <span className="text-[var(--color-text-muted-light)] text-[10px] uppercase font-semibold">Price Tier</span>
+                    <p className="font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                      {business.price_tier}
+                    </p>
+                  </div>
+                )}
+
+                {(business.latitude || business.longitude) && (
+                  <div className="p-3 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] space-y-1">
+                    <span className="text-[var(--color-text-muted-light)] text-[10px] uppercase font-semibold">Geo Coordinates</span>
+                    <p className="font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                      {business.latitude || '0'}, {business.longitude || '0'}
+                    </p>
+                  </div>
+                )}
 
                 <div className="p-3 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] space-y-1">
                   <span className="text-[var(--color-text-muted-light)] text-[10px] uppercase font-semibold">Operating Hours</span>
@@ -260,21 +315,30 @@ export default function BusinessDetailsModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/50 flex flex-wrap items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => onEdit(business)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:bg-gray-100 dark:hover:bg-zinc-700 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] transition-colors cursor-pointer"
-          >
-            <Edit size={14} /> Edit Profile
-          </button>
+        <div className="px-6 py-4 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 shrink-0 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="py-2 px-4 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] font-medium text-xs sm:text-sm transition-colors text-center cursor-pointer"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              onClick={() => onEdit(business)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs sm:text-sm font-medium border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] transition-colors cursor-pointer"
+            >
+              <Edit size={14} /> Edit Profile
+            </button>
+          </div>
 
           <div className="flex flex-wrap items-center gap-2">
             {status !== 'approved' && (
               <button
                 type="button"
                 onClick={() => onApprove(business)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs sm:text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors cursor-pointer"
               >
                 <CheckCircle2 size={14} /> Approve Profile
               </button>
@@ -284,7 +348,7 @@ export default function BusinessDetailsModal({
               <button
                 type="button"
                 onClick={() => onSuspend(business)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs sm:text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition-colors cursor-pointer"
               >
                 <AlertTriangle size={14} /> Suspend
               </button>
@@ -294,7 +358,7 @@ export default function BusinessDetailsModal({
               <button
                 type="button"
                 onClick={() => onReject(business)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs sm:text-sm font-medium bg-red-600 hover:bg-red-700 text-white shadow-xs transition-colors cursor-pointer"
               >
                 <XCircle size={14} /> Reject
               </button>
@@ -304,7 +368,7 @@ export default function BusinessDetailsModal({
               <button
                 type="button"
                 onClick={() => onActivate(business)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold bg-[#003E83] hover:bg-[#002e62] text-white shadow-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs sm:text-sm font-medium bg-[#003E83] hover:bg-[#002e62] text-white shadow-xs transition-colors cursor-pointer"
               >
                 <RefreshCw size={14} /> Reactivate
               </button>

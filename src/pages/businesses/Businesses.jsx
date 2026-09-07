@@ -17,11 +17,15 @@ const INITIAL_MOCK_BUSINESSES = [
     name: 'Angkor Heritage Restaurant & Lounge',
     category: { id: 3, name: 'Dining' },
     category_name: 'Dining',
-    owner: { name: 'Owner', email: 'info@angkor-restaurant.com', phone: '+855 12 884 920' },
+    owner: { name: 'Sokha Chan', email: 'info@angkor-restaurant.com', phone: '+855 12 884 920' },
     province: { name: 'Siem Reap' },
     address: 'National Road 6, Siem Reap',
     phone: '+855 12 884 920',
     email: 'info@angkor-restaurant.com',
+    price_tier: '$$$',
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
+    latitude: '13.3610',
+    longitude: '103.8590',
     verification_status: 'approved',
     license_number: 'MOT-2024-REG',
     rating: 4.8,
@@ -35,11 +39,15 @@ const INITIAL_MOCK_BUSINESSES = [
     name: 'Buger',
     category: { id: 3, name: 'Dining' },
     category_name: 'Dining',
-    owner: { name: 'Owner', email: 'tonbunheng1122@gmail.com', phone: '+855 92 110 445' },
+    owner: { name: 'Ton Bunheng', email: 'tonbunheng1122@gmail.com', phone: '+855 92 110 445' },
     province: { name: 'Siem Reap' },
     address: 'Street 08, Pub Street District, Siem Reap',
     phone: '+855 92 110 445',
     email: 'tonbunheng1122@gmail.com',
+    price_tier: '$$',
+    image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=80&w=800',
+    latitude: '13.3540',
+    longitude: '103.8540',
     verification_status: 'pending',
     license_number: 'MOT-2024-REG',
     rating: 4.9,
@@ -53,11 +61,15 @@ const INITIAL_MOCK_BUSINESSES = [
     name: 'Mekong River Sunset Cruise & Kayaking',
     category: { id: 2, name: 'Adventure & Tour' },
     category_name: 'Adventure & Tour',
-    owner: { name: 'Owner', email: 'booking@mekong-cruise.com', phone: '+855 16 339 012' },
+    owner: { name: 'Vannak Kem', email: 'booking@mekong-cruise.com', phone: '+855 16 339 012' },
     province: { name: 'Phnom Penh' },
     address: 'Monivong Blvd, Boeung Keng Kang, Phnom Penh',
     phone: '+855 16 339 012',
     email: 'booking@mekong-cruise.com',
+    price_tier: '$$',
+    image: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&q=80&w=800',
+    latitude: '11.5564',
+    longitude: '104.9282',
     verification_status: 'pending',
     license_number: 'MOT-2024-REG',
     rating: 4.6,
@@ -71,11 +83,15 @@ const INITIAL_MOCK_BUSINESSES = [
     name: 'Kampot Pepper Plantation & Eco Lodge',
     category: { id: 1, name: 'Resort & Hotel' },
     category_name: 'Resort & Hotel',
-    owner: { name: 'Owner', email: 'contact@kampot-pepperlodge.com', phone: '+855 77 400 918' },
+    owner: { name: 'Dara Pich', email: 'contact@kampot-pepperlodge.com', phone: '+855 77 400 918' },
     province: { name: 'Kampot' },
     address: 'Street 11, Kampot Area, Kampot',
     phone: '+855 77 400 918',
     email: 'contact@kampot-pepperlodge.com',
+    price_tier: '$$$',
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+    latitude: '10.6104',
+    longitude: '104.1815',
     verification_status: 'approved',
     license_number: 'MOT-2024-REG',
     rating: 4.7,
@@ -125,7 +141,17 @@ export default function Businesses() {
       if (data && (Array.isArray(data.businesses) || Array.isArray(data))) {
         const rawList = Array.isArray(data.businesses) ? data.businesses : (Array.isArray(data) ? data : []);
         if (rawList.length > 0) {
-          setBusinesses(rawList);
+          const mapped = rawList.map(item => {
+            const fallback = INITIAL_MOCK_BUSINESSES.find(m => m.id === item.id || m.name?.toLowerCase() === item.name?.toLowerCase());
+            return {
+              ...item,
+              image: item.image || item.image_url || item.cover_image || item.photo || fallback?.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
+              price_tier: item.price_tier || fallback?.price_tier || '$$',
+              latitude: item.latitude || fallback?.latitude || '13.3610',
+              longitude: item.longitude || fallback?.longitude || '103.8590'
+            };
+          });
+          setBusinesses(mapped);
           if (data.verification_stats) {
             setStats(data.verification_stats);
           }
@@ -290,7 +316,25 @@ export default function Businesses() {
     try {
       if (editingBusiness) {
         await businessService.update(editingBusiness.id, formData);
-        setBusinesses(prev => prev.map(b => b.id === editingBusiness.id ? { ...b, ...formData } : b));
+        setBusinesses(prev => prev.map(b => b.id === editingBusiness.id ? {
+          ...b,
+          ...formData,
+          province: typeof formData.province === 'string' ? { name: formData.province } : (formData.province || b.province),
+          category: formData.category_name ? { id: formData.category_id, name: formData.category_name } : b.category,
+          category_name: formData.category_name || b.category_name,
+          image: formData.image !== undefined ? formData.image : b.image,
+          price_tier: formData.price_tier || b.price_tier,
+          latitude: formData.latitude || b.latitude,
+          longitude: formData.longitude || b.longitude,
+          phone: formData.phone || formData.owner_phone || b.phone,
+          email: formData.email || formData.owner_email || b.email,
+          owner: {
+            ...b.owner,
+            name: formData.owner_name || b.owner?.name,
+            email: formData.owner_email || b.owner?.email,
+            phone: formData.owner_phone || b.owner?.phone,
+          }
+        } : b));
         showSuccess(`Business profile "${formData.name}" has been updated.`, 'Changes Saved');
       } else {
         const newId = Date.now();
@@ -302,8 +346,12 @@ export default function Businesses() {
           owner: { name: formData.owner_name, email: formData.owner_email, phone: formData.owner_phone },
           province: { name: formData.province },
           address: formData.address,
-          phone: formData.owner_phone,
-          email: formData.owner_email,
+          phone: formData.phone || formData.owner_phone,
+          email: formData.email || formData.owner_email,
+          image: formData.image,
+          price_tier: formData.price_tier,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
           verification_status: formData.verification_status || 'pending',
           license_number: formData.license_number || 'MOT-2024-REG',
           rating: 5.0,
@@ -331,36 +379,36 @@ export default function Businesses() {
 
   const statsList = [
     {
-      label: "PENDING REVIEW",
-      value: stats.pending,
-      subtext: "Awaiting Verification",
-      icon: AlertCircle,
-      color: "text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]",
-      bg: "bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)]"
+      label: "Total Businesses",
+      value: (stats.total || 0).toLocaleString(),
+      subtext: "All business records",
+      icon: Building2,
+      color: "text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]",
+      bg: "bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)]"
     },
     {
-      label: "APPROVED & ACTIVE",
-      value: stats.approved,
-      subtext: "Verified Commercial Listings",
+      label: "Active & Approved",
+      value: (stats.approved || 0).toLocaleString(),
+      subtext: "Verified commercial listings",
       icon: CheckCircle,
       color: "text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]",
       bg: "bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)]"
     },
     {
-      label: "SUSPENDED",
-      value: stats.suspended || 0,
-      subtext: "Temporarily Flagged",
-      icon: AlertTriangle,
+      label: "Pending Review",
+      value: (stats.pending || 0).toLocaleString(),
+      subtext: "Awaiting verification",
+      icon: AlertCircle,
       color: "text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]",
       bg: "bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)]"
     },
     {
-      label: "TOTAL REGISTERED",
-      value: stats.total,
-      subtext: "All Business Records",
-      icon: Building2,
-      color: "text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]",
-      bg: "bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)]"
+      label: "Suspended",
+      value: (stats.suspended || 0).toLocaleString(),
+      subtext: "Temporarily flagged",
+      icon: AlertTriangle,
+      color: "text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]",
+      bg: "bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)]"
     }
   ];
 
@@ -410,20 +458,15 @@ export default function Businesses() {
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className={`text-xs font-bold uppercase tracking-wider truncate ${
-                    stat.label.includes('APPROVED') ? 'text-emerald-600 dark:text-emerald-400' :
-                    stat.label.includes('PENDING') ? 'text-amber-600 dark:text-amber-400' :
-                    stat.label.includes('SUSPENDED') ? 'text-amber-600 dark:text-amber-400' :
-                    'text-blue-600 dark:text-blue-400'
-                  }`}>
+                  <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-medium truncate">
                     {stat.label}
                   </p>
-                  <p className="text-lg md:text-2xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mt-1 tracking-tight">
+                  <p className="text-lg md:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mt-1 tracking-tight">
                     {stat.value}
                   </p>
                 </div>
-                <div className={`p-2.5 rounded-md shrink-0 ${stat.bg}`}>
-                  <IconComponent className={`w-5 h-5 ${stat.color}`} />
+                <div className={`p-2 rounded-md shrink-0 ${stat.bg}`}>
+                  <IconComponent className={`w-4 h-4 md:w-5 md:h-5 ${stat.color}`} />
                 </div>
               </div>
               <p className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] mt-2">
@@ -534,7 +577,16 @@ export default function Businesses() {
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700 overflow-hidden font-bold text-[#003E83] dark:text-blue-400">
-                            {b.name.charAt(0).toUpperCase()}
+                            {(b.image || b.image_url || b.cover_image || b.logo) ? (
+                              <img
+                                src={b.image || b.image_url || b.cover_image || b.logo}
+                                alt={b.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                              />
+                            ) : (
+                              b.name?.charAt(0)?.toUpperCase() || 'B'
+                            )}
                           </div>
                           <div className="min-w-0">
                             <div className="text-xs md:text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
