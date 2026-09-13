@@ -21,14 +21,14 @@ export default function UsersToolbar({
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <h2 className="text-lg sm:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">User Management</h2>
-            <span className="text-xs font-semibold text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-semibold text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] px-2.5 py-0.5 rounded-md">
               {totalCount}
             </span>
           </div>
 
           {/* Quick Segment Tabs */}
           {onQuickFilterChange && (
-            <div className="flex items-center bg-gray-100 dark:bg-zinc-800/80 p-0.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-zinc-700/60 ml-2">
+            <div className="flex items-center bg-gray-100 dark:bg-zinc-800/80 p-0.5 rounded-md text-xs font-medium border border-gray-200 dark:border-zinc-700/60 ml-2">
               <button
                 type="button"
                 onClick={() => onQuickFilterChange('all')}

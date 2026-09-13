@@ -17,7 +17,7 @@ export default function ProfileAchievements({ achievements = [] }) {
           return (
             <div
               key={index}
-              className={`text-center p-3 rounded-lg transition-all relative flex flex-col justify-between h-[124px] ${
+              className={`text-center p-3 rounded-md transition-all relative flex flex-col justify-between h-[124px] ${
                 achievement.unlocked
                   ? 'bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)] shadow-xs'
                   : 'bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] opacity-60'

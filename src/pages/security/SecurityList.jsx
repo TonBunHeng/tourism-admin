@@ -74,7 +74,7 @@ export default function SecurityList({
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-md bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] flex items-center justify-center shrink-0">
                     <ShieldAlert className="w-5 h-5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)]" />
                   </div>
 
@@ -83,7 +83,7 @@ export default function SecurityList({
                       <p className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
                         {alert.email}
                       </p>
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border shrink-0 ${getStatusBadge(alert.is_read, alert.is_ip_blocked)}`}>
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md border shrink-0 ${getStatusBadge(alert.is_read, alert.is_ip_blocked)}`}>
                         {alert.is_ip_blocked ? 'IP Blocked' : alert.is_read ? 'Acknowledged' : 'Active Alert'}
                       </span>
                     </div>
@@ -97,7 +97,7 @@ export default function SecurityList({
                         <Globe className="w-3.5 h-3.5" />
                         {alert.ip_address || '127.0.0.1'}
                       </span>
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${getSeverityBadge(alert.attempts)}`}>
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md border ${getSeverityBadge(alert.attempts)}`}>
                         {alert.attempts} Failed Attempts
                       </span>
                       <span className="flex items-center gap-1">
@@ -111,7 +111,7 @@ export default function SecurityList({
                       <button
                         type="button"
                         onClick={() => onOpenDetails(alert)}
-                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-colors cursor-pointer"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
@@ -120,7 +120,7 @@ export default function SecurityList({
                         <button
                           type="button"
                           onClick={() => onMarkRead(alert.id)}
-                          className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors cursor-pointer"
+                          className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-colors cursor-pointer"
                           title="Acknowledge"
                         >
                           <Check className="w-4 h-4" />
@@ -129,7 +129,7 @@ export default function SecurityList({
                       <button
                         type="button"
                         onClick={() => onDeleteAlert(alert.id)}
-                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-colors cursor-pointer"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -197,7 +197,7 @@ export default function SecurityList({
 
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-md bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] flex items-center justify-center shrink-0">
                           <Mail className="w-3.5 h-3.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)]" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -206,7 +206,7 @@ export default function SecurityList({
                               {alert.email}
                             </p>
                             {alert.is_ip_blocked && (
-                              <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-red-600 text-white shrink-0">
+                              <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded-md bg-red-600 text-white shrink-0">
                                 Blocked
                               </span>
                             )}
@@ -228,14 +228,14 @@ export default function SecurityList({
                     </td>
 
                     <td className="px-3 py-3.5 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-bold rounded-full border ${getSeverityBadge(alert.attempts)}`}>
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-bold rounded-md border ${getSeverityBadge(alert.attempts)}`}>
                         <Lock className="w-3 h-3 shrink-0" />
                         {alert.attempts} Attempts
                       </span>
                     </td>
 
                     <td className="px-3 py-3.5 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-semibold rounded-full border ${getStatusBadge(alert.is_read, alert.is_ip_blocked)}`}>
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-semibold rounded-md border ${getStatusBadge(alert.is_read, alert.is_ip_blocked)}`}>
                         {alert.is_ip_blocked ? (
                           <>
                             <Ban className="w-3 h-3 text-red-500 shrink-0" />
@@ -243,12 +243,12 @@ export default function SecurityList({
                           </>
                         ) : !alert.is_read ? (
                           <>
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+                            <span className="w-1.5 h-1.5 rounded-md bg-red-500 animate-pulse shrink-0" />
                             <span>Active Alert</span>
                           </>
                         ) : (
                           <>
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                            <span className="w-1.5 h-1.5 rounded-md bg-slate-400 shrink-0" />
                             <span>Acknowledged</span>
                           </>
                         )}
@@ -267,7 +267,7 @@ export default function SecurityList({
                         <button
                           type="button"
                           onClick={() => onOpenDetails(alert)}
-                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-colors cursor-pointer"
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-colors cursor-pointer"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
@@ -276,7 +276,7 @@ export default function SecurityList({
                           <button
                             type="button"
                             onClick={() => onMarkRead(alert.id)}
-                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-colors cursor-pointer"
                             title="Acknowledge"
                           >
                             <Check className="w-4 h-4" />
@@ -285,7 +285,7 @@ export default function SecurityList({
                         <button
                           type="button"
                           onClick={() => onDeleteAlert(alert.id)}
-                          className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-colors cursor-pointer"
+                          className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-colors cursor-pointer"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />

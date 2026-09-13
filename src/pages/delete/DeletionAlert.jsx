@@ -6,7 +6,7 @@ export default function DeletionAlert({ requests }) {
   if (criticalCount === 0) return null;
 
   return (
-    <div className="bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] rounded-lg p-4 mb-6 md:mb-8 flex items-start gap-3">
+    <div className="bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] rounded-md p-4 mb-6 md:mb-8 flex items-start gap-3">
       <AlertTriangle className="w-5 h-5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] flex-shrink-0 mt-0.5" />
       <div>
         <p className="text-sm font-medium text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)]">

@@ -189,6 +189,24 @@
   animation: fadeIn 0.15s ease-in reverse both;
 }
 
+/* Smooth Dropdown Animation for Header Navigation */
+@keyframes dropdownFadeSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdownFadeSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top right;
+  will-change: transform, opacity;
+}
+
 /* Standard, subtle scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

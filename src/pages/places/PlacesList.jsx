@@ -16,7 +16,7 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
               className="p-4 hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors cursor-pointer"
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 shrink-0 border border-gray-200 dark:border-zinc-700 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100 dark:bg-zinc-800 shrink-0 border border-gray-200 dark:border-zinc-700 flex items-center justify-center">
                   {place.image_url || place.image ? (
                     <img src={place.image_url || place.image} alt={place.name} className="w-full h-full object-cover" />
                   ) : (
@@ -29,13 +29,13 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
                     <p className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
                       {place.name}
                     </p>
-                    <span className="shrink-0 inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-full bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
+                    <span className="shrink-0 inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
                       {place.status || 'Active'}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
+                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
                       {place.category}
                     </span>
                     <span className="flex items-center gap-1 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
@@ -56,7 +56,7 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
                     <button
                       type="button"
                       onClick={() => onViewPlace(place.id)}
-                      className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                      className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                       title="View Details"
                     >
                       <Eye className="w-4 h-4" />
@@ -64,7 +64,7 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
                     <button
                       type="button"
                       onClick={() => onEditPlace(place)}
-                      className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                      className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                       title="Edit"
                     >
                       <Edit className="w-4 h-4" />
@@ -72,7 +72,7 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
                     <button
                       type="button"
                       onClick={() => onDeletePlace(place.id)}
-                      className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                      className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -133,7 +133,7 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
 
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 shrink-0 border border-gray-200 dark:border-zinc-700 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-md overflow-hidden bg-gray-100 dark:bg-zinc-800 shrink-0 border border-gray-200 dark:border-zinc-700 flex items-center justify-center">
                         {place.image_url || place.image ? (
                           <img src={place.image_url || place.image} alt={place.name} className="w-full h-full object-cover" />
                         ) : (
@@ -145,7 +145,7 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
                           {place.name}
                         </p>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
+                          <span className="text-[10px] font-semibold px-2 py-0.2 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
                             {place.category}
                           </span>
                         </div>
@@ -173,7 +173,7 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
                   </td>
 
                   <td className="px-3 py-3.5 whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
                       {place.status || 'Active'}
                     </span>
                   </td>
@@ -183,7 +183,7 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
                       <button
                         type="button"
                         onClick={() => onViewPlace(place.id)}
-                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
@@ -191,7 +191,7 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
                       <button
                         type="button"
                         onClick={() => onEditPlace(place)}
-                        className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Edit"
                       >
                         <Edit className="w-4 h-4" />
@@ -199,7 +199,7 @@ export default function PlacesList({ places, onViewPlace, onEditPlace, onDeleteP
                       <button
                         type="button"
                         onClick={() => onDeletePlace(place.id)}
-                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />

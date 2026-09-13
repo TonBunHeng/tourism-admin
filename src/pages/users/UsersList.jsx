@@ -109,13 +109,13 @@ export default function UsersList({
 
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-9 h-9 rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700 overflow-hidden">
+                      <div className="relative w-9 h-9 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700 overflow-hidden">
                         {user.avatar ? (
                           <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                         ) : (
                           <UserIcon className="w-4 h-4 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]" />
                         )}
-                        <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-zinc-900 ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                        <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-md border-2 border-white dark:border-zinc-900 ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
@@ -123,7 +123,7 @@ export default function UsersList({
                             {user.name}
                           </p>
                           {user.verified && (
-                            <span className="text-[9px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/40 px-1 rounded-full">
+                            <span className="text-[9px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/40 px-1 rounded-md">
                               ✓
                             </span>
                           )}
@@ -136,14 +136,14 @@ export default function UsersList({
                   </td>
 
                   <td className="px-3 py-3.5 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-full border ${getRoleColor(user.role)}`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-md border ${getRoleColor(user.role)}`}>
                       {formatRoleLabel(user.role)}
                     </span>
                   </td>
 
                   <td className="px-3 py-3.5 whitespace-nowrap">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-semibold rounded-full border ${getStatusColor(user.status, isOnline)}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : (String(user.status || '').toLowerCase() === 'suspended' ? 'bg-rose-500' : 'bg-slate-400 dark:bg-zinc-500')}`} />
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-semibold rounded-md border ${getStatusColor(user.status, isOnline)}`}>
+                      <span className={`w-1.5 h-1.5 rounded-md ${isOnline ? 'bg-emerald-500 animate-pulse' : (String(user.status || '').toLowerCase() === 'suspended' ? 'bg-rose-500' : 'bg-slate-400 dark:bg-zinc-500')}`} />
                       {user.status || 'Active'}
                     </span>
                   </td>
@@ -164,7 +164,7 @@ export default function UsersList({
                       <button
                         type="button"
                         onClick={() => handleView(user)}
-                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
@@ -173,7 +173,7 @@ export default function UsersList({
                         type="button"
                         onClick={() => canModifyRow && handleEdit(user)}
                         disabled={!canModifyRow}
-                        className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                        className={`p-1.5 rounded-md transition-all cursor-pointer ${
                           canModifyRow 
                             ? 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 active:scale-90 hover:scale-105' 
                             : 'text-gray-300 dark:text-zinc-600 cursor-not-allowed opacity-50'
@@ -186,7 +186,7 @@ export default function UsersList({
                         type="button"
                         onClick={() => canModifyRow && handleDeleteItem(user.id)}
                         disabled={!canModifyRow}
-                        className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                        className={`p-1.5 rounded-md transition-all cursor-pointer ${
                           canModifyRow 
                             ? 'text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] active:scale-90 hover:scale-105' 
                             : 'text-gray-300 dark:text-zinc-600 cursor-not-allowed opacity-50'

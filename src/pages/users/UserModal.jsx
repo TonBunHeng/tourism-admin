@@ -118,7 +118,7 @@ export default function UserModal({
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
+        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] rounded-md shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -144,7 +144,7 @@ export default function UserModal({
 
           {/* Super Admin Security Banner if unauthorized */}
           {isBlockedFromEditing && (
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-lg flex items-start gap-2.5">
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-md flex items-start gap-2.5">
               <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <div className="text-xs text-amber-800 dark:text-amber-300">
                 <span className="font-bold block mb-0.5">Super Admin Protected</span>
@@ -155,7 +155,7 @@ export default function UserModal({
 
           {/* Avatar Upload */}
           <div className="flex items-center gap-4">
-            <div className="relative w-16 h-16 rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden shrink-0 flex items-center justify-center">
+            <div className="relative w-16 h-16 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden shrink-0 flex items-center justify-center">
               {data.avatar ? (
                 <img src={data.avatar} alt="Avatar" className="w-full h-full object-cover" />
               ) : (

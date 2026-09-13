@@ -20,7 +20,7 @@ export default function UserGrowthChart({ growthData }) {
   const chartData = (Array.isArray(growthData) && growthData.length > 0) ? growthData : fallbackData;
 
   return (
-    <div className="lg:col-span-2 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-6">
+    <div className="lg:col-span-2 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">User Growth & Platform Traffic</h3>

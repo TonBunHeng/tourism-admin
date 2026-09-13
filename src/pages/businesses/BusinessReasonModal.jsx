@@ -65,17 +65,17 @@ export default function BusinessReasonModal({
       aria-labelledby="alert-reason-title"
     >
       <div
-        className="bg-white dark:bg-[#18181b] rounded-lg shadow-2xl max-w-md w-full mx-4 p-6 relative border border-gray-200 dark:border-zinc-800 animate-alert-popup overflow-hidden"
+        className="bg-white dark:bg-[#18181b] rounded-md shadow-2xl max-w-md w-full mx-4 p-6 relative border border-gray-200 dark:border-zinc-800 animate-alert-popup overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Icon */}
         <div className="flex justify-center mb-4 animate-alert-icon">
           {isReject ? (
-            <div className="w-14 h-14 rounded-full bg-red-500/10 text-red-500 dark:text-red-400 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-md bg-red-500/10 text-red-500 dark:text-red-400 flex items-center justify-center">
               <AlertTriangle size={24} />
             </div>
           ) : (
-            <div className="w-14 h-14 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
               <AlertTriangle size={24} />
             </div>
           )}
@@ -104,12 +104,12 @@ export default function BusinessReasonModal({
                 if (error) setError('');
               }}
               placeholder="Enter explanation details for the business owner..."
-              className="w-full p-3 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-lg text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all resize-none"
+              className="w-full p-3 bg-gray-50 dark:bg-zinc-800/80 border border-gray-200 dark:border-zinc-700 rounded-md text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all resize-none"
             />
             {error && <p className="text-xs text-red-500 font-medium mt-1 text-left">{error}</p>}
           </div>
 
-          <div className="bg-gray-50 dark:bg-zinc-800/40 p-3 rounded-lg border border-gray-100 dark:border-zinc-800 text-[11px] text-gray-500 dark:text-zinc-400 text-left">
+          <div className="bg-gray-50 dark:bg-zinc-800/40 p-3 rounded-md border border-gray-100 dark:border-zinc-800 text-[11px] text-gray-500 dark:text-zinc-400 text-left">
             <span className="font-semibold text-gray-700 dark:text-zinc-300">Note: </span>
             This message will be sent to the business owner&apos;s registered email address and updated in administrative audit logs.
           </div>
@@ -119,13 +119,13 @@ export default function BusinessReasonModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 px-4 border border-gray-300 dark:border-zinc-800 bg-transparent hover:bg-gray-100 dark:hover:bg-zinc-800/80 text-gray-700 dark:text-zinc-300 font-medium rounded-lg transition-colors cursor-pointer text-sm"
+              className="flex-1 py-2.5 px-4 border border-gray-300 dark:border-zinc-800 bg-transparent hover:bg-gray-100 dark:hover:bg-zinc-800/80 text-gray-700 dark:text-zinc-300 font-medium rounded-md transition-colors cursor-pointer text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`flex-1 py-2.5 px-4 font-medium rounded-lg transition-colors cursor-pointer text-sm flex items-center justify-center gap-1.5 text-white ${
+              className={`flex-1 py-2.5 px-4 font-medium rounded-md transition-colors cursor-pointer text-sm flex items-center justify-center gap-1.5 text-white ${
                 isReject
                   ? 'bg-red-500 hover:bg-red-600 active:scale-[0.98]'
                   : 'bg-amber-500 hover:bg-amber-600 active:scale-[0.98]'

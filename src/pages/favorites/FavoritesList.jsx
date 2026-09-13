@@ -73,7 +73,7 @@ export default function FavoritesList({
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-800 shrink-0 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-100 dark:bg-zinc-800 shrink-0 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-center">
                     {favorite.image ? (
                       <img
                         src={favorite.image}
@@ -91,7 +91,7 @@ export default function FavoritesList({
                         {favorite.name}
                       </p>
                       <span
-                        className={`px-2 py-0.5 text-[10px] font-bold rounded-full border shrink-0 ${
+                        className={`px-2 py-0.5 text-[10px] font-bold rounded-md border shrink-0 ${
                           isVisited
                             ? 'bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]'
                             : 'bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]'
@@ -102,7 +102,7 @@ export default function FavoritesList({
                     </div>
 
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[var(--color-rose-badge-bg)] dark:bg-[var(--color-rose-badge-dark-bg)] text-[var(--color-rose-badge-text)] dark:text-[var(--color-rose-badge-dark-text)] border border-[var(--color-rose-badge-border)] dark:border-[var(--color-rose-badge-dark-border)]">
+                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[var(--color-rose-badge-bg)] dark:bg-[var(--color-rose-badge-dark-bg)] text-[var(--color-rose-badge-text)] dark:text-[var(--color-rose-badge-dark-text)] border border-[var(--color-rose-badge-border)] dark:border-[var(--color-rose-badge-dark-border)]">
                         {favorite.category}
                       </span>
                       <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
@@ -122,7 +122,7 @@ export default function FavoritesList({
                       <button
                         type="button"
                         onClick={() => handleToggleVisit(favorite.id)}
-                        className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-colors cursor-pointer"
                         title={isVisited ? 'Mark as to visit' : 'Mark as visited'}
                       >
                         <Check className="w-4 h-4" />
@@ -130,7 +130,7 @@ export default function FavoritesList({
                       <button
                         type="button"
                         onClick={() => handleView(favorite)}
-                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
@@ -138,7 +138,7 @@ export default function FavoritesList({
                       <button
                         type="button"
                         onClick={() => handleDelete(favorite.id || favorite.place_id)}
-                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Remove"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -173,7 +173,7 @@ export default function FavoritesList({
                   checked={isAllSelected}
                   onChange={onSelectAll}
                   aria-label="Select all favorites"
-                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-zinc-600 cursor-pointer"
+                  className="w-4 h-4 rounded-md text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-zinc-600 cursor-pointer"
                 />
               </th>
               <th className="pl-2 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-8 text-center">
@@ -224,7 +224,7 @@ export default function FavoritesList({
                         checked={isSelected}
                         onChange={() => handleSelectOne(favorite.id)}
                         aria-label={`Select ${favorite.name}`}
-                        className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-zinc-600 cursor-pointer"
+                        className="w-4 h-4 rounded-md text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-zinc-600 cursor-pointer"
                       />
                     </td>
 
@@ -234,7 +234,7 @@ export default function FavoritesList({
 
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-800 shrink-0 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-md overflow-hidden bg-slate-100 dark:bg-zinc-800 shrink-0 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-center">
                           {favorite.image ? (
                             <img
                               src={favorite.image}
@@ -253,7 +253,7 @@ export default function FavoritesList({
                             {favorite.name}
                           </p>
                           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                            <span className="px-2 py-0.2 text-[10px] font-semibold rounded-full bg-[var(--color-rose-badge-bg)] dark:bg-[var(--color-rose-badge-dark-bg)] text-[var(--color-rose-badge-text)] dark:text-[var(--color-rose-badge-dark-text)] border border-[var(--color-rose-badge-border)] dark:border-[var(--color-rose-badge-dark-border)]">
+                            <span className="px-2 py-0.2 text-[10px] font-semibold rounded-md bg-[var(--color-rose-badge-bg)] dark:bg-[var(--color-rose-badge-dark-bg)] text-[var(--color-rose-badge-text)] dark:text-[var(--color-rose-badge-dark-text)] border border-[var(--color-rose-badge-border)] dark:border-[var(--color-rose-badge-dark-border)]">
                               {favorite.category}
                             </span>
                             <span className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center gap-1 truncate">
@@ -267,7 +267,7 @@ export default function FavoritesList({
 
                     <td className="px-3 py-3.5 whitespace-nowrap text-xs">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] flex items-center justify-center font-bold text-[10px] shrink-0 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden">
+                        <div className="w-7 h-7 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] flex items-center justify-center font-bold text-[10px] shrink-0 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden">
                           {userAvatar ? (
                             <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
                           ) : (
@@ -280,7 +280,7 @@ export default function FavoritesList({
                               {userName}
                             </span>
                             {userVerified && (
-                              <span className="text-[9px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/40 px-1 rounded-full">
+                              <span className="text-[9px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/40 px-1 rounded-md">
                                 ✓
                               </span>
                             )}
@@ -306,7 +306,7 @@ export default function FavoritesList({
 
                     <td className="px-3 py-3.5 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full border ${
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md border ${
                           isVisited
                             ? 'bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]'
                             : 'bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]'
@@ -329,7 +329,7 @@ export default function FavoritesList({
                         <button
                           type="button"
                           onClick={() => handleToggleVisit(favorite.id)}
-                          className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors cursor-pointer"
+                          className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-colors cursor-pointer"
                           title={isVisited ? 'Mark as to visit' : 'Mark as visited'}
                         >
                           <Check className="w-4 h-4" />
@@ -337,7 +337,7 @@ export default function FavoritesList({
                         <button
                           type="button"
                           onClick={() => handleView(favorite)}
-                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
@@ -345,7 +345,7 @@ export default function FavoritesList({
                         <button
                           type="button"
                           onClick={() => handleDelete(favorite.id || favorite.place_id)}
-                          className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="Remove from favorites"
                         >
                           <Trash2 className="w-4 h-4" />

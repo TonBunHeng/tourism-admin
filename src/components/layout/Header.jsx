@@ -15,7 +15,13 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showLogoutAlert, setShowLogoutAlert] = useState(false);
-  const [currentLang, setCurrentLang] = useState('EN');
+  const [currentLang, setCurrentLang] = useState(() => {
+    try {
+      return localStorage.getItem('app_language') || 'EN';
+    } catch {
+      return 'EN';
+    }
+  });
   const [searchQuery, setSearchQuery] = useState('');
 
   const [notifications, setNotifications] = useState([]);
@@ -200,6 +206,33 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
     }
   };
 
+  const toggleNotifications = () => {
+    setShowNotifications((prev) => !prev);
+    setShowProfileMenu(false);
+    setShowLangMenu(false);
+  };
+
+  const toggleProfileMenu = () => {
+    setShowProfileMenu((prev) => !prev);
+    setShowNotifications(false);
+    setShowLangMenu(false);
+  };
+
+  const toggleLangMenu = () => {
+    setShowLangMenu((prev) => !prev);
+    setShowNotifications(false);
+    setShowProfileMenu(false);
+  };
+
+  const handleSelectLang = (lang) => {
+    setCurrentLang(lang);
+    try {
+      localStorage.setItem('app_language', lang);
+      window.dispatchEvent(new CustomEvent('language-changed', { detail: { lang } }));
+    } catch (e) {}
+    setShowLangMenu(false);
+  };
+
   return (
     <header className="h-16 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-30 transition-colors duration-200 w-full flex items-center shrink-0">
       <div className="px-3 sm:px-6 lg:px-8 w-full">
@@ -209,7 +242,7 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
             <button
               type="button"
               onClick={handleSidebarToggle}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors shrink-0 cursor-pointer flex items-center justify-center"
+              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 active:scale-95 text-gray-600 dark:text-zinc-300 transition-all duration-150 shrink-0 cursor-pointer flex items-center justify-center"
               title={isSidebarOpen ? "Close Sidebar" : isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
               aria-label="Toggle Sidebar Navigation"
             >
@@ -226,56 +259,65 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
           </div>
 
           {/* Right section - Actions */}
-          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Dark / Light Mode Toggle */}
             <button
+              type="button"
               onClick={handleToggleTheme}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors cursor-pointer"
+              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 active:scale-95 text-gray-600 dark:text-zinc-300 transition-all duration-150 cursor-pointer"
               aria-label="Toggle dark mode"
+              title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
               {isDarkMode ? (
-                <Moon size={20} className="text-blue-400" />
+                <Moon size={20} className="text-blue-400 transition-transform duration-200" />
               ) : (
-                <Sun size={20} className="text-amber-500" />
+                <Sun size={20} className="text-amber-500 transition-transform duration-200" />
               )}
             </button>
 
             {/* Language Switcher */}
             <div ref={langRef} className="relative">
               <button
-                onClick={() => setShowLangMenu(!showLangMenu)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors cursor-pointer"
+                type="button"
+                onClick={toggleLangMenu}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md active:scale-95 text-gray-600 dark:text-zinc-300 transition-all duration-150 cursor-pointer ${
+                  showLangMenu ? 'bg-gray-100 dark:bg-zinc-800 text-[#003E83] dark:text-blue-400' : 'hover:bg-gray-100 dark:hover:bg-zinc-800'
+                }`}
                 aria-label="Change language"
+                title="Change language (English / ភាសាខ្មែរ)"
               >
-                <Globe size={20} />
+                <Globe size={18} className="shrink-0 transition-transform duration-200" />
+                <span className="text-xs font-semibold uppercase tracking-wider">{currentLang}</span>
               </button>
 
               {showLangMenu && (
-                <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-zinc-900 rounded-md shadow-md border border-gray-200 dark:border-zinc-800 py-1 z-50">
-                  <div className="px-3 py-1.5 text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">
+                <div className="absolute right-0 mt-2 w-44 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-md shadow-xl border border-gray-200 dark:border-zinc-800 py-1.5 z-50 animate-dropdown overflow-hidden">
+                  <div className="px-3.5 py-1.5 text-[11px] font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">
                     Select Language
                   </div>
                   <button
-                    onClick={() => { setCurrentLang('EN'); setShowLangMenu(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between transition-colors cursor-pointer ${
+                    type="button"
+                    onClick={() => handleSelectLang('EN')}
+                    className={`w-full text-left px-3.5 py-2 text-sm flex items-center justify-between transition-colors duration-150 cursor-pointer ${
                       currentLang === 'EN'
-                        ? 'bg-blue-50 dark:bg-zinc-800 text-[#003E83] dark:text-blue-400 font-medium'
-                        : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800'
+                        ? 'bg-blue-50/80 dark:bg-zinc-800/80 text-[#003E83] dark:text-blue-400 font-medium'
+                        : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800/60'
                     }`}
                   >
                     <span>English</span>
-                    <span className="text-xs uppercase px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded">EN</span>
+                    <span className="text-xs uppercase px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded-md font-mono text-gray-500 dark:text-zinc-400">EN</span>
                   </button>
                   <button
-                    onClick={() => { setCurrentLang('KH'); setShowLangMenu(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between transition-colors cursor-pointer ${
+                    type="button"
+                    onClick={() => handleSelectLang('KH')}
+                    className={`w-full text-left px-3.5 py-2 text-sm flex items-center justify-between transition-colors duration-150 cursor-pointer ${
                       currentLang === 'KH'
-                        ? 'bg-blue-50 dark:bg-zinc-800 text-[#003E83] dark:text-blue-400 font-medium'
-                        : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800'
+                        ? 'bg-blue-50/80 dark:bg-zinc-800/80 text-[#003E83] dark:text-blue-400 font-medium'
+                        : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800/60'
                     }`}
                   >
-                    <span>ភាសាខ្មែរ</span>
-                    <span className="text-xs uppercase px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded">KH</span>
+                    <span className="font-medium">ភាសាខ្មែរ</span>
+                    <span className="text-xs uppercase px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded-md font-mono text-gray-500 dark:text-zinc-400">KH</span>
                   </button>
                 </div>
               )}
@@ -284,25 +326,29 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
             {/* Notifications */}
             <div ref={notificationRef} className="relative">
               <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                type="button"
+                onClick={toggleNotifications}
+                className={`relative p-2 rounded-md active:scale-95 transition-all duration-150 cursor-pointer ${
+                  showNotifications ? 'bg-gray-100 dark:bg-zinc-800 text-[#003E83] dark:text-blue-400' : 'hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300'
+                }`}
                 aria-label="Notifications"
+                title="Notifications"
               >
-                <Bell size={20} className="text-gray-600 dark:text-zinc-300" />
+                <Bell size={20} className="transition-transform duration-200" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 text-[10px] font-bold text-white bg-red-600 rounded-full">
+                  <span className="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 text-[10px] font-bold text-white bg-red-600 rounded-md shadow-xs">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-72 sm:w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-zinc-900 rounded-md shadow-md border border-gray-200 dark:border-zinc-800 overflow-hidden z-50">
+                <div className="absolute right-0 mt-2 w-72 sm:w-96 max-w-[calc(100vw-2rem)] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-md shadow-xl border border-gray-200 dark:border-zinc-800 overflow-hidden z-50 animate-dropdown">
                   <div className="p-3.5 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-sm text-gray-800 dark:text-zinc-100">Notifications</h3>
                       {unreadCount > 0 && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-100 text-[#003E83] dark:bg-blue-950/60 dark:text-blue-400 rounded">
+                        <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-100 text-[#003E83] dark:bg-blue-950/60 dark:text-blue-400 rounded-md">
                           {unreadCount} new
                         </span>
                       )}
@@ -333,11 +379,11 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
                         <div
                           key={n.id}
                           onClick={() => handleNotificationClick(n)}
-                          className={`p-3 text-xs flex items-start gap-2.5 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/60 ${
+                          className={`p-3 text-xs flex items-start gap-2.5 transition-colors duration-150 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800/60 ${
                             !n.read ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''
                           }`}
                         >
-                          <div className={`w-2 h-2 mt-1 rounded-full shrink-0 ${!n.read ? 'bg-blue-600' : 'bg-transparent'}`} />
+                          <div className={`w-2 h-2 mt-1 rounded-md shrink-0 ${!n.read ? 'bg-blue-600' : 'bg-transparent'}`} />
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-800 dark:text-zinc-200 truncate">{n.title || n.subject || 'System Notification'}</p>
                             <p className="text-gray-500 dark:text-zinc-400 truncate mt-0.5">{n.message || n.body}</p>
@@ -364,11 +410,15 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
             {/* Profile */}
             <div ref={profileRef} className="relative">
               <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                type="button"
+                onClick={toggleProfileMenu}
+                className="p-0.5 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 active:scale-95 transition-all duration-150 cursor-pointer"
                 aria-label="Profile menu"
+                title="Profile menu"
               >
-                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-zinc-800 text-blue-700 dark:text-blue-400 border border-gray-200 dark:border-zinc-700 flex items-center justify-center font-bold text-xs overflow-hidden">
+                <div className={`w-8 h-8 rounded-md bg-blue-100 dark:bg-zinc-800 text-blue-700 dark:text-blue-400 border flex items-center justify-center font-bold text-xs overflow-hidden transition-all duration-150 ${
+                  showProfileMenu ? 'border-[#003E83] ring-2 ring-blue-200 dark:ring-blue-900/50' : 'border-gray-200 dark:border-zinc-700'
+                }`}>
                   {userAvatar ? (
                     <img
                       src={userAvatar}
@@ -383,9 +433,9 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
               </button>
 
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-zinc-900 rounded-md shadow-md border border-gray-200 dark:border-zinc-800 overflow-hidden z-50">
+                <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-md shadow-xl border border-gray-200 dark:border-zinc-800 overflow-hidden z-50 animate-dropdown">
                   <div className="px-3.5 py-3 border-b border-gray-200 dark:border-zinc-800 flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-zinc-800 text-blue-700 dark:text-blue-400 border border-gray-200 dark:border-zinc-700 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
+                    <div className="w-8 h-8 rounded-md bg-blue-100 dark:bg-zinc-800 text-blue-700 dark:text-blue-400 border border-gray-200 dark:border-zinc-700 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
                       {userAvatar ? (
                         <img
                           src={userAvatar}
@@ -403,7 +453,7 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
                   </div>
 
                   <div className="p-1.5">
-                    <Link to="/profile" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors">
+                    <Link to="/profile" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md transition-colors duration-150">
                       <User size={16} className="text-gray-400" />
                       My Profile
                     </Link>
@@ -411,7 +461,7 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
                       const role = JSON.parse(localStorage.getItem('user') || '{}')?.role;
                       if (['super_admin', 'admin', 'Super Admin', 'Admin', 'administrator', 'superadmin'].includes(String(role).toLowerCase().trim().replace(/ /g, '_')) || ['Super Admin', 'Admin'].includes(role)) {
                         return (
-                          <Link to="/settings" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors">
+                          <Link to="/settings" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md transition-colors duration-150">
                             <Settings size={16} className="text-gray-400" />
                             Settings
                           </Link>
@@ -426,7 +476,7 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
                         setShowProfileMenu(false);
                         setShowLogoutAlert(true);
                       }}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-colors w-full text-left cursor-pointer"
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-md transition-colors duration-150 w-full text-left cursor-pointer"
                     >
                       <LogOut size={16} className="text-red-500 dark:text-red-400" />
                       Log Out

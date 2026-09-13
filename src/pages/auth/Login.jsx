@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, Sun, Moon, ArrowRight, Ban, AlertTriangle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Sun, Moon, ArrowRight, Ban, AlertTriangle, Loader2 } from "lucide-react";
 import { getInitialTheme, applyTheme, isDarkTheme, THEME_CHANGE_EVENT } from "../../utils/Theme";
 import authService from "../../services/authService";
 import { useAlert } from "../../context/AlertContext";
@@ -81,11 +81,11 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 transition-colors duration-150">
       {/* Clean, professional container */}
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg shadow-sm overflow-hidden p-6 sm:p-8 relative">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden p-6 sm:p-8 relative">
         <button
           type="button"
           onClick={handleToggleTheme}
-          className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-md text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 transition-colors cursor-pointer"
           title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           aria-label="Toggle theme"
         >
@@ -197,7 +197,7 @@ export default function Login() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 text-[#003E83] focus:ring-[#003E83] cursor-pointer"
+                    className="w-4 h-4 rounded-md border-gray-300 dark:border-zinc-700 text-[#003E83] focus:ring-[#003E83] cursor-pointer"
                   />
                   <span className="text-xs text-gray-600 dark:text-zinc-400">Remember session</span>
                 </label>
@@ -210,7 +210,7 @@ export default function Login() {
               >
                 {isLoading ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
                     <span>Signing in...</span>
                   </>
                 ) : (

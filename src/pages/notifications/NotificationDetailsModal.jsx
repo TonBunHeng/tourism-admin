@@ -98,7 +98,7 @@ export default function NotificationDetailsModal({
       aria-modal="true"
     >
       <div
-        className="w-full max-w-lg bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark-modal)] border border-gray-200 dark:border-zinc-800 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
+        className="w-full max-w-lg bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark-modal)] border border-gray-200 dark:border-zinc-800 rounded-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -108,7 +108,7 @@ export default function NotificationDetailsModal({
               <IconComponent className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <span className={`inline-block text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${getCategoryBadgeColor(notification.category, notification.type)} mb-1`}>
+              <span className={`inline-block text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md border ${getCategoryBadgeColor(notification.category, notification.type)} mb-1`}>
                 {notification.category || 'General'}
               </span>
               <h2 className="text-sm font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
@@ -120,7 +120,7 @@ export default function NotificationDetailsModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 rounded transition-colors cursor-pointer"
+            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 rounded-md transition-colors cursor-pointer"
             title="Close modal"
           >
             <X className="w-5 h-5" />
@@ -139,7 +139,7 @@ export default function NotificationDetailsModal({
                 <Clock className="w-3.5 h-3.5" />
                 {formattedDate}
               </span>
-              <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700" />
+              <span className="w-1 h-1 rounded-md bg-slate-300 dark:bg-zinc-700" />
               <span className={`font-semibold ${notification.read ? 'text-slate-500 dark:text-zinc-400' : 'text-blue-600 dark:text-blue-400'}`}>
                 {notification.read ? 'Read' : 'Unread'}
               </span>
@@ -147,13 +147,13 @@ export default function NotificationDetailsModal({
           </div>
 
           {/* Description */}
-          <div className="p-4 rounded-lg bg-slate-100/70 dark:bg-zinc-800/60 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] text-slate-700 dark:text-zinc-300 leading-relaxed text-sm">
+          <div className="p-4 rounded-md bg-slate-100/70 dark:bg-zinc-800/60 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] text-slate-700 dark:text-zinc-300 leading-relaxed text-sm">
             {notification.description || 'No additional description provided.'}
           </div>
 
           {/* Security Alert Payload Card */}
           {isSecurity && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/5 dark:bg-red-950/20 p-4 space-y-3">
+            <div className="rounded-md border border-red-500/30 bg-red-500/5 dark:bg-red-950/20 p-4 space-y-3">
               <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold text-xs uppercase tracking-wider">
                 <AlertOctagon className="w-4 h-4" />
                 Security Incident Parameters
@@ -209,7 +209,7 @@ export default function NotificationDetailsModal({
               <h4 className="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
                 Event Data
               </h4>
-              <div className="p-3 rounded-lg bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-800 space-y-1.5 text-xs">
+              <div className="p-3 rounded-md bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-800 space-y-1.5 text-xs">
                 {Object.entries(data).map(([key, val]) => (
                   <div key={key} className="flex items-center justify-between gap-2">
                     <span className="text-slate-500 capitalize">{key.replace(/_/g, ' ')}:</span>

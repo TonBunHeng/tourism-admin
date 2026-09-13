@@ -76,7 +76,7 @@ export default function IntegrationTab({ settings, setSettings }) {
                 value={settings.googleMapsApiKey || ''}
                 onChange={(e) => handleChange('googleMapsApiKey', e.target.value)}
                 placeholder="AIzaSyA..."
-                className="w-full pl-3 pr-9 py-2 text-sm font-mono rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+                className="w-full pl-3 pr-9 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
               />
               <button
                 type="button"
@@ -101,7 +101,7 @@ export default function IntegrationTab({ settings, setSettings }) {
                 value={settings.mapboxApiKey || ''}
                 onChange={(e) => handleChange('mapboxApiKey', e.target.value)}
                 placeholder="pk.eyJ1..."
-                className="w-full pl-3 pr-9 py-2 text-sm font-mono rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+                className="w-full pl-3 pr-9 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
               />
               <button
                 type="button"
@@ -137,7 +137,7 @@ export default function IntegrationTab({ settings, setSettings }) {
                 value={settings.weatherApiKey || ''}
                 onChange={(e) => handleChange('weatherApiKey', e.target.value)}
                 placeholder="Enter OpenWeather API Key..."
-                className="w-full pl-3 pr-9 py-2 text-sm font-mono rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+                className="w-full pl-3 pr-9 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
               />
               <button
                 type="button"
@@ -168,7 +168,7 @@ export default function IntegrationTab({ settings, setSettings }) {
               <select
                 value={settings.aiProvider || 'gemini'}
                 onChange={(e) => handleChange('aiProvider', e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+                className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
               >
                 <option value="gemini">Google Gemini 2.0 / 1.5</option>
                 <option value="openai">OpenAI (GPT-4o)</option>
@@ -186,7 +186,7 @@ export default function IntegrationTab({ settings, setSettings }) {
                   value={settings.aiApiKey || ''}
                   onChange={(e) => handleChange('aiApiKey', e.target.value)}
                   placeholder="API Key..."
-                  className="w-full pl-3 pr-9 py-2 text-sm font-mono rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+                  className="w-full pl-3 pr-9 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
                 />
                 <button
                   type="button"
@@ -233,7 +233,7 @@ export default function IntegrationTab({ settings, setSettings }) {
               value={settings.smtpHost || ''}
               onChange={(e) => handleChange('smtpHost', e.target.value)}
               placeholder="e.g. smtp.mailtrap.io or smtp.gmail.com"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
             />
           </div>
 
@@ -246,7 +246,7 @@ export default function IntegrationTab({ settings, setSettings }) {
               value={settings.smtpPort || '587'}
               onChange={(e) => handleChange('smtpPort', e.target.value)}
               placeholder="587"
-              className="w-full px-3 py-2 text-sm font-mono rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+              className="w-full px-3 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
             />
           </div>
 
@@ -257,7 +257,7 @@ export default function IntegrationTab({ settings, setSettings }) {
             <select
               value={settings.smtpEncryption || 'tls'}
               onChange={(e) => handleChange('smtpEncryption', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
             >
               <option value="tls">TLS (STARTTLS - Port 587)</option>
               <option value="ssl">SSL (Implicit - Port 465)</option>
@@ -274,7 +274,7 @@ export default function IntegrationTab({ settings, setSettings }) {
               value={settings.smtpUsername || ''}
               onChange={(e) => handleChange('smtpUsername', e.target.value)}
               placeholder="mailer@tourism.gov.kh"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
             />
           </div>
 
@@ -288,7 +288,7 @@ export default function IntegrationTab({ settings, setSettings }) {
                 value={settings.smtpPassword || ''}
                 onChange={(e) => handleChange('smtpPassword', e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-3 pr-9 py-2 text-sm font-mono rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+                className="w-full pl-3 pr-9 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
               />
               <button
                 type="button"

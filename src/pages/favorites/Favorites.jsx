@@ -387,7 +387,7 @@ export default function Favorites() {
       <FavoritesStats favorites={favorites} />
 
       {/* 3. Main Explorer Card Container */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex flex-col flex-1">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex flex-col flex-1">
         {/* Search, Filter & Bulk Toolbar */}
         <FavoritesToolbar
           totalCount={filteredFavorites.length}

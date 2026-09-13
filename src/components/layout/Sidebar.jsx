@@ -122,7 +122,7 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
             </span>
           </div>
           {!isExpanded && (
-            <div className="hidden md:block absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md bg-gray-900 dark:bg-zinc-950 border border-gray-800 dark:border-zinc-800 text-white">
+            <div className="hidden md:block absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md bg-gray-900 dark:bg-zinc-950 border border-gray-800 dark:border-zinc-800 text-white">
               {item.name}
             </div>
           )}
@@ -152,7 +152,7 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
         </div>
 
         {!isExpanded && (
-          <div className="hidden md:block absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md bg-gray-900 dark:bg-zinc-950 border border-gray-800 dark:border-zinc-800 text-white">
+          <div className="hidden md:block absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md bg-gray-900 dark:bg-zinc-950 border border-gray-800 dark:border-zinc-800 text-white">
             {item.name}
           </div>
         )}
@@ -176,7 +176,7 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
         {/* Brand Header */}
         <div className="h-16 flex items-center justify-between px-3.5 overflow-hidden shrink-0 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-colors">
           <div className="flex items-center gap-2.5 w-full min-w-0">
-            <div className="w-8 h-8 rounded flex items-center justify-center shrink-0 bg-blue-50 dark:bg-zinc-800 border border-blue-100 dark:border-zinc-700 transition-colors">
+            <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 bg-blue-50 dark:bg-zinc-800 border border-blue-100 dark:border-zinc-700 transition-colors">
               <img src={tourism_app_icon} alt="AngkorVerses" className="w-7 h-7 object-contain" />
             </div>
             <div className={`flex flex-col whitespace-nowrap transition-all duration-200 ${isExpanded ? 'opacity-100 max-w-[160px]' : 'opacity-100 md:opacity-0 md:max-w-0 md:overflow-hidden'}`}>
@@ -189,7 +189,7 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="md:hidden p-1 rounded transition-colors shrink-0 text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+            className="md:hidden p-1 rounded-md transition-colors shrink-0 text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
             aria-label="Close navigation"
           >
             <X size={18} />
@@ -230,10 +230,10 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
         <div className="h-14 px-2.5 shrink-0 flex items-center border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-colors">
           <Link
             to="/profile"
-            className="w-full group relative flex items-center gap-2 p-1.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800/60 transition-colors overflow-hidden"
+            className="w-full group relative flex items-center gap-2 p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800/60 transition-colors overflow-hidden"
             aria-label="User Profile"
           >
-            <div className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden bg-blue-50 dark:bg-zinc-800 text-[#003E83] dark:text-blue-400 border border-blue-100 dark:border-zinc-700">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden bg-blue-50 dark:bg-zinc-800 text-[#003E83] dark:text-blue-400 border border-blue-100 dark:border-zinc-700">
               {userAvatar ? (
                 <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
               ) : (
@@ -250,7 +250,7 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
             </div>
 
             {!isExpanded && (
-              <div className="hidden md:block absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md bg-gray-900 dark:bg-zinc-950 border border-gray-800 dark:border-zinc-800 text-white">
+              <div className="hidden md:block absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-md bg-gray-900 dark:bg-zinc-950 border border-gray-800 dark:border-zinc-800 text-white">
                 {userName} ({displayRole})
               </div>
             )}

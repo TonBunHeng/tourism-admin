@@ -40,7 +40,7 @@ export default function PreferencesTab() {
                 key={theme.id}
                 type="button"
                 onClick={() => handleThemeChange(theme.id)}
-                className={`p-3 sm:p-4 rounded-lg border-2 transition-all text-center cursor-pointer ${
+                className={`p-3 sm:p-4 rounded-md border-2 transition-all text-center cursor-pointer ${
                   isSelected
                     ? 'border-[var(--color-input)] bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)]'
                     : 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:border-[var(--color-input)]'
@@ -62,13 +62,13 @@ export default function PreferencesTab() {
             { id: 'push', label: 'Push Notifications', desc: 'Receive notifications in browser' },
             { id: 'sms', label: 'SMS Notifications', desc: 'Receive updates via SMS' }
           ].map((pref) => (
-            <div key={pref.id} className="flex items-center justify-between gap-4 p-3 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 rounded-lg">
+            <div key={pref.id} className="flex items-center justify-between gap-4 p-3 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 rounded-md">
               <div className="min-w-0">
                 <p className="font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">{pref.label}</p>
                 <p className="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">{pref.desc}</p>
               </div>
-              <button type="button" className="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full bg-[var(--color-primary)] transition-colors">
-                <span className="inline-block h-4 w-4 transform rounded-full bg-[var(--color-white)] translate-x-6" />
+              <button type="button" className="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-md bg-[var(--color-primary)] transition-colors">
+                <span className="inline-block h-4 w-4 transform rounded-md bg-[var(--color-white)] translate-x-6" />
               </button>
             </div>
           ))}
@@ -80,18 +80,16 @@ export default function PreferencesTab() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1.5">Language</label>
-            <select className="w-full px-4 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+            <select className="w-full px-4 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
               <option>English</option>
               <option>Khmer</option>
-              <option>French</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1.5">Timezone</label>
-            <select className="w-full px-4 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+            <select className="w-full px-4 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
               <option>Asia/Phnom_Penh</option>
-              <option>Asia/Bangkok</option>
-              <option>UTC</option>
+              <option>America/New_York</option>
             </select>
           </div>
         </div>

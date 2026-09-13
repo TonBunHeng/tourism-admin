@@ -60,7 +60,7 @@ export default function SecurityGrid({
           <div
             key={alert.id}
             onClick={() => onOpenDetails(alert)}
-            className={`p-4 rounded-lg bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
+            className={`p-4 rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
               !alert.is_read ? 'ring-1 ring-red-500/30' : ''
             }`}
           >
@@ -71,7 +71,7 @@ export default function SecurityGrid({
                   <div className="p-2 rounded-md bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
                     <ShieldAlert className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/60 px-2 py-0.5 rounded border border-red-200 dark:border-red-900/50">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/60 px-2 py-0.5 rounded-md border border-red-200 dark:border-red-900/50">
                     {alert.type || 'Alert'}
                   </span>
                 </div>
@@ -124,7 +124,7 @@ export default function SecurityGrid({
             {/* Card Footer */}
             <div className="mt-4 pt-3 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-between text-xs">
               <span className={`font-semibold ${alert.is_read ? 'text-slate-400' : 'text-red-500 flex items-center gap-1.5'}`}>
-                {!alert.is_read && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
+                {!alert.is_read && <span className="w-1.5 h-1.5 rounded-md bg-red-500 animate-pulse" />}
                 {alert.is_read ? 'Read' : 'Action Required'}
               </span>
 

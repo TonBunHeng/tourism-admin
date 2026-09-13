@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import authService, { normalizeRole, isFullAdminRole } from '../services/authService';
 import Forbidden from '../pages/error/Forbidden';
@@ -117,7 +118,7 @@ export default function ProtectedRoute({ allowedRoles = ['super_admin', 'admin',
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950">
         <div className="flex flex-col items-center gap-2.5">
-          <div className="w-7 h-7 border-2 border-[#003E83] border-t-transparent dark:border-blue-500 dark:border-t-transparent rounded-full animate-spin" />
+          <Loader2 className="w-7 h-7 text-[#003E83] dark:text-blue-500 animate-spin" />
           <p className="text-xs font-medium text-gray-500 dark:text-zinc-400">Verifying session...</p>
         </div>
       </div>

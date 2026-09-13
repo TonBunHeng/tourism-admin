@@ -47,7 +47,7 @@ export default function SettingsStats({ settings }) {
         return (
           <div
             key={index}
-            className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex flex-col justify-between h-[104px]"
+            className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex flex-col justify-between h-[104px]"
           >
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">

@@ -49,14 +49,14 @@ export default function GalleryEditModal({
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] rounded-xl max-w-lg w-full shadow-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden animate-alert-popup flex flex-col max-h-[90vh]"
+        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] rounded-md max-w-lg w-full shadow-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden animate-alert-popup flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-zinc-800 shrink-0">
           <h3 className="text-base font-bold text-gray-900 dark:text-zinc-100">Edit Media</h3>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-all active:scale-90 cursor-pointer"
+            className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md transition-all active:scale-90 cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -80,7 +80,7 @@ export default function GalleryEditModal({
             <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">Media File (Picture / Video)</label>
 
             {editingMedia.url ? (
-              <div className="relative w-full h-44 rounded-lg overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] group shadow-sm">
+              <div className="relative w-full h-44 rounded-md overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] group shadow-sm">
                 {editingMedia.type === 'video' ? (
                   <video src={editingMedia.url} className="w-full h-full object-cover" controls />
                 ) : (
@@ -103,7 +103,7 @@ export default function GalleryEditModal({
                 </div>
               </div>
             ) : (
-              <label className="border-2 border-dashed border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 rounded-lg p-6 text-center hover:border-[var(--color-primary)] transition-colors cursor-pointer block">
+              <label className="border-2 border-dashed border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 rounded-md p-6 text-center hover:border-[var(--color-primary)] transition-colors cursor-pointer block">
                 <Upload className="w-8 h-8 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mx-auto mb-2" />
                 <p className="text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] font-medium text-xs">Drop picture/video here or click to upload</p>
                 <input type="file" accept="image/*,video/*" className="hidden" onChange={handleFileChange} />

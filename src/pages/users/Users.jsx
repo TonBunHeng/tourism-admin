@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import UsersHeader from './UsersHeader';
 import UsersStats from './UsersStats';
 import UsersToolbar from './UsersToolbar';
@@ -277,7 +278,7 @@ export default function Users() {
       <UsersStats users={users} />
 
       {/* Main Users Table / Grid Section */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         <UsersToolbar
           totalCount={totalRecords}
           searchTerm={searchTerm}
@@ -295,7 +296,7 @@ export default function Users() {
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-3 border-[#003E83] border-t-transparent dark:border-blue-500 rounded-full animate-spin" />
+              <Loader2 className="w-8 h-8 text-[#003E83] dark:text-blue-500 animate-spin" />
               <p className="text-xs font-medium text-gray-500 dark:text-zinc-400">Loading user accounts...</p>
             </div>
           </div>

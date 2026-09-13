@@ -44,8 +44,8 @@ export default function CategoriesGrid({
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">{category.placeCount} places</span>
                       {/* Color Tag Badge */}
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.2 rounded-full bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: themeColor }} />
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.2 rounded-md bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700">
+                        <span className="w-2 h-2 rounded-md shrink-0" style={{ backgroundColor: themeColor }} />
                         <span style={{ color: themeColor }} className="font-semibold">{themeColor}</span>
                       </span>
                     </div>

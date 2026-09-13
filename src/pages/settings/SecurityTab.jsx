@@ -107,7 +107,7 @@ export default function SecurityTab({ settings, setSettings }) {
               onChange={(e) => handleChange('twoFactorAuth', e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-md peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-md after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
           </label>
         </div>
 
@@ -140,7 +140,7 @@ export default function SecurityTab({ settings, setSettings }) {
             <select
               value={settings.sessionTimeout || '30'}
               onChange={(e) => handleChange('sessionTimeout', e.target.value)}
-              className="w-full h-10 px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full h-10 px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             >
               <option value="15">15 Minutes (High Security)</option>
               <option value="30">30 Minutes (Recommended)</option>
@@ -156,7 +156,7 @@ export default function SecurityTab({ settings, setSettings }) {
             <select
               value={settings.passwordPolicy || 'strong'}
               onChange={(e) => handleChange('passwordPolicy', e.target.value)}
-              className="w-full h-10 px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full h-10 px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             >
               <option value="standard">Standard (8+ chars)</option>
               <option value="strong">Strong (8+ chars, numbers & symbols)</option>
@@ -171,7 +171,7 @@ export default function SecurityTab({ settings, setSettings }) {
             <select
               value={settings.loginAttempts || '5'}
               onChange={(e) => handleChange('loginAttempts', e.target.value)}
-              className="w-full h-10 px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full h-10 px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             >
               <option value="3">3 Attempts (Strict)</option>
               <option value="5">5 Attempts (Standard)</option>
@@ -197,14 +197,14 @@ export default function SecurityTab({ settings, setSettings }) {
           {sessions.map((sess) => (
             <div key={sess.id} className="py-3.5 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${sess.isCurrent ? 'bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-primary)]' : 'bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]'}`}>
+                <div className={`p-2 rounded-md ${sess.isCurrent ? 'bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-primary)]' : 'bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]'}`}>
                   <Shield className="w-4 h-4" />
                 </div>
                 <div>
                   <p className="text-xs sm:text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
                     {sess.device}
                     {sess.isCurrent && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">
                         Current Session
                       </span>
                     )}
@@ -239,12 +239,12 @@ export default function SecurityTab({ settings, setSettings }) {
           aria-labelledby="twofa-modal-title"
         >
           <div
-            className="bg-white dark:bg-[#18181b] rounded-lg shadow-2xl max-w-sm sm:max-w-md w-full mx-4 p-6 relative border border-gray-200 dark:border-zinc-800 animate-alert-popup overflow-hidden"
+            className="bg-white dark:bg-[#18181b] rounded-md shadow-2xl max-w-sm sm:max-w-md w-full mx-4 p-6 relative border border-gray-200 dark:border-zinc-800 animate-alert-popup overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Centered Soft-Tinted Icon Badge */}
             <div className="flex justify-center mb-5 animate-alert-icon">
-              <div className="w-14 h-14 rounded-full bg-blue-500/10 text-[#003E83] dark:text-blue-400 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-md bg-blue-500/10 text-[#003E83] dark:text-blue-400 flex items-center justify-center">
                 <ShieldCheck size={24} />
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function SecurityTab({ settings, setSettings }) {
             </p>
 
             {/* Security Tip Callout Card */}
-            <div className="p-3.5 bg-blue-50/80 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-900 text-xs text-blue-800 dark:text-blue-300 space-y-1 mb-5 text-left">
+            <div className="p-3.5 bg-blue-50/80 dark:bg-blue-950/30 rounded-md border border-blue-200 dark:border-blue-900 text-xs text-blue-800 dark:text-blue-300 space-y-1 mb-5 text-left">
               <p className="font-semibold flex items-center gap-1.5 text-blue-900 dark:text-blue-200 text-xs">
                 <Info className="w-3.5 h-3.5 text-[#003E83] dark:text-blue-400 shrink-0" />
                 Security Tip
@@ -275,7 +275,7 @@ export default function SecurityTab({ settings, setSettings }) {
               <button
                 type="button"
                 onClick={() => setShow2FAModal(false)}
-                className="w-full py-2.5 px-4 font-medium rounded-lg bg-[#003E83] hover:bg-[#002e62] text-white transition-colors cursor-pointer text-sm shadow-xs"
+                className="w-full py-2.5 px-4 font-medium rounded-md bg-[#003E83] hover:bg-[#002e62] text-white transition-colors cursor-pointer text-sm shadow-xs"
               >
                 Understood
               </button>

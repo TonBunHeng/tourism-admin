@@ -48,26 +48,26 @@ export default function BusinessDetailsModal({
     switch (status) {
       case 'approved':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
             <CheckCircle2 size={14} /> Approved & Active
           </span>
         );
       case 'suspended':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
             <AlertTriangle size={14} /> Suspended
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border border-red-200 dark:border-red-800">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300 border border-red-200 dark:border-red-800">
             <XCircle size={14} /> Rejected
           </span>
         );
       case 'pending':
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
             <AlertCircle size={14} /> Pending Review
           </span>
         );
@@ -82,17 +82,17 @@ export default function BusinessDetailsModal({
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col relative border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] animate-alert-popup overflow-hidden"
+        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col relative border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] animate-alert-popup overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="p-6 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/30 shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#003E83] text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-xs overflow-hidden border border-slate-200 dark:border-zinc-700">
+            <div className="w-12 h-12 rounded-md bg-[#003E83] text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-xs overflow-hidden border border-slate-200 dark:border-zinc-700">
               <img
                 src={business.logo || businessImage}
                 alt={business.name}
-                className="w-full h-full object-cover rounded-full"
+                className="w-full h-full object-cover rounded-md"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = defaultFallbackImage;
@@ -147,7 +147,7 @@ export default function BusinessDetailsModal({
         <div className="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
           {activeTab === 'overview' && (
             <div className="space-y-4">
-              <div className="rounded-lg overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] h-48 w-full bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] relative group shadow-xs">
+              <div className="rounded-md overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] h-48 w-full bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] relative group shadow-xs">
                 <img
                   src={businessImage}
                   alt={business.name}
@@ -159,7 +159,7 @@ export default function BusinessDetailsModal({
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-70 pointer-events-none" />
                 <div className="absolute bottom-2.5 left-3 text-white">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-black/60 backdrop-blur-xs px-2.5 py-1 rounded text-white/90">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-black/60 backdrop-blur-xs px-2.5 py-1 rounded-md text-white/90">
                     Cover Picture
                   </span>
                 </div>
@@ -228,7 +228,7 @@ export default function BusinessDetailsModal({
           {activeTab === 'owner' && (
             <div className="space-y-3">
               <div className="bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] p-4 rounded-md border border-blue-100 dark:border-blue-900/50 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#003E83] text-white font-bold text-base flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-md bg-[#003E83] text-white font-bold text-base flex items-center justify-center shrink-0">
                   {business.owner?.name ? business.owner.name.charAt(0).toUpperCase() : 'O'}
                 </div>
                 <div>
@@ -284,7 +284,7 @@ export default function BusinessDetailsModal({
                   <span className="font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
                     <FileText className="w-4 h-4 text-[#003E83]" /> Ministry Tourism Operating License
                   </span>
-                  <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded font-semibold">
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded-md font-semibold">
                     Attached
                   </span>
                 </div>

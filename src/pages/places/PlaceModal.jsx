@@ -145,7 +145,7 @@ export default function PlaceModal({
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <style>
           html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; background: #0f172a; }
-          .leaflet-popup-content-wrapper { border-radius: 8px; font-family: sans-serif; font-size: 12px; }
+          .leaflet-popup-content-wrapper { border-radius: 6px; font-family: sans-serif; font-size: 12px; }
         </style>
       </head>
       <body>
@@ -188,7 +188,7 @@ export default function PlaceModal({
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] rounded-xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
+        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] rounded-md max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -243,7 +243,7 @@ export default function PlaceModal({
               </label>
 
               {safeFormData.image_url ? (
-                <div className="relative w-full h-36 rounded-lg overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] group mb-2 shadow-xs">
+                <div className="relative w-full h-36 rounded-md overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] group mb-2 shadow-xs">
                   <img src={safeFormData.image_url} alt="Place Preview" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button
@@ -266,7 +266,7 @@ export default function PlaceModal({
               ) : (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-gray-300 dark:border-zinc-700 hover:border-[#003E83] dark:hover:border-[#003E83] bg-gray-50/70 dark:bg-zinc-800/40 rounded-lg p-4 text-center transition-colors cursor-pointer mb-2"
+                  className="border-2 border-dashed border-gray-300 dark:border-zinc-700 hover:border-[#003E83] dark:hover:border-[#003E83] bg-gray-50/70 dark:bg-zinc-800/40 rounded-md p-4 text-center transition-colors cursor-pointer mb-2"
                 >
                   <Upload className="w-5 h-5 text-gray-400 mx-auto mb-1" />
                   <p className="text-gray-800 dark:text-zinc-200 font-medium text-xs">
@@ -499,7 +499,7 @@ export default function PlaceModal({
 
               {/* Interactive Map vs Google Maps Mode */}
               {mapMode === 'interactive' ? (
-                <div className="relative w-full h-48 rounded-lg overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[#0f172a] shadow-xs">
+                <div className="relative w-full h-48 rounded-md overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[#0f172a] shadow-xs">
                   <div className="absolute top-2 left-2 z-10 bg-black/85 text-white text-[11px] px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-white/15">
                     <MousePointerClick className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Click anywhere on map to pick location pin</span>
@@ -520,7 +520,7 @@ export default function PlaceModal({
                   ></iframe>
                 </div>
               ) : (
-                <div className="relative w-full h-48 rounded-lg overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] shadow-xs">
+                <div className="relative w-full h-48 rounded-md overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] shadow-xs">
                   <iframe
                     title="Google Maps Location View"
                     width="100%"

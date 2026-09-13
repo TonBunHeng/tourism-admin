@@ -49,13 +49,13 @@ export default function FavoriteModal({
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] rounded-xl max-w-lg w-full shadow-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
+        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] rounded-md max-w-lg w-full shadow-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4.5 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] dark:text-[var(--color-info-dark-text)]">
+            <div className="p-2 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] dark:text-[var(--color-info-dark-text)]">
               <BookmarkPlus className="w-5 h-5" />
             </div>
             <div>
@@ -70,7 +70,7 @@ export default function FavoriteModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-text-primary-light)] dark:hover:text-[var(--color-white)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] rounded-full transition-all active:scale-90 cursor-pointer"
+            className="p-1.5 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-text-primary-light)] dark:hover:text-[var(--color-white)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] rounded-md transition-all active:scale-90 cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -116,7 +116,7 @@ export default function FavoriteModal({
                   placeholder="Search existing places..."
                   value={placeSearch}
                   onChange={(e) => setPlaceSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 text-xs md:text-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+                  className="w-full pl-9 pr-4 py-2 text-xs md:text-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
                 />
               </div>
 
@@ -126,7 +126,7 @@ export default function FavoriteModal({
                     type="checkbox"
                     checked={markVisitedOnAdd}
                     onChange={(e) => setMarkVisitedOnAdd(e.target.checked)}
-                    className="rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                    className="rounded-md text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                   />
                   <span>Mark as visited immediately</span>
                 </label>
@@ -137,7 +137,7 @@ export default function FavoriteModal({
                   availableFilteredPlaces.map((place) => (
                     <div
                       key={place.id}
-                      className="p-3 rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 hover:border-[var(--color-primary)]/50 transition-all flex items-center justify-between gap-3"
+                      className="p-3 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 hover:border-[var(--color-primary)]/50 transition-all flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-200 dark:bg-zinc-700 shrink-0">
@@ -167,7 +167,7 @@ export default function FavoriteModal({
                       <button
                         type="button"
                         onClick={() => onAddExisting && onAddExisting(place.id, markVisitedOnAdd)}
-                        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] transition-all shrink-0 cursor-pointer shadow-sm"
+                        className="px-3 py-1.5 text-xs font-semibold rounded-md bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] transition-all shrink-0 cursor-pointer shadow-sm"
                       >
                         + Add
                       </button>
@@ -191,7 +191,7 @@ export default function FavoriteModal({
                   placeholder="e.g., Angkor Wat, Pub Street..."
                   value={newPlace.name || ''}
                   onChange={(e) => updatePlace({ ...newPlace, name: e.target.value })}
-                  className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)]"
+                  className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)]"
                   required
                 />
               </div>
@@ -205,7 +205,7 @@ export default function FavoriteModal({
                     <select
                       value={newPlace.category || (filteredCategories[0] || 'Temple')}
                       onChange={(e) => updatePlace({ ...newPlace, category: e.target.value })}
-                      className="appearance-none w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 cursor-pointer"
+                      className="appearance-none w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 cursor-pointer"
                     >
                       {filteredCategories.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -224,7 +224,7 @@ export default function FavoriteModal({
                     placeholder="e.g., Siem Reap, Cambodia"
                     value={newPlace.location || ''}
                     onChange={(e) => updatePlace({ ...newPlace, location: e.target.value })}
-                    className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)]"
+                    className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)]"
                     required
                   />
                 </div>
@@ -240,7 +240,7 @@ export default function FavoriteModal({
                     placeholder="e.g., Sunrise / 6:00 AM"
                     value={newPlace.bestTime || ''}
                     onChange={(e) => updatePlace({ ...newPlace, bestTime: e.target.value })}
-                    className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+                    className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
                   />
                 </div>
 
@@ -253,7 +253,7 @@ export default function FavoriteModal({
                     placeholder="e.g., Free or $20"
                     value={newPlace.price || ''}
                     onChange={(e) => updatePlace({ ...newPlace, price: e.target.value })}
-                    className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+                    className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
                   />
                 </div>
               </div>
@@ -267,7 +267,7 @@ export default function FavoriteModal({
                   placeholder="https://images.unsplash.com/..."
                   value={newPlace.image || newPlace.image_url || ''}
                   onChange={(e) => updatePlace({ ...newPlace, image: e.target.value, image_url: e.target.value })}
-                  className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+                  className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
                 />
               </div>
 
@@ -280,7 +280,7 @@ export default function FavoriteModal({
                   placeholder="Tell us what makes this place special..."
                   value={newPlace.description || ''}
                   onChange={(e) => updatePlace({ ...newPlace, description: e.target.value })}
-                  className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 resize-none"
+                  className="w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md px-3.5 py-2.5 text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 resize-none"
                 />
               </div>
 

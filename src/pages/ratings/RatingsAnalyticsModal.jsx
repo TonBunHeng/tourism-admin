@@ -245,7 +245,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 transition-opacity duration-150 animate-alert-backdrop">
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] rounded-lg max-w-4xl w-full max-h-[90vh] shadow-lg border border-gray-200 dark:border-zinc-800 overflow-hidden flex flex-col animate-alert-popup">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] rounded-md max-w-4xl w-full max-h-[90vh] shadow-lg border border-gray-200 dark:border-zinc-800 overflow-hidden flex flex-col animate-alert-popup">
         
         {/* Simple Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-zinc-800 shrink-0">
@@ -260,7 +260,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 rounded transition-colors cursor-pointer"
+            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 rounded-md transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -335,7 +335,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             
             {/* Card 1: Total Ratings */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 font-medium">
                 <span>Total Ratings</span>
                 <MessageSquare className="w-4 h-4 text-blue-500" />
@@ -349,7 +349,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
             </div>
 
             {/* Card 2: Average Score */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 font-medium">
                 <span>Average Rating</span>
                 <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
@@ -363,7 +363,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
             </div>
 
             {/* Card 3: Positive Sentiment */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 font-medium">
                 <span>Positive Sentiment</span>
                 <ThumbsUp className="w-4 h-4 text-emerald-500" />
@@ -377,7 +377,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
             </div>
 
             {/* Card 4: Verified Reviews */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 font-medium">
                 <span>Verified Reviews</span>
                 <ShieldCheck className="w-4 h-4 text-purple-500" />
@@ -396,7 +396,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             
             {/* Chart: Monthly Volume */}
-            <div className="lg:col-span-2 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="lg:col-span-2 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-zinc-100">
@@ -408,7 +408,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
                 </div>
                 <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-zinc-400">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-xs bg-[#003E83]" />
+                    <span className="w-2.5 h-2.5 rounded-md bg-[#003E83]" />
                     Reviews
                   </span>
                   <span className="flex items-center gap-1.5">
@@ -469,7 +469,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
             </div>
 
             {/* Score & Sentiment Breakdown */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs flex flex-col justify-between">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs flex flex-col justify-between">
               <div>
                 <h4 className="text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-1">
                   Rating Breakdown
@@ -490,9 +490,9 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
                           {item.count} ({item.percentage}%)
                         </span>
                       </div>
-                      <div className="h-1.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="h-1.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-md overflow-hidden">
                         <div
-                          className="h-full bg-amber-500 rounded-full transition-all duration-300"
+                          className="h-full bg-amber-500 rounded-md transition-all duration-300"
                           style={{ width: `${item.percentage}%` }}
                         />
                       </div>
@@ -519,7 +519,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
 
           {/* Destination Reviews List */}
           {filteredReviews.length > 0 && (
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-semibold text-gray-900 dark:text-zinc-100">
                   Recent Tourist Reviews
@@ -544,7 +544,7 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
                   return (
                     <div key={review.id || index} className="py-2.5 flex items-center justify-between gap-3 text-xs">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="w-5 h-5 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 flex items-center justify-center font-medium text-[11px] shrink-0">
+                        <span className="w-5 h-5 rounded-md bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 flex items-center justify-center font-medium text-[11px] shrink-0">
                           {index + 1}
                         </span>
                         <div className="min-w-0">
@@ -558,14 +558,14 @@ export default function RatingsAnalyticsModal({ isOpen, onClose, reviews = [] })
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400">
                           {catName}
                         </span>
                         <div className="flex items-center gap-1 text-amber-500 font-medium">
                           <Star className="w-3 h-3 fill-amber-500" />
                           <span>{ratingNum.toFixed(1)}</span>
                         </div>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${
                           ratingNum >= 4
                             ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40'
                             : 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40'

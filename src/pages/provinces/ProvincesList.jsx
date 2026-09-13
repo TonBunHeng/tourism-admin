@@ -37,12 +37,12 @@ export default function ProvincesList({
                       {province.name}
                     </p>
                   </div>
-                  <span className={`inline-flex items-center px-2 py-0.5 mt-1 text-[10px] font-medium rounded-full border ${getTypeBadgeColor(province.type)}`}>
+                  <span className={`inline-flex items-center px-2 py-0.5 mt-1 text-[10px] font-medium rounded-md border ${getTypeBadgeColor(province.type)}`}>
                     {province.type}
                   </span>
                 </div>
 
-                <span className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-semibold rounded-full border ${getStatusColor(province.status)}`}>
+                <span className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-semibold rounded-md border ${getStatusColor(province.status)}`}>
                   <Clock className="w-3 h-3" />
                   {province.status}
                 </span>
@@ -67,7 +67,7 @@ export default function ProvincesList({
                 <button
                   type="button"
                   onClick={() => handleView(province)}
-                  className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                  className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                   title="View Details"
                 >
                   <Eye className="w-4 h-4" />
@@ -75,7 +75,7 @@ export default function ProvincesList({
                 <button
                   type="button"
                   onClick={() => handleEdit(province)}
-                  className="p-1.5 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] hover:bg-[var(--color-info-bg)] dark:hover:bg-[var(--color-info-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                  className="p-1.5 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] hover:bg-[var(--color-info-bg)] dark:hover:bg-[var(--color-info-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                   title="Edit"
                 >
                   <Edit className="w-4 h-4" />
@@ -83,7 +83,7 @@ export default function ProvincesList({
                 <button
                   type="button"
                   onClick={() => handleDeleteItem(province.id || province)}
-                  className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                  className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                   title="Delete"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -131,7 +131,7 @@ export default function ProvincesList({
                     </p>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2.5 py-1 text-xs font-medium rounded-full border ${getTypeBadgeColor(province.type)}`}>
+                    <span className={`px-2.5 py-1 text-xs font-medium rounded-md border ${getTypeBadgeColor(province.type)}`}>
                       {province.type}
                     </span>
                   </td>
@@ -145,7 +145,7 @@ export default function ProvincesList({
                     {province.districts}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full border ${getStatusColor(province.status)}`}>
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md border ${getStatusColor(province.status)}`}>
                       <Clock className="w-3 h-3" />
                       {province.status}
                     </span>
@@ -155,7 +155,7 @@ export default function ProvincesList({
                       <button
                         type="button"
                         onClick={() => handleView(province)}
-                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
@@ -163,7 +163,7 @@ export default function ProvincesList({
                       <button
                         type="button"
                         onClick={() => handleEdit(province)}
-                        className="p-1.5 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] hover:bg-[var(--color-info-bg)] dark:hover:bg-[var(--color-info-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] hover:bg-[var(--color-info-bg)] dark:hover:bg-[var(--color-info-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Edit"
                       >
                         <Edit className="w-4 h-4" />
@@ -171,7 +171,7 @@ export default function ProvincesList({
                       <button
                         type="button"
                         onClick={() => handleDeleteItem(province.id || province)}
-                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />

@@ -54,33 +54,33 @@ export default function AlertModal({
     switch (type) {
       case 'success':
         return (
-          <div className="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
             <CheckCircle2 size={24} />
           </div>
         );
       case 'danger':
       case 'delete':
         return (
-          <div className="w-14 h-14 rounded-full bg-red-500/10 text-red-500 dark:text-red-400 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-md bg-red-500/10 text-red-500 dark:text-red-400 flex items-center justify-center">
             <Trash2 size={24} />
           </div>
         );
       case 'error':
         return (
-          <div className="w-14 h-14 rounded-full bg-red-500/10 text-red-500 dark:text-red-400 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-md bg-red-500/10 text-red-500 dark:text-red-400 flex items-center justify-center">
             <AlertCircle size={24} />
           </div>
         );
       case 'warning':
         return (
-          <div className="w-14 h-14 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
             <AlertTriangle size={24} />
           </div>
         );
       case 'info':
       default:
         return (
-          <div className="w-14 h-14 rounded-full bg-blue-500/10 text-[#003E83] dark:text-blue-400 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-md bg-blue-500/10 text-[#003E83] dark:text-blue-400 flex items-center justify-center">
             <Info size={24} />
           </div>
         );
@@ -115,7 +115,7 @@ export default function AlertModal({
       aria-labelledby="alert-modal-title"
     >
       <div
-        className="bg-white dark:bg-[#18181b] rounded-lg shadow-2xl max-w-sm w-full mx-4 p-6 relative border border-gray-200 dark:border-zinc-800 animate-alert-popup overflow-hidden"
+        className="bg-white dark:bg-[#18181b] rounded-md shadow-2xl max-w-sm w-full mx-4 p-6 relative border border-gray-200 dark:border-zinc-800 animate-alert-popup overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Icon */}
@@ -143,14 +143,14 @@ export default function AlertModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 px-4 border border-gray-300 dark:border-zinc-800 bg-transparent hover:bg-gray-100 dark:hover:bg-zinc-800/80 text-gray-700 dark:text-zinc-300 font-medium rounded-lg transition-colors cursor-pointer text-sm"
+              className="flex-1 py-2.5 px-4 border border-gray-300 dark:border-zinc-800 bg-transparent hover:bg-gray-100 dark:hover:bg-zinc-800/80 text-gray-700 dark:text-zinc-300 font-medium rounded-md transition-colors cursor-pointer text-sm"
             >
               {cancelText}
             </button>
             <button
               type="button"
               onClick={handleConfirm}
-              className={`flex-1 py-2.5 px-4 font-medium rounded-lg transition-colors cursor-pointer text-sm ${getConfirmButtonClass()}`}
+              className={`flex-1 py-2.5 px-4 font-medium rounded-md transition-colors cursor-pointer text-sm ${getConfirmButtonClass()}`}
             >
               {finalConfirmText}
             </button>
@@ -160,7 +160,7 @@ export default function AlertModal({
             <button
               type="button"
               onClick={handleConfirm}
-              className={`w-full py-2.5 px-4 font-medium rounded-lg transition-colors cursor-pointer text-sm ${getConfirmButtonClass()}`}
+              className={`w-full py-2.5 px-4 font-medium rounded-md transition-colors cursor-pointer text-sm ${getConfirmButtonClass()}`}
             >
               {finalConfirmText}
             </button>

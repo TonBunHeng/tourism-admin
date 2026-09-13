@@ -75,7 +75,7 @@ export default function FavoriteDetailsModal({
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] rounded-xl max-w-2xl w-full max-h-[90vh] shadow-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden flex flex-col animate-alert-popup"
+        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] rounded-md max-w-2xl w-full max-h-[90vh] shadow-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden flex flex-col animate-alert-popup"
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -108,7 +108,7 @@ export default function FavoriteDetailsModal({
         {/* Modal Body */}
         <div className="overflow-y-auto p-6 space-y-5 flex-1">
           {/* Hero Image / Banner */}
-          <div className="relative h-56 w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-800 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+          <div className="relative h-56 w-full rounded-md overflow-hidden bg-slate-100 dark:bg-zinc-800 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
             {favorite.image ? (
               <img
                 src={favorite.image}
@@ -165,13 +165,13 @@ export default function FavoriteDetailsModal({
           </div>
 
           {/* Favorited By (Traveler / User Info Section) */}
-          <div className="p-4 rounded-lg bg-[var(--color-info-bg)]/40 dark:bg-[var(--color-info-dark-bg)]/30 border border-[var(--color-info-border)]/50 dark:border-[var(--color-info-dark-border)]/50">
+          <div className="p-4 rounded-md bg-[var(--color-info-bg)]/40 dark:bg-[var(--color-info-dark-bg)]/30 border border-[var(--color-info-border)]/50 dark:border-[var(--color-info-dark-border)]/50">
             <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] flex items-center gap-1.5 mb-3">
               <User className="w-4 h-4" /> Favorited By Traveler
             </span>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] flex items-center justify-center font-bold text-base shrink-0 border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)] overflow-hidden">
+                <div className="w-12 h-12 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] flex items-center justify-center font-bold text-base shrink-0 border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)] overflow-hidden">
                   {userAvatar ? (
                     <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
                   ) : (
@@ -184,7 +184,7 @@ export default function FavoriteDetailsModal({
                       {userName}
                     </p>
                     {userVerified && (
-                      <span className="text-[10px] flex items-center gap-0.5 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] font-semibold bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] px-2 py-0.5 rounded-full border border-[var(--color-info-border)]">
+                      <span className="text-[10px] flex items-center gap-0.5 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] font-semibold bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] px-2 py-0.5 rounded-md border border-[var(--color-info-border)]">
                         <ShieldCheck className="w-3 h-3" /> Verified Traveler
                       </span>
                     )}
@@ -218,7 +218,7 @@ export default function FavoriteDetailsModal({
           {/* Key Place Attributes 2x2 Grid */}
           <div className="grid grid-cols-2 gap-3">
             {/* Rating & Reviews */}
-            <div className="p-3.5 rounded-lg bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            <div className="p-3.5 rounded-md bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] block">
                 Destination Rating
               </span>
@@ -234,7 +234,7 @@ export default function FavoriteDetailsModal({
             </div>
 
             {/* Best Visiting Time */}
-            <div className="p-3.5 rounded-lg bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            <div className="p-3.5 rounded-md bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] block">
                 Best Visiting Time
               </span>
@@ -248,7 +248,7 @@ export default function FavoriteDetailsModal({
             </div>
 
             {/* Entry Price */}
-            <div className="p-3.5 rounded-lg bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            <div className="p-3.5 rounded-md bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] block">
                 Entry & Price
               </span>
@@ -262,7 +262,7 @@ export default function FavoriteDetailsModal({
             </div>
 
             {/* Travel Wishlist Status */}
-            <div className="p-3.5 rounded-lg bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            <div className="p-3.5 rounded-md bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] block">
                 Travel Status
               </span>
@@ -278,7 +278,7 @@ export default function FavoriteDetailsModal({
 
           {/* Description */}
           {favorite.description && (
-            <div className="p-4 rounded-lg bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            <div className="p-4 rounded-md bg-[var(--color-surface-hover-light)]/60 dark:bg-[var(--color-surface-hover-dark)]/40 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] block mb-1.5">
                 Overview & Destination Description
               </span>

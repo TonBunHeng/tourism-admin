@@ -166,13 +166,13 @@ export default function SecurityExportModal({ isOpen, onClose, alerts = [], meta
       aria-labelledby="security-export-modal-title"
     >
       <div
-        className="w-full max-w-md bg-white dark:bg-[#18181b] border border-gray-200 dark:border-zinc-800 rounded-lg shadow-2xl overflow-hidden animate-alert-popup"
+        className="w-full max-w-md bg-white dark:bg-[#18181b] border border-gray-200 dark:border-zinc-800 rounded-md shadow-2xl overflow-hidden animate-alert-popup"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
         <div className="p-5 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-500/10 text-[#003E83] dark:text-blue-400 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-md bg-blue-500/10 text-[#003E83] dark:text-blue-400 flex items-center justify-center shrink-0">
               <Download className="w-5 h-5" />
             </div>
             <div>
@@ -193,9 +193,9 @@ export default function SecurityExportModal({ isOpen, onClose, alerts = [], meta
             type="button"
             onClick={handleDownloadPDF}
             disabled={downloading}
-            className="w-full p-3.5 rounded-lg border border-gray-200 dark:border-zinc-800 hover:border-red-400 dark:hover:border-red-500/50 bg-gray-50/70 dark:bg-zinc-900/60 hover:bg-red-50/20 dark:hover:bg-zinc-800/80 transition-all flex items-start gap-3.5 text-left cursor-pointer group disabled:opacity-60"
+            className="w-full p-3.5 rounded-md border border-gray-200 dark:border-zinc-800 hover:border-red-400 dark:hover:border-red-500/50 bg-gray-50/70 dark:bg-zinc-900/60 hover:bg-red-50/20 dark:hover:bg-zinc-800/80 transition-all flex items-start gap-3.5 text-left cursor-pointer group disabled:opacity-60"
           >
-            <div className="w-10 h-10 rounded-full bg-red-500/10 text-red-500 dark:text-red-400 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-md bg-red-500/10 text-red-500 dark:text-red-400 flex items-center justify-center shrink-0">
               {downloading && downloadType === 'pdf' ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
@@ -222,9 +222,9 @@ export default function SecurityExportModal({ isOpen, onClose, alerts = [], meta
             type="button"
             onClick={handleDownloadExcel}
             disabled={downloading}
-            className="w-full p-3.5 rounded-lg border border-gray-200 dark:border-zinc-800 hover:border-emerald-400 dark:hover:border-emerald-500/50 bg-gray-50/70 dark:bg-zinc-900/60 hover:bg-emerald-50/20 dark:hover:bg-zinc-800/80 transition-all flex items-start gap-3.5 text-left cursor-pointer group disabled:opacity-60"
+            className="w-full p-3.5 rounded-md border border-gray-200 dark:border-zinc-800 hover:border-emerald-400 dark:hover:border-emerald-500/50 bg-gray-50/70 dark:bg-zinc-900/60 hover:bg-emerald-50/20 dark:hover:bg-zinc-800/80 transition-all flex items-start gap-3.5 text-left cursor-pointer group disabled:opacity-60"
           >
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-md bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 flex items-center justify-center shrink-0">
               {downloading && downloadType === 'excel' ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
@@ -251,9 +251,9 @@ export default function SecurityExportModal({ isOpen, onClose, alerts = [], meta
             type="button"
             onClick={handleDownloadJSON}
             disabled={downloading}
-            className="w-full p-3.5 rounded-lg border border-gray-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-500/50 bg-gray-50/70 dark:bg-zinc-900/60 hover:bg-indigo-50/20 dark:hover:bg-zinc-800/80 transition-all flex items-start gap-3.5 text-left cursor-pointer group disabled:opacity-60"
+            className="w-full p-3.5 rounded-md border border-gray-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-500/50 bg-gray-50/70 dark:bg-zinc-900/60 hover:bg-indigo-50/20 dark:hover:bg-zinc-800/80 transition-all flex items-start gap-3.5 text-left cursor-pointer group disabled:opacity-60"
           >
-            <div className="w-10 h-10 rounded-full bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-md bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center shrink-0">
               {downloading && downloadType === 'json' ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
@@ -284,7 +284,7 @@ export default function SecurityExportModal({ isOpen, onClose, alerts = [], meta
           <button
             type="button"
             onClick={onClose}
-            className="py-2 px-4 rounded-lg border border-gray-300 dark:border-zinc-800 bg-transparent hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-xs font-medium transition-colors cursor-pointer"
+            className="py-2 px-4 rounded-md border border-gray-300 dark:border-zinc-800 bg-transparent hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-xs font-medium transition-colors cursor-pointer"
           >
             Cancel
           </button>

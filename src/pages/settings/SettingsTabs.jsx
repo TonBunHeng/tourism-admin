@@ -22,7 +22,7 @@ export default function SettingsTabs({ tabs, activeTab, onTabChange, searchMatch
               <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]'}`} />
               <span>{tab.label}</span>
               {Boolean(matchCount) && (
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-[#003E83]/10 text-[#003E83] dark:bg-blue-900/40 dark:text-blue-300'}`}>
+                <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-[#003E83]/10 text-[#003E83] dark:bg-blue-900/40 dark:text-blue-300'}`}>
                   {matchCount}
                 </span>
               )}

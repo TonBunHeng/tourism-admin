@@ -58,11 +58,11 @@ export default function FavoritesToolbar({
           <h2 className="text-base md:text-lg font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
             Saved Destinations
           </h2>
-          <span className="text-xs font-semibold text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] bg-[var(--color-neutral-badge-bg)] dark:bg-[var(--color-neutral-badge-dark-bg)] px-2.5 py-0.5 rounded-full border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+          <span className="text-xs font-semibold text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] bg-[var(--color-neutral-badge-bg)] dark:bg-[var(--color-neutral-badge-dark-bg)] px-2.5 py-0.5 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
             {totalCount} {totalCount === 1 ? 'place' : 'places'}
           </span>
           {selectedCount > 0 && (
-            <span className="text-xs font-semibold text-[var(--color-rose-badge-text)] dark:text-[var(--color-rose-badge-dark-text)] bg-[var(--color-rose-badge-bg)] dark:bg-[var(--color-rose-badge-dark-bg)] border border-[var(--color-rose-badge-border)] dark:border-[var(--color-rose-badge-dark-border)] px-2.5 py-0.5 rounded-full animate-in fade-in">
+            <span className="text-xs font-semibold text-[var(--color-rose-badge-text)] dark:text-[var(--color-rose-badge-dark-text)] bg-[var(--color-rose-badge-bg)] dark:bg-[var(--color-rose-badge-dark-bg)] border border-[var(--color-rose-badge-border)] dark:border-[var(--color-rose-badge-dark-border)] px-2.5 py-0.5 rounded-md animate-in fade-in">
               {selectedCount} selected
             </span>
           )}
@@ -78,13 +78,13 @@ export default function FavoritesToolbar({
               placeholder="Search favorites..."
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 text-xs md:text-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all"
+              className="w-full pl-9 pr-8 py-2 text-xs md:text-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-[var(--color-text-muted-light)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40 focus:border-[var(--color-primary)] transition-all"
             />
             {searchTerm && (
               <button
                 type="button"
                 onClick={() => handleSearch('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted-light)] hover:text-[var(--color-text-primary-light)] dark:hover:text-[var(--color-white)] p-0.5 rounded-full"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted-light)] hover:text-[var(--color-text-primary-light)] dark:hover:text-[var(--color-white)] p-0.5 rounded-md"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -96,7 +96,7 @@ export default function FavoritesToolbar({
             <select
               value={selectedCategory}
               onChange={(e) => handleCategory(e.target.value)}
-              className="appearance-none pl-3 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+              className="appearance-none pl-3 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -112,7 +112,7 @@ export default function FavoritesToolbar({
             <select
               value={selectedStatus}
               onChange={(e) => handleStatus(e.target.value)}
-              className="appearance-none pl-3 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+              className="appearance-none pl-3 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
             >
               {statuses.map((st) => (
                 <option key={st} value={st}>
@@ -128,7 +128,7 @@ export default function FavoritesToolbar({
             <select
               value={sortBy}
               onChange={(e) => handleSort(e.target.value)}
-              className="appearance-none pl-3 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
+              className="appearance-none pl-3 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/40"
             >
               <option value="recent">Most Recent</option>
               <option value="oldest">Oldest Added</option>
@@ -141,7 +141,7 @@ export default function FavoritesToolbar({
           </div>
 
           {/* View Toggle (Grid / List) */}
-          <div className="flex bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] p-0.5 rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+          <div className="flex bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] p-0.5 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
             <button
               type="button"
               onClick={() => handleViewMode('grid')}
@@ -173,7 +173,7 @@ export default function FavoritesToolbar({
             <button
               type="button"
               onClick={handleReset}
-              className="flex items-center gap-1 px-3 py-2 text-xs md:text-sm font-medium text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-3 py-2 text-xs md:text-sm font-medium text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-colors cursor-pointer"
               title="Reset all filters"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -197,7 +197,7 @@ export default function FavoritesToolbar({
               <button
                 type="button"
                 onClick={onBulkMarkVisited}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)] hover:opacity-90 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)] hover:opacity-90 transition-all cursor-pointer"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Mark as Visited</span>
@@ -208,7 +208,7 @@ export default function FavoritesToolbar({
               <button
                 type="button"
                 onClick={onBulkDelete}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] hover:opacity-90 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] hover:opacity-90 transition-all cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Remove</span>
@@ -219,7 +219,7 @@ export default function FavoritesToolbar({
               <button
                 type="button"
                 onClick={onDeselectAll}
-                className="px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] rounded-lg transition-colors cursor-pointer border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]"
+                className="px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] rounded-md transition-colors cursor-pointer border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]"
               >
                 Deselect All
               </button>

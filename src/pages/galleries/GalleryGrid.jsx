@@ -21,7 +21,7 @@ export default function GalleryGrid({ media, mediaItems, onPreview, onEdit, onDe
             <div className="relative w-full h-40 mb-3 rounded-md overflow-hidden border border-gray-200 dark:border-zinc-800 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]">
               {item.type === 'video' ? (
                 <div className="w-full h-full bg-black/60 flex items-center justify-center">
-                  <div className="w-9 h-9 rounded-full bg-white/90 dark:bg-gray-900/90 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-md bg-white/90 dark:bg-gray-900/90 flex items-center justify-center">
                     <Video className="w-4 h-4 text-[var(--color-info-text)] ml-0.5" />
                   </div>
                 </div>
@@ -55,7 +55,7 @@ export default function GalleryGrid({ media, mediaItems, onPreview, onEdit, onDe
                 {item.tags?.map((tag, idx) => (
                   <span
                     key={idx}
-                    className="text-[10px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 px-1.5 py-0.5 rounded"
+                    className="text-[10px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 px-1.5 py-0.5 rounded-md"
                   >
                     #{tag}
                   </span>

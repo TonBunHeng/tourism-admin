@@ -115,7 +115,7 @@ export default function GeneralTab({ settings, setSettings }) {
               value={settings.siteName || ''}
               onChange={(e) => handleChange('siteName', e.target.value)}
               placeholder="e.g. AngkorVerses Administrative Portal"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             />
           </div>
 
@@ -128,7 +128,7 @@ export default function GeneralTab({ settings, setSettings }) {
               value={settings.organizationName || ''}
               onChange={(e) => handleChange('organizationName', e.target.value)}
               placeholder="e.g. Ministry of Tourism & Culture Cambodia"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             />
           </div>
 
@@ -141,7 +141,7 @@ export default function GeneralTab({ settings, setSettings }) {
               value={settings.siteDescription || ''}
               onChange={(e) => handleChange('siteDescription', e.target.value)}
               placeholder="Describe the tourism portal's primary purpose and target tourist audience..."
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all resize-none"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all resize-none"
             />
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function GeneralTab({ settings, setSettings }) {
                 value={settings.contactEmail || ''}
                 onChange={(e) => handleChange('contactEmail', e.target.value)}
                 placeholder="support@tourism.gov.kh"
-                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+                className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
               />
             </div>
           </div>
@@ -182,7 +182,7 @@ export default function GeneralTab({ settings, setSettings }) {
                 value={settings.contactPhone || ''}
                 onChange={(e) => handleChange('contactPhone', e.target.value)}
                 placeholder="+855 23 888 999"
-                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+                className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
               />
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function GeneralTab({ settings, setSettings }) {
               value={settings.emergencyTouristPolice || '+855 31 322 2117'}
               onChange={(e) => handleChange('emergencyTouristPolice', e.target.value)}
               placeholder="+855 31 322 2117"
-              className="w-full px-3 py-2 text-sm font-mono rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full px-3 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             />
           </div>
 
@@ -209,7 +209,7 @@ export default function GeneralTab({ settings, setSettings }) {
               value={settings.emergencyPolice || '117'}
               onChange={(e) => handleChange('emergencyPolice', e.target.value)}
               placeholder="117"
-              className="w-full px-3 py-2 text-sm font-mono rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full px-3 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             />
           </div>
         </div>
@@ -222,7 +222,7 @@ export default function GeneralTab({ settings, setSettings }) {
           Regional Localization & Currency
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1">
               Default System Language
@@ -230,12 +230,10 @@ export default function GeneralTab({ settings, setSettings }) {
             <select
               value={settings.defaultLanguage || 'km'}
               onChange={(e) => handleChange('defaultLanguage', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             >
               <option value="km">ខ្មែរ (Khmer)</option>
               <option value="en">English (US)</option>
-              <option value="fr">Français (French)</option>
-              <option value="zh">中文 (Chinese)</option>
             </select>
           </div>
 
@@ -246,7 +244,7 @@ export default function GeneralTab({ settings, setSettings }) {
             <select
               value={settings.defaultCurrency || 'USD'}
               onChange={(e) => handleChange('defaultCurrency', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             >
               <option value="USD">USD ($ - US Dollar)</option>
               <option value="KHR">KHR (៛ - Cambodian Riel)</option>
@@ -260,28 +258,10 @@ export default function GeneralTab({ settings, setSettings }) {
             <select
               value={settings.timezone || 'Asia/Phnom_Penh'}
               onChange={(e) => handleChange('timezone', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             >
               <option value="Asia/Phnom_Penh">Asia/Phnom_Penh (GMT+07:00 ICT)</option>
-              <option value="Asia/Bangkok">Asia/Bangkok (GMT+07:00)</option>
-              <option value="UTC">UTC (GMT+00:00)</option>
               <option value="America/New_York">America/New_York (GMT-05:00)</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1">
-              Date Display Format
-            </label>
-            <select
-              value={settings.dateFormat || 'YYYY-MM-DD'}
-              onChange={(e) => handleChange('dateFormat', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
-            >
-              <option value="YYYY-MM-DD">YYYY-MM-DD (2026-08-30)</option>
-              <option value="DD/MM/YYYY">DD/MM/YYYY (30/08/2026)</option>
-              <option value="MM/DD/YYYY">MM/DD/YYYY (08/30/2026)</option>
-              <option value="DD MMM YYYY">DD MMM YYYY (30 Aug 2026)</option>
             </select>
           </div>
         </div>
@@ -304,7 +284,7 @@ export default function GeneralTab({ settings, setSettings }) {
               value={settings.termsOfServiceUrl || ''}
               onChange={(e) => handleChange('termsOfServiceUrl', e.target.value)}
               placeholder="https://tourism.gov.kh/terms"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             />
           </div>
 
@@ -317,7 +297,7 @@ export default function GeneralTab({ settings, setSettings }) {
               value={settings.privacyPolicyUrl || ''}
               onChange={(e) => handleChange('privacyPolicyUrl', e.target.value)}
               placeholder="https://tourism.gov.kh/privacy"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+              className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             />
           </div>
         </div>
@@ -337,7 +317,7 @@ export default function GeneralTab({ settings, setSettings }) {
               onChange={(e) => handleChange('maintenanceMode', e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-md peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-md after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
           </label>
         </div>
 
@@ -358,7 +338,7 @@ export default function GeneralTab({ settings, setSettings }) {
                 value={settings.maintenanceMessage || ''}
                 onChange={(e) => handleChange('maintenanceMessage', e.target.value)}
                 placeholder="The system is undergoing scheduled maintenance. Please check back shortly."
-                className="w-full px-3 py-1.5 text-xs rounded border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-1 focus:ring-[var(--color-input)]"
+                className="w-full px-3 py-1.5 text-xs rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-1 focus:ring-[var(--color-input)]"
               />
             </div>
           </div>
@@ -373,7 +353,7 @@ export default function GeneralTab({ settings, setSettings }) {
         </h3>
 
         {uploadError && (
-          <div className="p-3 rounded bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 flex items-center gap-2 text-xs text-red-700 dark:text-red-400 font-medium">
+          <div className="p-3 rounded-md bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 flex items-center gap-2 text-xs text-red-700 dark:text-red-400 font-medium">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{uploadError}</span>
           </div>
@@ -389,7 +369,7 @@ export default function GeneralTab({ settings, setSettings }) {
             {logoPreview ? (
               <div className="relative border-2 border-dashed border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md p-4 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-14 h-14 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-center overflow-hidden">
                     <img src={logoPreview} alt="System Logo" className="max-h-full max-w-full object-contain" />
                   </div>
                   <div>
@@ -404,7 +384,7 @@ export default function GeneralTab({ settings, setSettings }) {
                 <button
                   type="button"
                   onClick={removeLogo}
-                  className="p-1.5 text-[var(--color-text-muted-light)] hover:text-[var(--color-danger-text)] dark:hover:text-[var(--color-danger-dark-text)] rounded-lg transition-colors cursor-pointer"
+                  className="p-1.5 text-[var(--color-text-muted-light)] hover:text-[var(--color-danger-text)] dark:hover:text-[var(--color-danger-dark-text)] rounded-md transition-colors cursor-pointer"
                   title="Remove Logo"
                 >
                   <X className="w-4 h-4" />
@@ -429,7 +409,7 @@ export default function GeneralTab({ settings, setSettings }) {
             {faviconPreview ? (
               <div className="relative border-2 border-dashed border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md p-4 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-center overflow-hidden">
+                  <div className="w-10 h-10 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-center overflow-hidden">
                     <img src={faviconPreview} alt="Favicon" className="max-h-full max-w-full object-contain" />
                   </div>
                   <div>
@@ -444,7 +424,7 @@ export default function GeneralTab({ settings, setSettings }) {
                 <button
                   type="button"
                   onClick={removeFavicon}
-                  className="p-1.5 text-[var(--color-text-muted-light)] hover:text-[var(--color-danger-text)] dark:hover:text-[var(--color-danger-dark-text)] rounded-lg transition-colors cursor-pointer"
+                  className="p-1.5 text-[var(--color-text-muted-light)] hover:text-[var(--color-danger-text)] dark:hover:text-[var(--color-danger-dark-text)] rounded-md transition-colors cursor-pointer"
                   title="Remove Favicon"
                 >
                   <X className="w-4 h-4" />

@@ -16,7 +16,7 @@ export default function SecurityToolbar({
   ];
 
   return (
-    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-3 rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-3 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
       {/* Search Input */}
       <div className="relative flex-1 min-w-[240px]">
         <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />

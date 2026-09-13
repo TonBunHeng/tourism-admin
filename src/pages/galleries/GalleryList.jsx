@@ -18,7 +18,7 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
                 className="p-4 hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors cursor-pointer"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] overflow-hidden relative shrink-0 border border-slate-200 dark:border-zinc-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-md bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] overflow-hidden relative shrink-0 border border-slate-200 dark:border-zinc-700 flex items-center justify-center">
                     {item.type === 'video' ? (
                       <div className="w-full h-full bg-black/60 flex items-center justify-center">
                         <Video className="w-5 h-5 text-white" />
@@ -33,13 +33,13 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
                       <p className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
                         {item.title}
                       </p>
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border shrink-0 ${getStatusColor(item.status)}`}>
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md border shrink-0 ${getStatusColor(item.status)}`}>
                         {item.status}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
+                      <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
                         {item.category}
                       </span>
                       <span className="text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">
@@ -54,7 +54,7 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
                       <button
                         type="button"
                         onClick={() => onPreview(item)}
-                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
@@ -62,7 +62,7 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
                       <button
                         type="button"
                         onClick={() => onEdit(item)}
-                        className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Edit"
                       >
                         <Edit className="w-4 h-4" />
@@ -70,7 +70,7 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
                       <button
                         type="button"
                         onClick={() => onDelete(item.id)}
-                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -137,7 +137,7 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
 
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] overflow-hidden relative shrink-0 border border-slate-200 dark:border-zinc-700 flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-md bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] overflow-hidden relative shrink-0 border border-slate-200 dark:border-zinc-700 flex items-center justify-center">
                           {item.type === 'video' ? (
                             <div className="w-full h-full bg-black/60 flex items-center justify-center">
                               <Video className="w-4 h-4 text-white" />
@@ -162,7 +162,7 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
                     </td>
 
                     <td className="px-3 py-3.5 whitespace-nowrap">
-                      <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
+                      <span className="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
                         {item.category}
                       </span>
                     </td>
@@ -179,7 +179,7 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
                     </td>
 
                     <td className="px-3 py-3.5 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full border ${getStatusColor(item.status)}`}>
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md border ${getStatusColor(item.status)}`}>
                         {item.status}
                       </span>
                     </td>
@@ -189,7 +189,7 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
                         <button
                           type="button"
                           onClick={() => onPreview(item)}
-                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
@@ -197,7 +197,7 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
                         <button
                           type="button"
                           onClick={() => onEdit(item)}
-                          className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="Edit"
                         >
                           <Edit className="w-4 h-4" />
@@ -205,7 +205,7 @@ export default function GalleryList({ media, mediaItems, onPreview, onEdit, onDe
                         <button
                           type="button"
                           onClick={() => onDelete(item.id)}
-                          className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />

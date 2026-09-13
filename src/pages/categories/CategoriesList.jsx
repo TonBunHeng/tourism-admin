@@ -31,7 +31,7 @@ export default function CategoriesList({
             >
               <div className="flex items-start gap-3">
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700"
+                  className="w-10 h-10 rounded-md flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700"
                   style={{
                     backgroundColor: category.color ? `${category.color}15` : 'rgba(59, 130, 246, 0.1)',
                     borderColor: category.color ? `${category.color}40` : undefined
@@ -48,7 +48,7 @@ export default function CategoriesList({
                     <p className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
                       {category.name}
                     </p>
-                    <span className={`shrink-0 inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-full border ${getStatusColor(category.status)}`}>
+                    <span className={`shrink-0 inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-md border ${getStatusColor(category.status)}`}>
                       {category.status}
                     </span>
                   </div>
@@ -72,7 +72,7 @@ export default function CategoriesList({
                     <button
                       type="button"
                       onClick={() => handleView(category)}
-                      className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                      className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                       title="View Details"
                     >
                       <Eye className="w-4 h-4" />
@@ -80,7 +80,7 @@ export default function CategoriesList({
                     <button
                       type="button"
                       onClick={() => handleEdit(category)}
-                      className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                      className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                       title="Edit"
                     >
                       <Edit className="w-4 h-4" />
@@ -88,7 +88,7 @@ export default function CategoriesList({
                     <button
                       type="button"
                       onClick={() => handleDeleteItem(category.id)}
-                      className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                      className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -150,7 +150,7 @@ export default function CategoriesList({
                   <td className="px-4 py-3.5 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border"
+                        className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 border"
                         style={{
                           backgroundColor: category.color ? `${category.color}15` : 'rgba(59, 130, 246, 0.1)',
                           borderColor: category.color ? `${category.color}40` : 'rgba(59, 130, 246, 0.2)'
@@ -181,7 +181,7 @@ export default function CategoriesList({
                   </td>
 
                   <td className="px-3 py-3.5 whitespace-nowrap">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full border ${getStatusColor(category.status)}`}>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md border ${getStatusColor(category.status)}`}>
                       {category.status}
                     </span>
                   </td>
@@ -191,7 +191,7 @@ export default function CategoriesList({
                       <button
                         type="button"
                         onClick={() => handleView(category)}
-                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
@@ -199,7 +199,7 @@ export default function CategoriesList({
                       <button
                         type="button"
                         onClick={() => handleEdit(category)}
-                        className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Edit"
                       >
                         <Edit className="w-4 h-4" />
@@ -207,7 +207,7 @@ export default function CategoriesList({
                       <button
                         type="button"
                         onClick={() => handleDeleteItem(category.id)}
-                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />

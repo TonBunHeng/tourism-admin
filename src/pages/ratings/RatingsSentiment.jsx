@@ -19,7 +19,7 @@ export default function RatingsSentiment({ reviews = [], ratingDistribution }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 sm:mb-8">
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-6 lg:col-span-2">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-6 lg:col-span-2">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">Rating Distribution</h3>
           <span className="text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">
@@ -35,9 +35,9 @@ export default function RatingsSentiment({ reviews = [], ratingDistribution }) {
                   <span className="text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">{item.rating}</span>
                   <Star className="w-4 h-4 fill-[var(--color-warning-text)] text-[var(--color-warning-text)]" />
                 </div>
-                <div className="flex-1 h-2 bg-[var(--color-neutral-badge-bg)] dark:bg-[var(--color-surface-hover-dark)] rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-[var(--color-neutral-badge-bg)] dark:bg-[var(--color-surface-hover-dark)] rounded-md overflow-hidden">
                   <div
-                    className="h-full bg-[var(--color-warning-text)] rounded-full transition-all duration-500"
+                    className="h-full bg-[var(--color-warning-text)] rounded-md transition-all duration-500"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -50,7 +50,7 @@ export default function RatingsSentiment({ reviews = [], ratingDistribution }) {
           })}
         </div>
       </div>
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-6 flex flex-col justify-between">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-6 flex flex-col justify-between">
         <div>
           <h3 className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mb-4">Overall Sentiment</h3>
           <div className="space-y-3">

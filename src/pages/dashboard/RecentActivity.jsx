@@ -61,7 +61,7 @@ export default function RecentActivity({ activities, recentPlaces }) {
         : defaultActivities)).slice(0, 5);
 
   return (
-    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 flex flex-col h-full">
+    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 flex flex-col h-full">
       <div className="flex items-center justify-between mb-4 flex-shrink-0 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
         <div>
           <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
@@ -87,9 +87,9 @@ export default function RecentActivity({ activities, recentPlaces }) {
             return (
               <div
                 key={activity.id || idx}
-                className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors group"
+                className="flex items-start gap-3 p-2.5 rounded-md hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors group"
               >
-                <div className="w-8 h-8 rounded-lg bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)] flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)] flex items-center justify-center shrink-0 mt-0.5">
                   <Icon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 </div>
 
@@ -98,7 +98,7 @@ export default function RecentActivity({ activities, recentPlaces }) {
                     <p className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
                       {activity.user}
                     </p>
-                    <span className={`text-[10px] px-2 py-0.2 rounded-full font-semibold uppercase tracking-wider border shrink-0 ${getBadgeStyle(activity.type)}`}>
+                    <span className={`text-[10px] px-2 py-0.2 rounded-md font-semibold uppercase tracking-wider border shrink-0 ${getBadgeStyle(activity.type)}`}>
                       {activity.type}
                     </span>
                   </div>

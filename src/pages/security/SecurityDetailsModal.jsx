@@ -65,7 +65,7 @@ export default function SecurityDetailsModal({
       aria-modal="true"
     >
       <div
-        className="w-full max-w-xl bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark-modal)] border border-gray-200 dark:border-zinc-800 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
+        className="w-full max-w-xl bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark-modal)] border border-gray-200 dark:border-zinc-800 rounded-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -118,7 +118,7 @@ export default function SecurityDetailsModal({
                 <Clock className="w-3.5 h-3.5" />
                 {formattedDate}
               </span>
-              <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700" />
+              <span className="w-1 h-1 rounded-md bg-slate-300 dark:bg-zinc-700" />
               <span className={`font-semibold ${alert.is_read ? 'text-slate-500 dark:text-zinc-400' : 'text-blue-600 dark:text-blue-400'}`}>
                 {alert.is_read ? 'Acknowledged (Read)' : 'Unread Incident'}
               </span>
@@ -126,14 +126,14 @@ export default function SecurityDetailsModal({
           </div>
 
           {/* Incident Parameters Grid */}
-          <div className="rounded-lg border border-red-500/30 bg-red-500/5 dark:bg-red-950/20 p-4 space-y-3">
+          <div className="rounded-md border border-red-500/30 bg-red-500/5 dark:bg-red-950/20 p-4 space-y-3">
             <div className="flex items-center justify-between gap-2 text-red-600 dark:text-red-400 font-semibold text-xs uppercase tracking-wider">
               <span className="flex items-center gap-2">
                 <AlertOctagon className="w-4 h-4" />
                 Authentication Attack Parameters
               </span>
               {isBlocked ? (
-                <span className="text-[10px] text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-950/80 px-2 py-0.5 rounded font-bold">
+                <span className="text-[10px] text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-950/80 px-2 py-0.5 rounded-md font-bold">
                   IP BLOCKED BY ADMIN
                 </span>
               ) : (
@@ -193,7 +193,7 @@ export default function SecurityDetailsModal({
           </div>
 
           {/* Defense Explanation */}
-          <div className="p-4 rounded-lg bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-800 space-y-2 text-xs">
+          <div className="p-4 rounded-md bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-800 space-y-2 text-xs">
             <h4 className="font-semibold text-slate-700 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-blue-500" />
               IP Access Protection

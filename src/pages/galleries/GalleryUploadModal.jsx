@@ -117,7 +117,7 @@ export default function GalleryUploadModal({ isOpen, onClose, categories = [], o
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] rounded-xl max-w-lg w-full shadow-2xl border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] overflow-hidden animate-alert-popup flex flex-col max-h-[90vh]"
+        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] rounded-md max-w-lg w-full shadow-2xl border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] overflow-hidden animate-alert-popup flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -201,14 +201,14 @@ export default function GalleryUploadModal({ isOpen, onClose, categories = [], o
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-2.5 py-1 bg-white/90 dark:bg-zinc-900/90 text-xs font-medium rounded border border-gray-200 dark:border-zinc-700 shadow-sm hover:bg-white transition-colors cursor-pointer"
+                      className="px-2.5 py-1 bg-white/90 dark:bg-zinc-900/90 text-xs font-medium rounded-md border border-gray-200 dark:border-zinc-700 shadow-sm hover:bg-white transition-colors cursor-pointer"
                     >
                       Replace
                     </button>
                     <button
                       type="button"
                       onClick={() => setFileUrl('')}
-                      className="p-1 bg-red-600 hover:bg-red-700 text-white rounded shadow-sm transition-colors cursor-pointer"
+                      className="p-1 bg-red-600 hover:bg-red-700 text-white rounded-md shadow-sm transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

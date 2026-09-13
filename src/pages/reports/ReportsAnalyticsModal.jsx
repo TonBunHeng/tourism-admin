@@ -249,7 +249,7 @@ export default function ReportsAnalyticsModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 transition-opacity duration-150 animate-alert-backdrop">
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] rounded-lg max-w-4xl w-full max-h-[90vh] shadow-lg border border-gray-200 dark:border-zinc-800 overflow-hidden flex flex-col animate-alert-popup">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] rounded-md max-w-4xl w-full max-h-[90vh] shadow-lg border border-gray-200 dark:border-zinc-800 overflow-hidden flex flex-col animate-alert-popup">
         
         {/* Simple Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-zinc-800 shrink-0">
@@ -264,7 +264,7 @@ export default function ReportsAnalyticsModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 rounded transition-colors cursor-pointer"
+            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 rounded-md transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -335,7 +335,7 @@ export default function ReportsAnalyticsModal({
           {/* Top 4 KPI Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Total DB Records */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 font-medium">
                 <span>Total Records</span>
                 <Database className="w-4 h-4 text-blue-500" />
@@ -349,7 +349,7 @@ export default function ReportsAnalyticsModal({
             </div>
 
             {/* Card 2: Exports Generated */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 font-medium">
                 <span>Exports Generated</span>
                 <Download className="w-4 h-4 text-purple-500" />
@@ -363,7 +363,7 @@ export default function ReportsAnalyticsModal({
             </div>
 
             {/* Card 3: Active / Verified Rate */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 font-medium">
                 <span>Active Rate</span>
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
@@ -377,7 +377,7 @@ export default function ReportsAnalyticsModal({
             </div>
 
             {/* Card 4: Quality & Rating Score */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 font-medium">
                 <span>Average Rating</span>
                 <Award className="w-4 h-4 text-amber-500" />
@@ -392,7 +392,7 @@ export default function ReportsAnalyticsModal({
           </div>
 
           {/* Monthly Ingestion Chart */}
-          <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+          <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h4 className="text-sm font-semibold text-gray-900 dark:text-zinc-100">
@@ -404,7 +404,7 @@ export default function ReportsAnalyticsModal({
               </div>
               <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-zinc-400">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-xs bg-[#003E83]" />
+                  <span className="w-2.5 h-2.5 rounded-md bg-[#003E83]" />
                   New Records
                 </span>
                 <span className="flex items-center gap-1.5">
@@ -455,7 +455,7 @@ export default function ReportsAnalyticsModal({
           {/* Breakdown Section: Composition & Status */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Composition Breakdown Card */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <h4 className="text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-1">
                 Dataset Composition ({selectedDataset === 'ALL' ? 'Global' : selectedDataset})
               </h4>
@@ -477,9 +477,9 @@ export default function ReportsAnalyticsModal({
                           {item.count} ({item.percentage}%)
                         </span>
                       </div>
-                      <div className="h-1.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="h-1.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-md overflow-hidden">
                         <div
-                          className={`h-full ${item.color} rounded-full transition-all duration-300`}
+                          className={`h-full ${item.color} rounded-md transition-all duration-300`}
                           style={{ width: `${item.percentage}%` }}
                         />
                       </div>
@@ -490,7 +490,7 @@ export default function ReportsAnalyticsModal({
             </div>
 
             {/* Status Breakdown Card */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <h4 className="text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-1">
                 Operational Status Breakdown
               </h4>
@@ -509,9 +509,9 @@ export default function ReportsAnalyticsModal({
                         {item.count} ({item.percentage}%)
                       </span>
                     </div>
-                    <div className="h-1.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-md overflow-hidden">
                       <div
-                        className={`h-full ${item.color} rounded-full transition-all duration-300`}
+                        className={`h-full ${item.color} rounded-md transition-all duration-300`}
                         style={{ width: `${item.percentage}%` }}
                       />
                     </div>

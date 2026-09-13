@@ -454,7 +454,7 @@ export default function Businesses() {
           return (
             <div
               key={index}
-              className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg p-4 shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex flex-col justify-between"
+              className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex flex-col justify-between"
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
@@ -478,7 +478,7 @@ export default function Businesses() {
       </div>
 
       {/* Main Business Table Container */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         {/* Toolbar Header */}
         <div className="px-4 sm:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -576,7 +576,7 @@ export default function Businesses() {
                     <tr key={b.id} className="hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors">
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700 overflow-hidden font-bold text-[#003E83] dark:text-blue-400">
+                          <div className="w-9 h-9 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700 overflow-hidden font-bold text-[#003E83] dark:text-blue-400">
                             {(b.image || b.image_url || b.cover_image || b.logo) ? (
                               <img
                                 src={b.image || b.image_url || b.cover_image || b.logo}
@@ -618,7 +618,7 @@ export default function Businesses() {
                       </td>
 
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${getBusinessVerificationStatusColor(status)}`}>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border capitalize ${getBusinessVerificationStatusColor(status)}`}>
                           {status === 'pending' && <AlertCircle className="w-3.5 h-3.5 mr-1" />}
                           {status === 'approved' && <CheckCircle className="w-3.5 h-3.5 mr-1" />}
                           {status === 'suspended' && <AlertTriangle className="w-3.5 h-3.5 mr-1" />}

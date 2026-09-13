@@ -50,7 +50,7 @@ export default function CategoryDistribution({ distribution, userStatus }) {
   ];
 
   return (
-    <div className="lg:col-span-1 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-6 flex flex-col justify-between">
+    <div className="lg:col-span-1 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-6 flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -75,9 +75,9 @@ export default function CategoryDistribution({ distribution, userStatus }) {
                   <span className="text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] font-medium">{category.name}</span>
                   <span className="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-semibold">{count} ({pct}%)</span>
                 </div>
-                <div className="w-full h-2 bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] rounded-md overflow-hidden">
                   <div
-                    className={`h-full ${category.color || 'bg-blue-500'} rounded-full transition-all duration-500`}
+                    className={`h-full ${category.color || 'bg-blue-500'} rounded-md transition-all duration-500`}
                     style={{ width: `${Math.max(pct, count > 0 ? 8 : 0)}%` }}
                   />
                 </div>

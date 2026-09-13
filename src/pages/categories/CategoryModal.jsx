@@ -56,7 +56,7 @@ export default function CategoryModal({
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] rounded-xl max-w-lg w-full shadow-2xl border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] overflow-hidden animate-alert-popup flex flex-col max-h-[90vh]"
+        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] rounded-md max-w-lg w-full shadow-2xl border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] overflow-hidden animate-alert-popup flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -132,7 +132,7 @@ export default function CategoryModal({
                     key={color}
                     type="button"
                     onClick={() => updateForm({ ...data, color })}
-                    className={`w-7 h-7 rounded-full border-2 transition-all cursor-pointer ${data.color === color ? "border-[#003E83] dark:border-white ring-2 ring-[#003E83]/40 scale-110 shadow-xs" : "border-transparent hover:scale-105"}`}
+                    className={`w-7 h-7 rounded-md border-2 transition-all cursor-pointer ${data.color === color ? "border-[#003E83] dark:border-white ring-2 ring-[#003E83]/40 scale-110 shadow-xs" : "border-transparent hover:scale-105"}`}
                     style={{ backgroundColor: color }}
                   />
                 ))}

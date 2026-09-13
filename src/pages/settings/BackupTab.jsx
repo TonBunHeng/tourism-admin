@@ -200,7 +200,7 @@ export default function BackupTab({ settings, setSettings }) {
             <select
               value={settings.backupSchedule || 'daily'}
               onChange={(e) => handleChange('backupSchedule', e.target.value)}
-              className="w-full h-10 px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+              className="w-full h-10 px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
             >
               <option value="daily">Daily at 02:00 AM (ICT)</option>
               <option value="weekly">Weekly (Sunday Midnight)</option>
@@ -216,7 +216,7 @@ export default function BackupTab({ settings, setSettings }) {
             <select
               value={settings.backupRetention || '30'}
               onChange={(e) => handleChange('backupRetention', e.target.value)}
-              className="w-full h-10 px-3 py-2 text-sm rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
+              className="w-full h-10 px-3 py-2 text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)]"
             >
               <option value="7">Retain last 7 days</option>
               <option value="14">Retain last 14 days</option>
@@ -235,7 +235,7 @@ export default function BackupTab({ settings, setSettings }) {
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 flex flex-col justify-between space-y-3">
+          <div className="p-4 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 flex flex-col justify-between space-y-3">
             <div>
               <h4 className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
                 Purge System Cache
@@ -254,7 +254,7 @@ export default function BackupTab({ settings, setSettings }) {
             </button>
           </div>
 
-          <div className="p-4 rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 flex flex-col justify-between space-y-3">
+          <div className="p-4 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 flex flex-col justify-between space-y-3">
             <div>
               <h4 className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
                 Purge Temp Uploads
@@ -273,7 +273,7 @@ export default function BackupTab({ settings, setSettings }) {
             </button>
           </div>
 
-          <div className="p-4 rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 flex flex-col justify-between space-y-3">
+          <div className="p-4 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 flex flex-col justify-between space-y-3">
             <div>
               <h4 className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
                 Optimize Database
@@ -328,7 +328,7 @@ export default function BackupTab({ settings, setSettings }) {
                   <td className="py-3 px-3 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">{b.date}</td>
                   <td className="py-3 px-3 font-medium">{b.size}</td>
                   <td className="py-3 px-3">
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">
                       {b.status}
                     </span>
                   </td>
@@ -369,12 +369,12 @@ export default function BackupTab({ settings, setSettings }) {
           aria-labelledby="restore-modal-title"
         >
           <div
-            className="bg-white dark:bg-[#18181b] rounded-lg shadow-2xl max-w-sm sm:max-w-md w-full mx-4 p-6 relative border border-gray-200 dark:border-zinc-800 animate-alert-popup overflow-hidden text-center"
+            className="bg-white dark:bg-[#18181b] rounded-md shadow-2xl max-w-sm sm:max-w-md w-full mx-4 p-6 relative border border-gray-200 dark:border-zinc-800 animate-alert-popup overflow-hidden text-center"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Centered Warning Icon Badge */}
             <div className="flex justify-center mb-5 animate-alert-icon">
-              <div className="w-14 h-14 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                 <AlertTriangle size={24} />
               </div>
             </div>
@@ -390,7 +390,7 @@ export default function BackupTab({ settings, setSettings }) {
             </p>
 
             {/* Caution Callout Box */}
-            <div className="p-3.5 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/50 rounded-lg text-left text-xs mb-5 space-y-1">
+            <div className="p-3.5 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/50 rounded-md text-left text-xs mb-5 space-y-1">
               <span className="font-bold text-amber-900 dark:text-amber-200 block text-xs">
                 ⚠️ Caution: Irreversible Database Overwrite
               </span>
@@ -417,7 +417,7 @@ export default function BackupTab({ settings, setSettings }) {
               <button
                 type="button"
                 onClick={() => setRestoreModalOpen(false)}
-                className="flex-1 py-2.5 px-4 border border-gray-300 dark:border-zinc-800 bg-transparent hover:bg-gray-100 dark:hover:bg-zinc-800/80 text-gray-700 dark:text-zinc-300 font-medium rounded-lg transition-colors cursor-pointer text-sm"
+                className="flex-1 py-2.5 px-4 border border-gray-300 dark:border-zinc-800 bg-transparent hover:bg-gray-100 dark:hover:bg-zinc-800/80 text-gray-700 dark:text-zinc-300 font-medium rounded-md transition-colors cursor-pointer text-sm"
               >
                 Cancel
               </button>
@@ -425,7 +425,7 @@ export default function BackupTab({ settings, setSettings }) {
                 type="button"
                 onClick={handleRestoreSubmit}
                 disabled={!selectedFile || restoring}
-                className="flex-1 py-2.5 px-4 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-medium rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-sm shadow-xs active:scale-[0.98]"
+                className="flex-1 py-2.5 px-4 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-medium rounded-md flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-sm shadow-xs active:scale-[0.98]"
               >
                 {restoring ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                 <span>{restoring ? 'Restoring...' : 'Confirm Restore'}</span>

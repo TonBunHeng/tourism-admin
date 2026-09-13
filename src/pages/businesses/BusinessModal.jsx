@@ -268,7 +268,7 @@ export default function BusinessModal({
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] rounded-xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
+        className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-modal-border)] rounded-md max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-alert-popup"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -420,7 +420,7 @@ export default function BusinessModal({
 
                   {/* Image Preview or Drop Zone */}
                   {formData.image ? (
-                    <div className="mt-3 relative w-full h-44 rounded-lg overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs group">
+                    <div className="mt-3 relative w-full h-44 rounded-md overflow-hidden border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs group">
                       <img
                         src={formData.image}
                         alt="Cover Preview"
@@ -460,7 +460,7 @@ export default function BusinessModal({
                       onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                       onDragLeave={() => setIsDragging(false)}
                       onDrop={handleDrop}
-                      className={`mt-2.5 flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer transition-all ${
+                      className={`mt-2.5 flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-md cursor-pointer transition-all ${
                         isDragging
                           ? 'border-[#003E83] bg-blue-50/50 dark:bg-blue-950/20'
                           : 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/40'

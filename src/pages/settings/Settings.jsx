@@ -404,7 +404,7 @@ export default function Settings() {
       <SettingsStats settings={settings} />
 
       {/* Main Settings Card */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex flex-col min-h-[550px]">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex flex-col min-h-[550px]">
         {/* Top Header Navigation Tabs */}
         <SettingsTabs
           tabs={SETTING_TABS}

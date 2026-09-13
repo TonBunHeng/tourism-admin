@@ -34,10 +34,10 @@ export default function EventsList({
                     <img
                       src={event.imageUrl}
                       alt={event.title}
-                      className="w-10 h-10 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
+                      className="w-10 h-10 rounded-md object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)] flex items-center justify-center shrink-0">
                       <Calendar className="w-5 h-5 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]" />
                     </div>
                   )}
@@ -47,13 +47,13 @@ export default function EventsList({
                       <p className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
                         {event.title}
                       </p>
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border shrink-0 ${getStatusColor(event.status)}`}>
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md border shrink-0 ${getStatusColor(event.status)}`}>
                         {event.status}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full border ${getCategoryColor(event.category)}`}>
+                      <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-md border ${getCategoryColor(event.category)}`}>
                         {event.category}
                       </span>
                       <span className="text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center gap-1 font-mono">
@@ -74,7 +74,7 @@ export default function EventsList({
                       <button
                         type="button"
                         onClick={() => handleView(event)}
-                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="View Details"
                       >
                         <Eye className="w-4 h-4" />
@@ -82,7 +82,7 @@ export default function EventsList({
                       <button
                         type="button"
                         onClick={() => handleEdit(event)}
-                        className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Edit"
                       >
                         <Edit className="w-4 h-4" />
@@ -90,7 +90,7 @@ export default function EventsList({
                       <button
                         type="button"
                         onClick={() => handleDeleteItem(event.id)}
-                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                        className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -160,10 +160,10 @@ export default function EventsList({
                           <img
                             src={event.imageUrl}
                             alt={event.title}
-                            className="w-9 h-9 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
+                            className="w-9 h-9 rounded-md object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
                           />
                         ) : (
-                          <div className="w-9 h-9 rounded-lg bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)] flex items-center justify-center shrink-0">
+                          <div className="w-9 h-9 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)] flex items-center justify-center shrink-0">
                             <Calendar className="w-4 h-4 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]" />
                           </div>
                         )}
@@ -172,11 +172,11 @@ export default function EventsList({
                             {event.title}
                           </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className={`text-[10px] font-semibold px-2 py-0.2 rounded-full border ${getCategoryColor(event.category)}`}>
+                            <span className={`text-[10px] font-semibold px-2 py-0.2 rounded-md border ${getCategoryColor(event.category)}`}>
                               {event.category}
                             </span>
                             {event.featured && (
-                              <span className="text-[10px] font-semibold px-1.5 py-0.2 bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)] rounded-full border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)]">
+                              <span className="text-[10px] font-semibold px-1.5 py-0.2 bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)] rounded-md border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)]">
                                 Featured
                               </span>
                             )}
@@ -210,7 +210,7 @@ export default function EventsList({
                     </td>
 
                     <td className="px-3 py-3.5 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full border ${getStatusColor(event.status)}`}>
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md border ${getStatusColor(event.status)}`}>
                         {event.status}
                       </span>
                     </td>
@@ -220,7 +220,7 @@ export default function EventsList({
                         <button
                           type="button"
                           onClick={() => handleView(event)}
-                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
@@ -228,7 +228,7 @@ export default function EventsList({
                         <button
                           type="button"
                           onClick={() => handleEdit(event)}
-                          className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="Edit"
                         >
                           <Edit className="w-4 h-4" />
@@ -236,7 +236,7 @@ export default function EventsList({
                         <button
                           type="button"
                           onClick={() => handleDeleteItem(event.id)}
-                          className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />

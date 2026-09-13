@@ -16,7 +16,7 @@ export default function ExportToast({ toast, onClose }) {
   const isPDF = toast.format === 'pdf';
 
   return (
-    <div className="fixed top-5 right-5 z-[9999] flex items-center gap-3 p-4 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg shadow-md max-w-sm w-full">
+    <div className="fixed top-5 right-5 z-[9999] flex items-center gap-3 p-4 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-md shadow-md max-w-sm w-full">
       <div className={`p-2.5 rounded-md shrink-0 ${
         isPDF
           ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400'
@@ -39,7 +39,7 @@ export default function ExportToast({ toast, onClose }) {
 
       <button
         onClick={onClose}
-        className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer"
+        className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer"
         aria-label="Close notification"
       >
         <X size={16} />

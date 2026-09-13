@@ -96,7 +96,7 @@ export default function RatingsToolbar({
             <button
               type="button"
               onClick={() => handleViewMode('table')}
-              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
                 viewMode === 'table' || viewMode === 'list'
                   ? 'bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] shadow-sm'
                   : 'hover:bg-[var(--color-border-subtle-light)] dark:hover:bg-[var(--color-border-dark)]'
@@ -110,7 +110,7 @@ export default function RatingsToolbar({
             <button
               type="button"
               onClick={() => handleViewMode('grid')}
-              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+              className={`p-1.5 rounded-md transition-colors cursor-pointer ${
                 viewMode === 'grid' || viewMode === 'feed'
                   ? 'bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] shadow-sm'
                   : 'hover:bg-[var(--color-border-subtle-light)] dark:hover:bg-[var(--color-border-dark)]'

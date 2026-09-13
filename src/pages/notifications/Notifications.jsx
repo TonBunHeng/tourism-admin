@@ -328,7 +328,7 @@ export default function Notifications() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-3 rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-3 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           {categories.map(cat => (
             <button
@@ -352,7 +352,7 @@ export default function Notifications() {
               type="checkbox"
               checked={showUnreadOnly}
               onChange={(e) => setShowUnreadOnly(e.target.checked)}
-              className="rounded border-gray-300 text-[#003E83] dark:text-blue-500 focus:ring-[#003E83] dark:focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer"
+              className="rounded-md border-gray-300 text-[#003E83] dark:text-blue-500 focus:ring-[#003E83] dark:focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer"
             />
             Show unread only ({unreadCount})
           </label>
@@ -360,7 +360,7 @@ export default function Notifications() {
       </div>
 
       {/* Notifications List */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs overflow-hidden divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)]">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs overflow-hidden divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)]">
         {loading ? (
           <div className="p-12 text-center flex flex-col items-center justify-center space-y-3">
             <Loader2 className="w-8 h-8 text-[#003E83] dark:text-blue-500 animate-spin" />
@@ -390,11 +390,11 @@ export default function Notifications() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
                         {notification.category || 'General'}
                       </span>
                       {!notification.read && (
-                        <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" />
+                        <span className="w-2 h-2 rounded-md bg-blue-600 shrink-0" />
                       )}
                       <span className="text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center gap-1">
                         <Clock className="w-3 h-3" />
@@ -415,7 +415,7 @@ export default function Notifications() {
                   <button
                     type="button"
                     onClick={(e) => handleDeleteNotification(notification.id, e)}
-                    className="p-1.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
                     title="Delete notification"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -424,7 +424,7 @@ export default function Notifications() {
                   <button
                     type="button"
                     onClick={(e) => handleOpenDetails(notification, e)}
-                    className="p-1.5 rounded text-gray-400 hover:text-[#003E83] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-md text-gray-400 hover:text-[#003E83] dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                     title="Open details"
                   >
                     <ChevronRight className="w-5 h-5 text-[#003E83] dark:text-blue-400" />
@@ -435,7 +435,7 @@ export default function Notifications() {
           })
         ) : (
           <div className="p-12 text-center">
-            <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 rounded-md bg-gray-100 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 flex items-center justify-center mx-auto mb-3">
               <Bell className="w-6 h-6" />
             </div>
             <h3 className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">

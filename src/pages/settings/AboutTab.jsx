@@ -88,8 +88,8 @@ export default function AboutTab() {
             <Cpu className="w-4 h-4 text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]" />
             Server Host & Environment Status
           </h3>
-          <span className="px-2.5 py-1 text-[11px] font-bold rounded-full bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[var(--color-success-text)] animate-pulse" />
+          <span className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-md bg-[var(--color-success-text)] animate-pulse" />
             Operational & Healthy
           </span>
         </div>
@@ -131,9 +131,9 @@ export default function AboutTab() {
             </span>
           </div>
 
-          <div className="w-full h-2.5 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] rounded-full overflow-hidden">
+          <div className="w-full h-2.5 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] rounded-md overflow-hidden">
             <div
-              className="h-full bg-[#003E83] rounded-full transition-all duration-500"
+              className="h-full bg-[#003E83] rounded-md transition-all duration-500"
               style={{ width: '42.5%' }}
             />
           </div>

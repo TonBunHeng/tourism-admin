@@ -55,7 +55,7 @@ export default function FavoritesGrid({
   if (!favorites || favorites.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-        <div className="w-16 h-16 rounded-full bg-[var(--color-rose-badge-bg)] dark:bg-[var(--color-rose-badge-dark-bg)] text-[var(--color-rose-badge-text)] dark:text-[var(--color-rose-badge-dark-text)] flex items-center justify-center mb-4 border border-[var(--color-rose-badge-border)] dark:border-[var(--color-rose-badge-dark-border)]">
+        <div className="w-16 h-16 rounded-md bg-[var(--color-rose-badge-bg)] dark:bg-[var(--color-rose-badge-dark-bg)] text-[var(--color-rose-badge-text)] dark:text-[var(--color-rose-badge-dark-text)] flex items-center justify-center mb-4 border border-[var(--color-rose-badge-border)] dark:border-[var(--color-rose-badge-dark-border)]">
           <Landmark className="w-8 h-8" />
         </div>
         <h3 className="text-lg font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mb-1">
@@ -86,7 +86,7 @@ export default function FavoritesGrid({
         return (
           <div
             key={favorite.id}
-            className={`bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-lg overflow-hidden shadow-xs flex flex-col justify-between group ${isSelected ? 'ring-2 ring-[var(--color-primary)]' : ''
+            className={`bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md overflow-hidden shadow-xs flex flex-col justify-between group ${isSelected ? 'ring-2 ring-[var(--color-primary)]' : ''
               }`}
           >
             {/* Image & Badges */}
@@ -117,7 +117,7 @@ export default function FavoritesGrid({
                   checked={isSelected}
                   onChange={(e) => handleSelect(favorite.id, e)}
                   aria-label={`Select ${favorite.name}`}
-                  className="w-4 h-4 rounded text-[#003E83] focus:ring-[#003E83] border-gray-300 bg-white cursor-pointer shadow-xs"
+                  className="w-4 h-4 rounded-md text-[#003E83] focus:ring-[#003E83] border-gray-300 bg-white cursor-pointer shadow-xs"
                 />
               </div>
 
@@ -127,7 +127,7 @@ export default function FavoritesGrid({
                   type="button"
                   onClick={() => handleDelete(favorite.id || favorite.place_id)}
                   title="Remove from favorites"
-                  className="p-1.5 rounded-full bg-white/90 dark:bg-zinc-900/90 text-rose-600 hover:bg-white transition-colors shadow-xs cursor-pointer"
+                  className="p-1.5 rounded-md bg-white/90 dark:bg-zinc-900/90 text-rose-600 hover:bg-white transition-colors shadow-xs cursor-pointer"
                 >
                   <Heart className="w-4 h-4 fill-current text-rose-600" />
                 </button>
@@ -175,8 +175,8 @@ export default function FavoritesGrid({
                 </p>
 
                 {/* Traveler / User Info Highlight */}
-                <div className="flex items-center gap-2 mt-3 p-2 bg-[var(--color-surface-hover-light)]/70 dark:bg-[var(--color-surface-hover-dark)]/50 rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
-                  <div className="w-7 h-7 rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] flex items-center justify-center font-bold text-[10px] shrink-0 overflow-hidden">
+                <div className="flex items-center gap-2 mt-3 p-2 bg-[var(--color-surface-hover-light)]/70 dark:bg-[var(--color-surface-hover-dark)]/50 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+                  <div className="w-7 h-7 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] flex items-center justify-center font-bold text-[10px] shrink-0 overflow-hidden">
                     {userAvatar ? (
                       <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
                     ) : (

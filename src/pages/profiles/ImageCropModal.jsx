@@ -87,11 +87,11 @@ export default function ImageCropModal({ isOpen, imageSrc, onClose, onCropComple
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] p-4 transition-opacity duration-150">
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] rounded-lg max-w-md w-full shadow-lg border border-gray-200 dark:border-zinc-800 overflow-hidden">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark-modal)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] rounded-md max-w-md w-full shadow-lg border border-gray-200 dark:border-zinc-800 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-zinc-800">
           <h3 className="text-base font-bold text-gray-900 dark:text-zinc-100">Crop & Position Profile Picture</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors cursor-pointer">
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md transition-colors cursor-pointer">
             <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
@@ -112,7 +112,7 @@ export default function ImageCropModal({ isOpen, imageSrc, onClose, onCropComple
             onTouchMove={handleMouseMove}
             onTouchEnd={handleMouseUp}
             onWheel={handleWheel}
-            className="relative w-64 h-64 rounded-full border-2 border-[#003E83] overflow-hidden bg-slate-950 cursor-grab active:cursor-grabbing shadow-sm flex items-center justify-center select-none"
+            className="relative w-64 h-64 rounded-md border-2 border-[#003E83] overflow-hidden bg-slate-950 cursor-grab active:cursor-grabbing shadow-sm flex items-center justify-center select-none"
           >
             <img
               ref={imageRef}
@@ -129,7 +129,7 @@ export default function ImageCropModal({ isOpen, imageSrc, onClose, onCropComple
               className="pointer-events-none select-none"
             />
             {/* Guide overlay */}
-            <div className="absolute inset-0 border border-white/20 rounded-full pointer-events-none" />
+            <div className="absolute inset-0 border border-white/20 rounded-md pointer-events-none" />
           </div>
 
           {/* Controls */}
@@ -143,7 +143,7 @@ export default function ImageCropModal({ isOpen, imageSrc, onClose, onCropComple
                 step="0.05"
                 value={zoom}
                 onChange={(e) => setZoom(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-[var(--color-primary)]"
+                className="w-full h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-md appearance-none cursor-pointer accent-[var(--color-primary)]"
               />
               <ZoomIn className="w-4 h-4 text-gray-500 shrink-0" />
             </div>

@@ -35,7 +35,7 @@ export default function ReportsTable({
       case 'approved':
       case 'completed':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-bold bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)] rounded-full">
+          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-bold bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)] rounded-md">
             Active / Approved
           </span>
         );
@@ -43,7 +43,7 @@ export default function ReportsTable({
       case 'upcoming':
       case 'scheduled':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-bold bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)] border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)] rounded-full">
+          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-bold bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)] border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)] rounded-md">
             Pending / Scheduled
           </span>
         );
@@ -51,13 +51,13 @@ export default function ReportsTable({
       case 'flagged':
       case 'inactive':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-bold bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] rounded-full">
+          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-bold bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] rounded-md">
             Flagged / Suspended
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-bold bg-[var(--color-neutral-badge-bg)] dark:bg-[var(--color-neutral-badge-dark-bg)] text-[var(--color-neutral-badge-text)] dark:text-[var(--color-neutral-badge-dark-text)] border border-[var(--color-neutral-badge-border)] dark:border-[var(--color-neutral-badge-dark-border)] rounded-full">
+          <span className="inline-flex items-center px-2.5 py-1 text-[11px] font-bold bg-[var(--color-neutral-badge-bg)] dark:bg-[var(--color-neutral-badge-dark-bg)] text-[var(--color-neutral-badge-text)] dark:text-[var(--color-neutral-badge-dark-text)] border border-[var(--color-neutral-badge-border)] dark:border-[var(--color-neutral-badge-dark-border)] rounded-md">
             {status}
           </span>
         );
@@ -65,7 +65,7 @@ export default function ReportsTable({
   };
 
   return (
-    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-sm overflow-hidden transition-colors duration-200">
+    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-sm overflow-hidden transition-colors duration-200">
       {/* Category Navigation Tabs - System Settings Style */}
       <div className="w-full border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-2.5 sm:p-3 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)]">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
@@ -140,11 +140,11 @@ export default function ReportsTable({
           [...Array(4)].map((_, i) => (
             <div key={i} className="p-4 space-y-3 animate-pulse">
               <div className="flex justify-between items-center">
-                <div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-20" />
-                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded-full w-24" />
+                <div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-20" />
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-24" />
               </div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4" />
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2" />
             </div>
           ))
         ) : paginatedData.length === 0 ? (
@@ -246,7 +246,7 @@ export default function ReportsTable({
               <div className="flex items-center justify-end mt-2 pt-2 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
                 <button
                   type="button"
-                  className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-colors cursor-pointer"
+                  className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-colors cursor-pointer"
                   title="View Details"
                 >
                   <Eye className="w-4 h-4" />
@@ -324,14 +324,14 @@ export default function ReportsTable({
             {isLoading ? (
               [...Array(5)].map((_, i) => (
                 <tr key={i} className="animate-pulse">
-                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-16" /></td>
-                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-32" /></td>
-                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-24" /></td>
-                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-20" /></td>
-                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-12" /></td>
-                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-14" /></td>
-                  <td className="py-4 px-4"><div className="h-5 bg-gray-200 dark:bg-gray-700 rounded-full w-24" /></td>
-                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-20" /></td>
+                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-16" /></td>
+                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-32" /></td>
+                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-24" /></td>
+                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-20" /></td>
+                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-12" /></td>
+                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-14" /></td>
+                  <td className="py-4 px-4"><div className="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-24" /></td>
+                  <td className="py-4 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-20" /></td>
                   
                 </tr>
               ))

@@ -63,7 +63,7 @@ export default function RatingsTable({
                 className="p-4 hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors cursor-pointer"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700">
+                  <div className="w-10 h-10 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700">
                     {avatarUrl ? (
                       <img src={avatarUrl} alt={userName} className="w-full h-full object-cover" />
                     ) : (
@@ -78,12 +78,12 @@ export default function RatingsTable({
                           {userName}
                         </p>
                         {userVerified && (
-                          <span className="text-[9px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/40 px-1 rounded-full shrink-0">
+                          <span className="text-[9px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/40 px-1 rounded-md shrink-0">
                             ✓
                           </span>
                         )}
                       </div>
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border shrink-0 ${getStatusColor(review.status)}`}>
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md border shrink-0 ${getStatusColor(review.status)}`}>
                         {review.status}
                       </span>
                     </div>
@@ -128,7 +128,7 @@ export default function RatingsTable({
                             <button
                               type="button"
                               onClick={() => onStatusChange(review.id, 'Approved')}
-                              className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-md transition-colors cursor-pointer"
                               title="Approve Review"
                             >
                               <Check className="w-4 h-4" />
@@ -136,7 +136,7 @@ export default function RatingsTable({
                             <button
                               type="button"
                               onClick={() => onStatusChange(review.id, 'Rejected')}
-                              className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-colors cursor-pointer"
                               title="Reject Review"
                             >
                               <X className="w-4 h-4" />
@@ -147,7 +147,7 @@ export default function RatingsTable({
                           <button
                             type="button"
                             onClick={() => onReply(review)}
-                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                             title="Reply"
                           >
                             <Reply className="w-4 h-4" />
@@ -156,7 +156,7 @@ export default function RatingsTable({
                         <button
                           type="button"
                           onClick={() => handleView(review)}
-                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
@@ -165,7 +165,7 @@ export default function RatingsTable({
                           <button
                             type="button"
                             onClick={() => onDelete(review.id)}
-                            className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -238,7 +238,7 @@ export default function RatingsTable({
 
                     <td className="px-4 py-3.5 min-w-[240px]">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700">
+                        <div className="w-9 h-9 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700">
                           {avatarUrl ? (
                             <img src={avatarUrl} alt={userName} className="w-full h-full object-cover" />
                           ) : (
@@ -251,7 +251,7 @@ export default function RatingsTable({
                               {userName}
                             </p>
                             {userVerified && (
-                              <span className="text-[9px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/40 px-1 rounded-full">
+                              <span className="text-[9px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/40 px-1 rounded-md">
                                 ✓
                               </span>
                             )}
@@ -288,7 +288,7 @@ export default function RatingsTable({
                     </td>
 
                     <td className="px-3 py-3.5 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full border ${getStatusColor(review.status)}`}>
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md border ${getStatusColor(review.status)}`}>
                         {review.status}
                       </span>
                     </td>
@@ -300,7 +300,7 @@ export default function RatingsTable({
                             <button
                               type="button"
                               onClick={() => onStatusChange(review.id, 'Approved')}
-                              className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-md transition-colors cursor-pointer"
                               title="Approve Review"
                             >
                               <Check className="w-4 h-4" />
@@ -308,7 +308,7 @@ export default function RatingsTable({
                             <button
                               type="button"
                               onClick={() => onStatusChange(review.id, 'Rejected')}
-                              className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-colors cursor-pointer"
                               title="Reject Review"
                             >
                               <X className="w-4 h-4" />
@@ -319,7 +319,7 @@ export default function RatingsTable({
                           <button
                             type="button"
                             onClick={() => onReply(review)}
-                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                             title="Reply"
                           >
                             <Reply className="w-4 h-4" />
@@ -328,7 +328,7 @@ export default function RatingsTable({
                         <button
                           type="button"
                           onClick={() => handleView(review)}
-                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
@@ -337,7 +337,7 @@ export default function RatingsTable({
                           <button
                             type="button"
                             onClick={() => onDelete(review.id)}
-                            className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-lg transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                             title="Delete Review"
                           >
                             <Trash2 className="w-4 h-4" />
