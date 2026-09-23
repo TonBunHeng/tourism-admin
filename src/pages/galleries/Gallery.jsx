@@ -181,7 +181,10 @@ export default function Gallery() {
         title: editingMedia.title,
         type: editingMedia.type || "image",
         category: editingMedia.category,
-        url: editingMedia.url
+        url: editingMedia.url,
+        file_size: editingMedia.size || editingMedia.file_size || "2.4 MB",
+        dimensions: editingMedia.dimensions || "1920x1080",
+        status: editingMedia.status || "Published"
       });
       setIsEditOpen(false);
       setEditingMedia(null);
@@ -300,6 +303,7 @@ export default function Gallery() {
           setIsPreviewOpen(false);
           setSelectedMedia(null);
         }}
+        onEdit={handleEdit}
       />
     </div>
   );

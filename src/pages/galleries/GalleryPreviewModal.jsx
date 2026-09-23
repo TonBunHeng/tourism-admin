@@ -116,8 +116,8 @@ export default function GalleryPreviewModal({ isOpen, media, onClose, onEdit }) 
             type="button"
             onClick={() => {
               const item = media;
-              onClose();
-              if (onEdit) onEdit(item);
+              onClose?.();
+              onEdit?.(item);
             }}
             className="py-2 px-4 rounded-md bg-[#003E83] hover:bg-[#002e62] text-white font-medium text-xs sm:text-sm transition-colors flex items-center gap-2 cursor-pointer"
           >

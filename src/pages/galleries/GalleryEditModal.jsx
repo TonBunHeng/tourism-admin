@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
-import { X, ChevronDown, Upload, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, ChevronDown, Upload, Trash2, Loader2 } from 'lucide-react';
+import uploadService from '../../services/uploadService';
 
 export default function GalleryEditModal({
   isOpen,
@@ -7,8 +8,10 @@ export default function GalleryEditModal({
   onEditingMediaChange,
   onClose,
   onSubmit,
-  categories
+  categories = []
 }) {
+  const [isUploading, setIsUploading] = useState(false);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose?.();
@@ -25,21 +28,46 @@ export default function GalleryEditModal({
 
   if (!isOpen || !editingMedia) return null;
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const isVideo = file.type.startsWith('video/');
-      const reader = new FileReader();
-      reader.onloadend = () => {
+    if (!file) return;
+
+    const isVideo = file.type.startsWith('video/');
+    const localUrl = URL.createObjectURL(file);
+    const sizeStr = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+
+    onEditingMediaChange({
+      ...editingMedia,
+      url: localUrl,
+      type: isVideo ? 'video' : 'image',
+      size: sizeStr
+    });
+
+    setIsUploading(true);
+    try {
+      const res = await uploadService.uploadFile(file, 'gallery');
+      if (res.success && res.data?.url) {
         onEditingMediaChange({
           ...editingMedia,
-          url: reader.result,
-          type: isVideo ? 'video' : 'image'
+          url: res.data.url,
+          type: res.data.type || (isVideo ? 'video' : 'image'),
+          size: res.data.file_size || sizeStr,
+          dimensions: res.data.dimensions || editingMedia.dimensions || '1920x1080'
         });
-      };
-      reader.readAsDataURL(file);
+      }
+    } catch (err) {
+      console.warn('Backend file upload fallback:', err);
+    } finally {
+      setIsUploading(false);
     }
   };
+
+  const categoryOptions = Array.from(
+    new Set([
+      editingMedia.category,
+      ...categories.filter(c => c && c !== 'All')
+    ])
+  ).filter(Boolean);
 
   return (
     <div
@@ -143,7 +171,7 @@ export default function GalleryEditModal({
                   onChange={(e) => onEditingMediaChange({ ...editingMedia, category: e.target.value })}
                   className="appearance-none w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md px-4 py-3 text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent cursor-pointer"
                 >
-                  {categories.filter(c => c !== 'All').map(cat => (
+                  {categoryOptions.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
@@ -156,7 +184,7 @@ export default function GalleryEditModal({
             <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1.5">Status</label>
             <div className="relative">
               <select
-                value={editingMedia.status}
+                value={editingMedia.status || 'Published'}
                 onChange={(e) => onEditingMediaChange({ ...editingMedia, status: e.target.value })}
                 className="appearance-none w-full bg-[var(--color-bg-light)] dark:bg-[var(--color-bg-dark)] border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md px-4 py-3 text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent cursor-pointer"
               >
@@ -177,9 +205,17 @@ export default function GalleryEditModal({
             </button>
             <button
               type="submit"
-              className="flex-1 py-2.5 px-4 rounded-md bg-[#003E83] hover:bg-[#002e62] text-white font-medium text-sm transition-colors text-center cursor-pointer"
+              disabled={isUploading}
+              className="flex-1 py-2.5 px-4 rounded-md bg-[#003E83] hover:bg-[#002e62] text-white font-medium text-sm transition-colors text-center cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              Save Changes
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Uploading...</span>
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </button>
           </div>
         </form>
