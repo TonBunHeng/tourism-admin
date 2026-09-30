@@ -52,7 +52,7 @@ export default function Dashboard() {
         <UserGrowthChart growthData={dashboardData?.user_growth} />
 
         {/* Quick Actions Grid */}
-        <QuickActions />
+        <QuickActions distribution={dashboardData?.category_distribution} stats={dashboardData?.stats} />
       </div>
 
       {/* Bottom Section */}
