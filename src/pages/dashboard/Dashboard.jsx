@@ -3,7 +3,6 @@ import DashboardHeader from './DashboardHeader';
 import DashboardStats from './DashboardStats';
 import UserGrowthChart from './UserGrowthChart';
 import QuickActions from './QuickActions';
-import RecentActivity from './RecentActivity';
 import TopPlaces from './TopPlaces';
 import CategoryDistribution from './CategoryDistribution';
 import dashboardService from '../../services/dashboardService';
@@ -56,13 +55,7 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
-        <RecentActivity
-          activities={dashboardData?.recent_activity}
-          recentPlaces={dashboardData?.recent_places}
-        />
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Places */}
         <TopPlaces
           places={dashboardData?.top_places}

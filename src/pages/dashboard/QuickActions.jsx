@@ -1,14 +1,6 @@
 import { useState } from 'react';
 import {
   PieChart as PieChartIcon,
-  MapPinned,
-  CalendarDays,
-  Users,
-  BarChart3,
-  Star,
-  List,
-  Sparkles,
-  ArrowRight,
 } from 'lucide-react';
 import {
   PieChart,
@@ -28,6 +20,8 @@ const PIE_COLORS = [
   '#F43F5E', // Rose
   '#6366F1', // Indigo
   '#14B8A6', // Teal
+  '#EC4899', // Pink
+  '#F97316', // Orange
 ];
 
 const fallbackDistribution = [
@@ -42,71 +36,31 @@ const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     return (
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-2.5 rounded-lg shadow-lg border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] text-xs min-w-[130px]">
-        <p className="font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-1.5">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] px-3.5 py-2.5 rounded-lg shadow-xl border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] text-xs min-w-[140px] pointer-events-none z-50">
+        <div className="flex items-center gap-2 mb-1">
           <span
-            className="w-2.5 h-2.5 rounded-full shrink-0"
+            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
             style={{ backgroundColor: data.payload.color || data.fill }}
           />
-          {data.name}
-        </p>
-        <p className="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-1">
-          Places: <strong className="text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">{data.value}</strong> ({data.payload.percentage || Math.round(data.percent * 100)}%)
-        </p>
+          <span className="font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
+            {data.name}
+          </span>
+        </div>
+        <div className="flex items-center justify-between text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] pt-0.5">
+          <span>Places: <strong className="font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">{data.value}</strong></span>
+          <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-1.5 py-0.5 rounded text-[10px]">
+            {data.payload.percentage || Math.round((data.percent || 0) * 100)}%
+          </span>
+        </div>
       </div>
     );
   }
   return null;
 };
 
-export default function QuickActions({ distribution = [], stats = null }) {
+export default function QuickActions({ distribution = [] }) {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState('chart'); // 'chart' | 'actions'
-
-  const quickActions = [
-    {
-      label: 'Add New Place',
-      icon: MapPinned,
-      color: 'text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]',
-      bg: 'bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]',
-      path: '/place'
-    },
-    {
-      label: 'Create Event',
-      icon: CalendarDays,
-      color: 'text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]',
-      bg: 'bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)]',
-      path: '/events'
-    },
-    {
-      label: 'Manage Users',
-      icon: Users,
-      color: 'text-[var(--color-purple-text)] dark:text-[var(--color-purple-dark-text)]',
-      bg: 'bg-[var(--color-purple-bg)] dark:bg-[var(--color-purple-dark-bg)] border border-[var(--color-purple-border)] dark:border-[var(--color-purple-dark-border)]',
-      path: '/users'
-    },
-    {
-      label: 'View Reports',
-      icon: BarChart3,
-      color: 'text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]',
-      bg: 'bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]',
-      path: '/reports'
-    },
-    {
-      label: 'Ratings & Reviews',
-      icon: Star,
-      color: 'text-[var(--color-rose-badge-text)] dark:text-[var(--color-rose-badge-dark-text)]',
-      bg: 'bg-[var(--color-rose-badge-bg)] dark:bg-[var(--color-rose-badge-dark-bg)] border border-[var(--color-rose-badge-border)] dark:border-[var(--color-rose-badge-dark-border)]',
-      path: '/ratings'
-    },
-    {
-      label: 'View Category',
-      icon: List,
-      color: 'text-[var(--color-cyan-badge-text)] dark:text-[var(--color-cyan-badge-dark-text)]',
-      bg: 'bg-[var(--color-cyan-badge-bg)] dark:bg-[var(--color-cyan-badge-dark-bg)] border border-[var(--color-cyan-badge-border)] dark:border-[var(--color-cyan-badge-dark-border)]',
-      path: '/category'
-    }
-  ];
+  const [hoveredItem, setHoveredItem] = useState(null);
 
   const rawCategories = (Array.isArray(distribution) && distribution.length > 0)
     ? distribution
@@ -126,166 +80,88 @@ export default function QuickActions({ distribution = [], stats = null }) {
   });
 
   return (
-    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 flex flex-col justify-between">
-      {/* Header with View Toggle */}
+    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-6 flex flex-col justify-between h-full">
+      {/* Header */}
       <div>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <div>
             <h3 className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-1.5">
-              {viewMode === 'chart' ? (
-                <>
-                  <PieChartIcon className="w-4 h-4 text-blue-500" />
-                  <span>Category Distribution</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span>Quick Actions</span>
-                </>
-              )}
+              <PieChartIcon className="w-4 h-4 text-blue-500" />
+              <span>Category Distribution</span>
             </h3>
             <p className="text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              {viewMode === 'chart'
-                ? 'Destinations grouped by category'
-                : 'Platform shortcuts and management'}
+              Destinations grouped by category
             </p>
           </div>
-
-          {/* Toggle pill */}
-          <div className="flex items-center bg-gray-100 dark:bg-zinc-800 p-0.5 rounded-md text-[11px] font-medium">
-            <button
-              onClick={() => setViewMode('chart')}
-              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                viewMode === 'chart'
-                  ? 'bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 font-semibold shadow-xs'
-                  : 'text-gray-500 dark:text-zinc-400 hover:text-gray-900'
-              }`}
-            >
-              Pie Chart
-            </button>
-            <button
-              onClick={() => setViewMode('actions')}
-              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                viewMode === 'actions'
-                  ? 'bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 font-semibold shadow-xs'
-                  : 'text-gray-500 dark:text-zinc-400 hover:text-gray-900'
-              }`}
-            >
-              Actions
-            </button>
-          </div>
+          <button
+            onClick={() => navigate('/categories')}
+            className="text-xs text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] font-medium cursor-pointer"
+          >
+            View All
+          </button>
         </div>
 
-        {/* View Content: Pie Chart */}
-        {viewMode === 'chart' ? (
-          <div>
-            {/* Pie / Donut Chart */}
-            <div className="h-48 sm:h-52 w-full relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={46}
-                    outerRadius={72}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-
-              {/* Donut Center Display */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-                  {totalPlaces}
+        {/* View Content: Larger Pie Chart */}
+        <div className="h-80 w-full relative flex items-center justify-center">
+          {/* Donut Center Display (Positioned with z-0 so tooltip stays clearly above) */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+            {hoveredItem ? (
+              <div className="flex flex-col items-center justify-center text-center px-4 transition-all duration-200">
+                <span className="text-3xl font-extrabold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] leading-tight tracking-tight">
+                  {hoveredItem.value}
                 </span>
-                <span className="text-[10px] uppercase font-semibold text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                  Places
+                <span
+                  className="text-xs font-bold truncate max-w-[130px] mt-0.5"
+                  style={{ color: hoveredItem.color }}
+                >
+                  {hoveredItem.name}
+                </span>
+                <span className="text-[10px] font-semibold text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+                  {hoveredItem.percentage}% of total
                 </span>
               </div>
-            </div>
-
-            {/* Category Breakdown Badges */}
-            <div className="space-y-1.5 mt-2">
-              {pieData.slice(0, 4).map((cat, idx) => (
-                <div key={idx} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
-                    <span className="text-[var(--color-text-primary-light)] dark:text-zinc-300 truncate font-medium">
-                      {cat.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                    <span className="text-[var(--color-text-secondary-light)] dark:text-zinc-400 text-[11px]">
-                      {cat.value}
-                    </span>
-                    <span className="font-semibold text-[var(--color-text-primary-light)] dark:text-white">
-                      {cat.percentage}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center transition-all duration-200">
+                <span className="text-3xl font-extrabold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] leading-tight tracking-tight">
+                  {totalPlaces}
+                </span>
+                <span className="text-[11px] uppercase font-bold tracking-wider text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+                  Total Places
+                </span>
+              </div>
+            )}
           </div>
-        ) : (
-          /* View Content: Original Quick Actions Grid */
-          <div className="grid grid-cols-2 gap-2.5 py-1">
-            {quickActions.map((action, index) => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={index}
-                  onClick={() =>
-                    navigate(
-                      action.path,
-                      action.label === 'Add New Place' || action.label === 'Create Event'
-                        ? { state: { openAdd: true } }
-                        : undefined
-                    )
-                  }
-                  className={`p-3 ${action.bg} rounded-md hover:brightness-95 transition-colors text-center cursor-pointer flex flex-col items-center justify-center`}
+
+          <div className="w-full h-full relative z-10">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={72}
+                  outerRadius={118}
+                  paddingAngle={2.5}
+                  dataKey="value"
+                  onMouseEnter={(_, index) => setHoveredItem(pieData[index])}
+                  onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <Icon className={`w-4 h-4 ${action.color} mb-1`} />
-                  <span className="text-xs font-medium text-gray-800 dark:text-zinc-200">{action.label}</span>
-                </button>
-              );
-            })}
+                  {pieData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.color}
+                      stroke="transparent"
+                      className="cursor-pointer transition-opacity hover:opacity-90"
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  content={<CustomTooltip />}
+                  wrapperStyle={{ zIndex: 50, pointerEvents: 'none' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
-        )}
-      </div>
-
-      {/* Bottom Footer Shortcuts */}
-      <div className="mt-4 pt-3 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-between text-xs">
-        <span className="text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-          Quick Links:
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate('/place', { state: { openAdd: true } })}
-            className="text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-0.5"
-          >
-            + Place
-          </button>
-          <span className="text-gray-300 dark:text-zinc-700">•</span>
-          <button
-            onClick={() => navigate('/events', { state: { openAdd: true } })}
-            className="text-[11px] font-medium text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
-          >
-            + Event
-          </button>
-          <span className="text-gray-300 dark:text-zinc-700">•</span>
-          <button
-            onClick={() => navigate('/category')}
-            className="text-[11px] font-medium text-[var(--color-text-secondary-light)] dark:text-zinc-400 hover:text-blue-600 cursor-pointer flex items-center gap-0.5"
-          >
-            Categories <ArrowRight className="w-3 h-3" />
-          </button>
         </div>
       </div>
     </div>
