@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import DashboardHeader from './DashboardHeader';
 import DashboardStats from './DashboardStats';
 import UserGrowthChart from './UserGrowthChart';
-import QuickActions from './QuickActions';
 import TopPlaces from './TopPlaces';
 import CategoryDistribution from './CategoryDistribution';
 import dashboardService from '../../services/dashboardService';
@@ -45,13 +44,10 @@ export default function Dashboard() {
       {/* Stats Cards Rows 1 and 2 */}
       <DashboardStats apiStats={dashboardData?.stats} />
 
-      {/* Charts and Quick Actions Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      {/* Charts Section */}
+      <div className="mb-8">
         {/* User Growth Chart */}
         <UserGrowthChart growthData={dashboardData?.user_growth} />
-
-        {/* Quick Actions Grid */}
-        <QuickActions distribution={dashboardData?.category_distribution} stats={dashboardData?.stats} />
       </div>
 
       {/* Bottom Section */}

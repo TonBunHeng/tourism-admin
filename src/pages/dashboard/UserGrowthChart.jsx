@@ -1,5 +1,5 @@
 import { User, TrendingUp } from 'lucide-react';
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function UserGrowthChart({ growthData }) {
   const fallbackData = [
@@ -20,10 +20,13 @@ export default function UserGrowthChart({ growthData }) {
   const chartData = (Array.isArray(growthData) && growthData.length > 0) ? growthData : fallbackData;
 
   return (
-    <div className="lg:col-span-2 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-6">
+    <div className="w-full bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">User Growth & Platform Traffic</h3>
+          <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
+            <User className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>User Growth & Platform Traffic</span>
+          </h3>
           <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">Monthly active engagement and visits</p>
         </div>
         <div className="flex items-center gap-2">
@@ -36,7 +39,7 @@ export default function UserGrowthChart({ growthData }) {
 
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+          <LineChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
             <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6B7280' }} axisLine={{ stroke: '#D1D5DB' }} tickLine={false} />
             <YAxis tick={{ fontSize: 12, fill: '#6B7280' }} axisLine={false} tickLine={false} />
@@ -49,7 +52,15 @@ export default function UserGrowthChart({ growthData }) {
               iconType="plainline"
               wrapperStyle={{ fontSize: 12, paddingTop: 12 }}
             />
-            <Bar dataKey="unitsSold" name="New Travelers" fill="#4472C4" barSize={16} radius={[3, 3, 0, 0]} />
+            <Line
+              type="monotone"
+              dataKey="unitsSold"
+              name="New Travelers"
+              stroke="#4472C4"
+              strokeWidth={3}
+              dot={false}
+              activeDot={{ r: 5 }}
+            />
             <Line
               type="monotone"
               dataKey="totalTransaction"
@@ -59,7 +70,7 @@ export default function UserGrowthChart({ growthData }) {
               dot={false}
               activeDot={{ r: 5 }}
             />
-          </ComposedChart>
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </div>

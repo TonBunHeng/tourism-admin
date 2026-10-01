@@ -1,51 +1,73 @@
 import { Star, Landmark } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const defaultPlaces = [
-  { id: 1, name: 'Angkor Wat Complex', rating: 4.9, reviews: 1420, image: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&q=80&w=300', category: 'Historical & Ancient Heritage' },
-  { id: 2, name: 'Bayon Temple', rating: 4.8, reviews: 980, image: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?auto=format&fit=crop&q=80&w=300', category: 'Ancient Stone Faces' },
-  { id: 3, name: 'Ta Prohm Temple', rating: 4.8, reviews: 850, image: 'https://images.unsplash.com/photo-1583037189850-1921ae7c6c22?auto=format&fit=crop&q=80&w=300', category: 'Nature & Jungle Ruins' },
-  { id: 4, name: 'Phnom Bakheng', rating: 4.7, reviews: 620, image: 'https://images.unsplash.com/photo-1528181304800-259b08848526?auto=format&fit=crop&q=80&w=300', category: 'Sunset Viewpoint' },
-  { id: 5, name: 'Banteay Srei', rating: 4.6, reviews: 430, image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&q=80&w=300', category: 'Pink Sandstone Carvings' }
+  { id: 1, name: 'Angkor Wat Complex', rating: 4.9, reviews: 1420, category: 'Heritage' },
+  { id: 2, name: 'Bayon Temple', rating: 4.8, reviews: 980, category: 'Ancient Ruins' },
+  { id: 3, name: 'Ta Prohm Temple', rating: 4.8, reviews: 850, category: 'Nature Ruins' },
+  { id: 4, name: 'Phnom Bakheng', rating: 4.7, reviews: 620, category: 'Sunset View' },
+  { id: 5, name: 'Banteay Srei', rating: 4.6, reviews: 430, category: 'Carvings' },
+  { id: 6, name: 'Tonle Sap Lake', rating: 4.5, reviews: 390, category: 'Floating Village' },
+  { id: 7, name: 'Royal Palace', rating: 4.5, reviews: 340, category: 'Historical' },
+  { id: 8, name: 'Koh Rong Island', rating: 4.4, reviews: 290, category: 'Beach & Resort' },
+  { id: 9, name: 'Bokor Mountain', rating: 4.4, reviews: 250, category: 'National Park' },
+  { id: 10, name: 'Preah Vihear', rating: 4.3, reviews: 210, category: 'Temple Heritage' },
 ];
 
-const palette = [
-  'bg-blue-500',
-  'bg-indigo-500',
-  'bg-purple-500',
-  'bg-cyan-500',
-  'bg-emerald-500',
-  'bg-amber-500',
-  'bg-rose-500',
-  'bg-teal-500',
+const barColors = [
+  '#3B82F6', // blue-500
+  '#6366F1', // indigo-500
+  '#8B5CF6', // purple-500
+  '#06B6D4', // cyan-500
+  '#10B981', // emerald-500
+  '#F59E0B', // amber-500
+  '#F43F5E', // rose-500
+  '#14B8A6', // teal-500
+  '#0284C7', // sky-600
+  '#6D28D9', // purple-700
 ];
 
 export default function TopPlaces({ places, topPlaces }) {
   const navigate = useNavigate();
 
-  const placesList = ((Array.isArray(places) && places.length > 0)
+  const rawList = ((Array.isArray(places) && places.length > 0)
     ? places
     : ((Array.isArray(topPlaces) && topPlaces.length > 0) ? topPlaces : defaultPlaces));
 
-  const maxReviews = Math.max(...placesList.map((p) => Number(p.reviews) || 0), 1);
-  const isScrollable = placesList.length > 10;
+  // Enforce top 10 places only
+  const placesList = rawList.slice(0, 10);
+
+  const chartData = placesList.map((place, index) => {
+    const reviewsCount = Number(place.reviews) || 0;
+    const ratingVal = Number(place.rating || 5.0).toFixed(1);
+    const shortName = place.name.length > 16 ? place.name.slice(0, 15) + '…' : place.name;
+
+    return {
+      id: place.id || index + 1,
+      fullName: place.name,
+      name: shortName,
+      reviews: reviewsCount,
+      rating: ratingVal,
+      category: place.category || 'Attraction',
+      rank: index + 1,
+    };
+  });
 
   return (
     <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 flex flex-col justify-between h-full">
       <div>
-        <div className="flex items-center justify-between mb-3 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
           <div>
             <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
               <Landmark className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               <span>Top Places</span>
               <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-900/60">
-                {placesList.length}
+                10
               </span>
             </h3>
             <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              {isScrollable
-                ? `Highest rated destinations (scroll to view all ${placesList.length})`
-                : 'Highest rated destinations'}
+              Top 10 highest rated destinations by review volume
             </p>
           </div>
           <button
@@ -56,65 +78,64 @@ export default function TopPlaces({ places, topPlaces }) {
           </button>
         </div>
 
-        {/* Places list (scrollable when > 10 places) */}
-        <div
-          className={`space-y-3 pt-1 ${
-            isScrollable ? 'max-h-[380px] overflow-y-auto pr-2' : ''
-          }`}
-        >
-          {placesList.map((place, index) => {
-            const reviewsCount = Number(place.reviews) || 0;
-            const ratingVal = Number(place.rating || 5.0).toFixed(1);
-            const pct = Math.max(Math.round((reviewsCount / maxReviews) * 100), reviewsCount > 0 ? 8 : 4);
-            const barColor = palette[index % palette.length];
-
-            return (
-              <div
-                key={place.id || index}
-                className="group cursor-pointer rounded-md p-1 -m-1 hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors"
-                onClick={() => navigate('/places')}
-              >
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <div className="flex items-center gap-2 min-w-0 pr-2">
-                    <span className="text-[10px] text-gray-400 dark:text-zinc-500 font-semibold w-4 shrink-0">
-                      #{index + 1}
-                    </span>
-                    {place.image || place.image_url ? (
-                      <img
-                        src={place.image || place.image_url}
-                        alt={place.name}
-                        className="w-5 h-5 rounded-md object-cover shrink-0 border border-gray-200 dark:border-zinc-700"
-                      />
-                    ) : null}
-                    <span className="text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
-                      {place.name}
-                    </span>
-                    <span className="text-[10px] text-gray-400 dark:text-zinc-500 hidden sm:inline truncate">
-                      • {place.category || 'Attraction'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="flex items-center gap-0.5 text-amber-500 font-bold text-[11px]">
-                      <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                      <span>{ratingVal}</span>
-                    </div>
-                    <span className="text-gray-300 dark:text-zinc-600">•</span>
-                    <span className="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-semibold text-xs">
-                      {reviewsCount.toLocaleString()} reviews
-                    </span>
-                  </div>
-                </div>
-
-                <div className="w-full h-2 bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] rounded-md overflow-hidden">
-                  <div
-                    className={`h-full ${barColor} rounded-md transition-all duration-500`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+        {/* Recharts Basic Bar Chart */}
+        <div className="h-[360px] w-full pt-1">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{ top: 5, right: 25, left: 10, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+              <XAxis
+                type="number"
+                tick={{ fontSize: 11, fill: '#6B7280' }}
+                axisLine={{ stroke: '#E5E7EB' }}
+                tickLine={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={110}
+                tick={{ fontSize: 11, fill: '#6B7280' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
+                        <p className="font-semibold text-gray-900 dark:text-zinc-100 flex items-center gap-1.5">
+                          <span className="text-blue-600 dark:text-blue-400 font-bold">#{data.rank}</span>
+                          {data.fullName}
+                        </p>
+                        <p className="text-gray-500 dark:text-zinc-400 text-[11px]">
+                          Category: {data.category}
+                        </p>
+                        <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
+                          <span className="flex items-center gap-1 text-amber-500 font-bold">
+                            <Star className="w-3 h-3 fill-amber-500" />
+                            {data.rating}
+                          </span>
+                          <span className="text-gray-600 dark:text-zinc-300 font-semibold">
+                            {data.reviews.toLocaleString()} reviews
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Bar dataKey="reviews" name="Reviews" radius={[0, 4, 4, 0]} barSize={18}>
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={barColors[index % barColors.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
