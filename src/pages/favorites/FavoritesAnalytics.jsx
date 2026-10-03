@@ -2,14 +2,15 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   ArrowLeft,
   Heart,
-  CheckCircle2,
   Users,
-  Star,
   MapPin,
-  Calendar,
+  Star,
+  CheckCircle2,
+  Clock,
   Filter,
   RotateCcw,
-  Landmark
+  Landmark,
+  Calendar
 } from 'lucide-react';
 import {
   ComposedChart,
@@ -34,45 +35,38 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
   const [apiAnalytics, setApiAnalytics] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Sync prop favorites or load directly if loaded as a standalone page
+  // Sync prop favorites if passed from parent
   useEffect(() => {
     if (initialFavorites && initialFavorites.length > 0) {
       setFavorites(initialFavorites);
-    } else {
-      const loadFavoritesData = async () => {
-        setIsLoading(true);
-        try {
-          const res = await favoriteService.getFavorites({ per_page: 100 });
-          if (res?.data && Array.isArray(res.data)) {
-            setFavorites(res.data);
-          }
-        } catch (e) {
-          console.warn('Failed to fetch favorites list for analytics page', e);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      loadFavoritesData();
     }
   }, [initialFavorites]);
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        const res = await favoriteService.getAnalytics({
-          timeframe,
-          category: selectedCategory,
-          visit_status: visitFilter
-        });
-        if (res && (res.success || res.data)) {
-          setApiAnalytics(res.data || res);
-        }
-      } catch (e) {
-        console.warn('Could not fetch remote favorites analytics, using local fallback:', e);
-      }
-    };
     fetchAnalytics();
   }, [timeframe, selectedCategory, visitFilter]);
+
+  const fetchAnalytics = async () => {
+    setIsLoading(true);
+    try {
+      const res = await favoriteService.getAnalytics({
+        timeframe,
+        category: selectedCategory,
+        visit_status: visitFilter
+      });
+      if (res && (res.success || res.data)) {
+        const data = res.data || res;
+        setApiAnalytics(data);
+        if ((!initialFavorites || initialFavorites.length === 0) && (data.recent_favorites || data.favorites)) {
+          setFavorites(data.recent_favorites || data.favorites);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch remote favorites analytics:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const safeFavorites = useMemo(() => (Array.isArray(favorites) ? favorites : []), [favorites]);
 
@@ -96,7 +90,7 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
     });
   }, [safeFavorites, selectedCategory, visitFilter]);
 
-  // Real statistics calculations from API with local fallback
+  // Real statistics calculations from API / database records
   const total = useMemo(() => {
     return apiAnalytics?.overview?.total_favorites ?? filteredFavorites.length;
   }, [apiAnalytics, filteredFavorites]);
@@ -139,7 +133,7 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
       : '0.0';
   }, [apiAnalytics, filteredFavorites]);
 
-  // Real monthly trend data based on favorites dates
+  // Real monthly trend data purely from database
   const monthlyData = useMemo(() => {
     if (apiAnalytics?.monthly_trends && Array.isArray(apiAnalytics.monthly_trends)) {
       return apiAnalytics.monthly_trends.map(item => ({
@@ -160,13 +154,8 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
         if (!isNaN(d.getTime())) {
           if (!targetYear || d.getFullYear() === targetYear) {
             monthCounts[d.getMonth()] += 1;
-            return;
           }
         }
-      }
-      const currentYear = new Date().getFullYear();
-      if (!targetYear || targetYear === currentYear) {
-        monthCounts[new Date().getMonth()] += 1;
       }
     });
 
@@ -182,10 +171,10 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
     });
   }, [apiAnalytics, filteredFavorites, timeframe]);
 
-  // Category distribution formatted for vertical Recharts Basic Bar Chart
+  // Category distribution purely from database
   const categoryData = useMemo(() => {
+    const fillColors = ['#003E83', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#64748b'];
     if (apiAnalytics?.category_distribution && Array.isArray(apiAnalytics.category_distribution)) {
-      const fillColors = ['#003E83', '#f43f5e', '#10b981', '#f59e0b', '#a855f7', '#06b6d4', '#6366f1'];
       return apiAnalytics.category_distribution.map((item, idx) => ({
         ...item,
         fillColor: item.fillColor || fillColors[idx % fillColors.length]
@@ -197,13 +186,10 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
       const cat = f.category || 'General';
       counts[cat] = (counts[cat] || 0) + 1;
     });
-    const colors = ['bg-[#003E83]', 'bg-rose-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-cyan-500'];
-    const fillColors = ['#003E83', '#f43f5e', '#10b981', '#f59e0b', '#a855f7', '#06b6d4'];
     return Object.entries(counts).map(([name, count], idx) => ({
       name,
       count,
       percentage: Math.round((count / total) * 100),
-      color: colors[idx % colors.length],
       fillColor: fillColors[idx % fillColors.length]
     }));
   }, [apiAnalytics, filteredFavorites, total]);
@@ -326,7 +312,7 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
               Filter Analytics
             </span>
             <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              ({filteredFavorites.length} records)
+              ({total.toLocaleString()} records)
             </span>
           </div>
 
@@ -385,107 +371,70 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
         </div>
       </div>
 
-      {/* 4. Chart 1: Saved Places Velocity & Growth */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+      {/* 4 & 5. Balanced Side-by-Side Analytics Charts Grid with Smooth Animations */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 sm:mb-8">
+        {/* Chart 1: Saved Places Velocity & Growth */}
+        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 flex flex-col justify-between">
           <div>
-            <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
-              <span>Saved Places Velocity & Growth ({timeframe})</span>
-            </h3>
-            <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-              Monthly new saves vs cumulative total wishlist
-            </p>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-[#003E83]" />
-              New Saves
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 bg-rose-500 rounded-full" />
-              Total Wishlist
-            </span>
-          </div>
-        </div>
-
-        <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
-              <XAxis 
-                dataKey="month" 
-                stroke="#9CA3AF" 
-                fontSize={11} 
-                tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={{ stroke: '#E5E7EB' }}
-              />
-              <YAxis 
-                stroke="#9CA3AF" 
-                fontSize={11} 
-                tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={{ stroke: '#E5E7EB' }}
-                domain={[0, (dataMax) => (Number.isFinite(dataMax) && dataMax > 5 ? Math.ceil(dataMax * 1.1) : 5)]}
-                allowDecimals={false} 
-                width={32}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'var(--color-bg-dark-modal, #18181b)',
-                  border: '1px solid var(--color-border-dark, #27272a)',
-                  borderRadius: '0.375rem',
-                  fontSize: '12px',
-                  color: '#fff'
-                }}
-              />
-              <Bar dataKey="newSaves" fill="#003E83" radius={[3, 3, 0, 0]} name="New Saves" barSize={16} />
-              <Line type="monotone" dataKey="cumulative" stroke="#f43f5e" strokeWidth={2} dot={{ r: 2 }} name="Total Wishlist" />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* 5. Chart 2: Category Breakdown (Stacked under Velocity chart) */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 mb-6 sm:mb-8 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
-            <div>
-              <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
-                <Landmark className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
-                <span>Category Breakdown</span>
-              </h3>
-              <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                Wishlist distribution across attraction categories
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+              <div>
+                <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
+                  <span>Saved Places Velocity & Growth ({timeframe})</span>
+                </h3>
+                <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+                  Monthly new saves vs cumulative total wishlist
+                </p>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#003E83]" />
+                  New Saves
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-0.5 bg-rose-500 rounded-full" />
+                  Total Wishlist
+                </span>
+              </div>
             </div>
-            <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              Based on {total.toLocaleString()} saved places
-            </span>
-          </div>
 
-          {categoryData.length === 0 ? (
-            <p className="text-xs text-gray-400 text-center py-10">No category records found</p>
-          ) : (
-            <div className="h-[230px] w-full">
+            <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={categoryData} layout="vertical" margin={{ top: 5, right: 25, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-                  <XAxis type="number" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
-                  <YAxis dataKey="name" type="category" width={110} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                <ComposedChart data={monthlyData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                  <XAxis 
+                    dataKey="month" 
+                    stroke="#9CA3AF" 
+                    fontSize={11} 
+                    tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#E5E7EB' }}
+                  />
+                  <YAxis 
+                    stroke="#9CA3AF" 
+                    fontSize={11} 
+                    tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#E5E7EB' }}
+                    domain={[0, (dataMax) => (Number.isFinite(dataMax) && dataMax > 5 ? Math.ceil(dataMax * 1.1) : 5)]}
+                    allowDecimals={false} 
+                    width={32}
+                  />
                   <Tooltip
-                    cursor={{ fill: 'rgba(107, 114, 128, 0.05)' }}
-                    content={({ active, payload }) => {
+                    content={({ active, payload, label }) => {
                       if (active && payload && payload.length) {
-                        const data = payload[0].payload;
+                        const newSaves = payload.find(p => p.dataKey === 'newSaves')?.value ?? 0;
+                        const cumulative = payload.find(p => p.dataKey === 'cumulative')?.value ?? 0;
                         return (
                           <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
-                            <p className="font-semibold text-gray-900 dark:text-zinc-100">{data.name}</p>
-                            <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
-                              <span className="text-gray-600 dark:text-zinc-300 font-semibold">
-                                {data.count} records ({data.percentage}%)
-                              </span>
+                            <p className="font-semibold text-gray-900 dark:text-zinc-100">{label}</p>
+                            <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
+                              <span>New Saves:</span>
+                              <span className="font-bold text-[#003E83] dark:text-blue-400">{newSaves}</span>
+                            </div>
+                            <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
+                              <span>Total Wishlist:</span>
+                              <span className="font-bold text-rose-500">{cumulative}</span>
                             </div>
                           </div>
                         );
@@ -493,26 +442,81 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
                       return null;
                     }}
                   />
-                  <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={18}>
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fillColor} />
-                    ))}
-                  </Bar>
-                </BarChart>
+                  <Bar dataKey="newSaves" fill="#003E83" radius={[3, 3, 0, 0]} name="New Saves" barSize={16} isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
+                  <Line type="monotone" dataKey="cumulative" stroke="#f43f5e" strokeWidth={2.5} dot={{ r: 3, fill: '#f43f5e' }} activeDot={{ r: 5 }} name="Total Wishlist" isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Journey Stage Status Summary */}
-        <div className="mt-4 pt-3 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-2 gap-3 text-center">
-          <div className="p-2.5 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
-            <p className="text-sm font-bold text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">{visitedCount}</p>
-            <p className="text-xs text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">Visited ({visitedPct}%)</p>
+        {/* Chart 2: Category Breakdown & Journey Status */}
+        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+              <div>
+                <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
+                  <Landmark className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
+                  <span>Category Breakdown</span>
+                </h3>
+                <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+                  Wishlist distribution across attraction categories
+                </p>
+              </div>
+              <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                Based on {total.toLocaleString()} saved places
+              </span>
+            </div>
+
+            {categoryData.length === 0 ? (
+              <p className="text-xs text-gray-400 text-center py-10">No category records found</p>
+            ) : (
+              <div className="h-[175px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={categoryData} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+                    <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
+                    <YAxis dataKey="name" type="category" interval={0} width={120} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                    <Tooltip
+                      cursor={{ fill: 'rgba(107, 114, 128, 0.05)' }}
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
+                              <p className="font-semibold text-gray-900 dark:text-zinc-100">{data.name}</p>
+                              <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
+                                <span className="text-gray-600 dark:text-zinc-300 font-semibold">
+                                  {data.count} {data.count === 1 ? 'place' : 'places'} ({data.percentage}%)
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={16} isAnimationActive={true} animationDuration={800} animationEasing="ease-out">
+                      {categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fillColor} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
-          <div className="p-2.5 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
-            <p className="text-sm font-bold text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]">{plannedCount}</p>
-            <p className="text-xs text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]">To Visit ({plannedPct}%)</p>
+
+          {/* Journey Stage Status Summary */}
+          <div className="mt-3 pt-2.5 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-2 gap-3 text-center">
+            <div className="p-2 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">{visitedCount}</p>
+              <p className="text-[11px] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">Visited ({visitedPct}%)</p>
+            </div>
+            <div className="p-2 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]">{plannedCount}</p>
+              <p className="text-[11px] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]">To Visit ({plannedPct}%)</p>
+            </div>
           </div>
         </div>
       </div>

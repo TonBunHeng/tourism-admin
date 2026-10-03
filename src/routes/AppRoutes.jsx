@@ -27,6 +27,7 @@ import DeletionRequests from '../pages/delete/DeletionRequests';
 import Settings from '../pages/settings/Settings';
 import Profile from '../pages/profiles/Profile';
 import Reports from '../pages/reports/Reports';
+import ReportsAnalytics from '../pages/reports/ReportsAnalytics';
 import Notifications from '../pages/notifications/Notifications';
 import Security from '../pages/security/Security';
 import Businesses from '../pages/businesses/Businesses';
@@ -77,6 +78,7 @@ const AppRoutes = () => {
               <Route path="/users" element={<Users />} />
               <Route path="/user" element={<Navigate to="/users" replace />} />
               <Route path="/reports" element={<Reports />} />
+              <Route path="/reports/analytics" element={<ReportsAnalytics />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/security" element={<Security />} />
             </Route>

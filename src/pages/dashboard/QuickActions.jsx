@@ -24,14 +24,6 @@ const PIE_COLORS = [
   '#F97316', // Orange
 ];
 
-const fallbackDistribution = [
-  { name: 'Temples', count: 4 },
-  { name: 'Historical Sites', count: 3 },
-  { name: 'Beaches', count: 2 },
-  { name: 'Nature Parks', count: 2 },
-  { name: 'Markets', count: 1 },
-];
-
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0];
@@ -62,15 +54,12 @@ export default function QuickActions({ distribution = [] }) {
   const navigate = useNavigate();
   const [hoveredItem, setHoveredItem] = useState(null);
 
-  const rawCategories = (Array.isArray(distribution) && distribution.length > 0)
-    ? distribution
-    : fallbackDistribution;
-
-  const totalPlaces = rawCategories.reduce((sum, item) => sum + (Number(item.count) || 0), 0) || 12;
+  const rawCategories = Array.isArray(distribution) ? distribution : [];
+  const totalPlaces = rawCategories.reduce((sum, item) => sum + (Number(item.count) || 0), 0);
 
   const pieData = rawCategories.map((item, index) => {
     const count = Number(item.count) || 0;
-    const pct = Math.round((count / totalPlaces) * 100);
+    const pct = totalPlaces > 0 ? Math.round((count / totalPlaces) * 100) : 0;
     return {
       name: item.name,
       value: count,
@@ -90,7 +79,7 @@ export default function QuickActions({ distribution = [] }) {
               <span>Category Distribution</span>
             </h3>
             <p className="text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              Destinations grouped by category
+              Destinations grouped by category from database
             </p>
           </div>
           <button
@@ -103,65 +92,77 @@ export default function QuickActions({ distribution = [] }) {
 
         {/* View Content: Larger Pie Chart */}
         <div className="h-80 w-full relative flex items-center justify-center">
-          {/* Donut Center Display (Positioned with z-0 so tooltip stays clearly above) */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
-            {hoveredItem ? (
-              <div className="flex flex-col items-center justify-center text-center px-4 transition-all duration-200">
-                <span className="text-3xl font-extrabold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] leading-tight tracking-tight">
-                  {hoveredItem.value}
-                </span>
-                <span
-                  className="text-xs font-bold truncate max-w-[130px] mt-0.5"
-                  style={{ color: hoveredItem.color }}
-                >
-                  {hoveredItem.name}
-                </span>
-                <span className="text-[10px] font-semibold text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                  {hoveredItem.percentage}% of total
-                </span>
+          {rawCategories.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-gray-400 text-xs">
+              <PieChartIcon className="w-8 h-8 mb-2 stroke-1 text-gray-300 dark:text-zinc-600" />
+              <p>No category distribution available</p>
+            </div>
+          ) : (
+            <>
+              {/* Donut Center Display */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                {hoveredItem ? (
+                  <div className="flex flex-col items-center justify-center text-center px-4 transition-all duration-200">
+                    <span className="text-3xl font-extrabold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] leading-tight tracking-tight">
+                      {hoveredItem.value}
+                    </span>
+                    <span
+                      className="text-xs font-bold truncate max-w-[130px] mt-0.5"
+                      style={{ color: hoveredItem.color }}
+                    >
+                      {hoveredItem.name}
+                    </span>
+                    <span className="text-[10px] font-semibold text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+                      {hoveredItem.percentage}% of total
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-center transition-all duration-200">
+                    <span className="text-3xl font-extrabold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] leading-tight tracking-tight">
+                      {totalPlaces}
+                    </span>
+                    <span className="text-[11px] uppercase font-bold tracking-wider text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+                      Total Places
+                    </span>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center text-center transition-all duration-200">
-                <span className="text-3xl font-extrabold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] leading-tight tracking-tight">
-                  {totalPlaces}
-                </span>
-                <span className="text-[11px] uppercase font-bold tracking-wider text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                  Total Places
-                </span>
-              </div>
-            )}
-          </div>
 
-          <div className="w-full h-full relative z-10">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={72}
-                  outerRadius={118}
-                  paddingAngle={2.5}
-                  dataKey="value"
-                  onMouseEnter={(_, index) => setHoveredItem(pieData[index])}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.color}
-                      stroke="transparent"
-                      className="cursor-pointer transition-opacity hover:opacity-90"
+              <div className="w-full h-full relative z-10">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={72}
+                      outerRadius={118}
+                      paddingAngle={2.5}
+                      dataKey="value"
+                      onMouseEnter={(_, index) => setHoveredItem(pieData[index])}
+                      onMouseLeave={() => setHoveredItem(null)}
+                      isAnimationActive={true}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          stroke="transparent"
+                          className="cursor-pointer transition-opacity hover:opacity-90"
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={<CustomTooltip />}
+                      wrapperStyle={{ zIndex: 50, pointerEvents: 'none' }}
                     />
-                  ))}
-                </Pie>
-                <Tooltip
-                  content={<CustomTooltip />}
-                  wrapperStyle={{ zIndex: 50, pointerEvents: 'none' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

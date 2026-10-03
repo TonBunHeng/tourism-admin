@@ -50,6 +50,7 @@ export default function Main() {
       "/galleries": "Galleries",
       "/events": "Events",
       "/reports": "Reports",
+      "/reports/analytics": "Reports Analytics",
       "/users": "Users",
       "/reviews": "Reviews",
       "/ratings": "Ratings",

@@ -4,7 +4,6 @@ import { FileText, FileSpreadsheet } from 'lucide-react';
 import ReportsHeader from './ReportsHeader';
 import ReportsStats from './ReportsStats';
 import ReportsTable from './ReportsTable';
-import ReportsAnalyticsModal from './ReportsAnalyticsModal';
 import { exportToPDF, exportToExcel } from '../../utils/exportReports';
 import { useAlert } from '../../context/AlertContext';
 import placeService from '../../services/placeService';
@@ -32,7 +31,6 @@ export default function Reports() {
   const [isResetting, setIsResetting] = useState(false);
   const { showConfirm, showSuccess, showError } = useAlert();
   const [totalExports, setTotalExports] = useState(14);
-  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const [datasets, setDatasets] = useState({
@@ -302,7 +300,6 @@ export default function Reports() {
         onResetFilter={handleResetFilter}
         onExportPDF={handleOpenExportPDF}
         onExportExcel={handleOpenExportExcel}
-        onOpenAnalytics={() => setIsAnalyticsModalOpen(true)}
         isSubmitting={isSubmitting}
         isResetting={isResetting}
       />
@@ -323,15 +320,6 @@ export default function Reports() {
         setStatusFilter={setStatusFilter}
         data={filteredData}
         isLoading={isLoading}
-      />
-
-      {/* Reports Analytics Modal */}
-      <ReportsAnalyticsModal
-        isOpen={isAnalyticsModalOpen}
-        onClose={() => setIsAnalyticsModalOpen(false)}
-        activeTab={activeTab}
-        datasets={datasets}
-        totalExports={totalExports}
       />
     </div>
   );

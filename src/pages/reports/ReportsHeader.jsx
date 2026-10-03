@@ -1,6 +1,7 @@
 // src/pages/reports/ReportsHeader.jsx
 import { useRef } from 'react';
 import { Send, Download, FileSpreadsheet, RotateCcw, BarChart2, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function ReportsHeader({
   selectedDay,
@@ -9,7 +10,6 @@ export default function ReportsHeader({
   onResetFilter,
   onExportPDF,
   onExportExcel,
-  onOpenAnalytics,
   isSubmitting,
   isResetting
 }) {
@@ -47,13 +47,13 @@ export default function ReportsHeader({
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
           {/* Reports Analytics Button */}
-          <button
-            onClick={onOpenAnalytics}
+          <Link
+            to="/reports/analytics"
             className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md bg-[#003E83] hover:bg-[#002e62] text-white transition-colors shrink-0 cursor-pointer"
           >
             <BarChart2 className="w-4 h-4 shrink-0" />
             <span>Analytics</span>
-          </button>
+          </Link>
 
           {/* Date Filter, Submit & Reset Controls */}
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">

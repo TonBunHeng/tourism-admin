@@ -33,22 +33,10 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
   const [apiAnalytics, setApiAnalytics] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Sync prop reviews or load directly if loaded as a standalone page
+  // Sync prop reviews if passed from parent
   useEffect(() => {
     if (initialReviews && initialReviews.length > 0) {
       setReviews(initialReviews);
-    } else {
-      const loadReviewsData = async () => {
-        try {
-          const res = await reviewService.getReviews({ per_page: 100 });
-          if (res?.data && Array.isArray(res.data)) {
-            setReviews(res.data);
-          }
-        } catch (e) {
-          console.warn('Failed to fetch reviews list for analytics page', e);
-        }
-      };
-      loadReviewsData();
     }
   }, [initialReviews]);
 
@@ -65,16 +53,21 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
         rating: ratingFilter
       });
       if (res && (res.success || res.data)) {
-        setApiAnalytics(res.data || res);
+        const data = res.data || res;
+        setApiAnalytics(data);
+        // Fallback reviews populate directly from analytics endpoint without double fetching
+        if ((!initialReviews || initialReviews.length === 0) && (data.recent_reviews || data.reviews)) {
+          setReviews(data.recent_reviews || data.reviews);
+        }
       }
     } catch (e) {
-      console.warn('Could not fetch remote ratings analytics, using local reviews fallback:', e);
+      console.warn('Could not fetch remote ratings analytics:', e);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Extract all categories dynamically from reviews or backend analytics
+  // Extract all categories dynamically from backend analytics or reviews
   const categories = useMemo(() => {
     if (apiAnalytics?.categories && Array.isArray(apiAnalytics.categories) && apiAnalytics.categories.length > 0) {
       return apiAnalytics.categories;
@@ -84,9 +77,6 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
       const cat = r.category || (typeof r.place === 'object' ? r.place?.category : null);
       if (cat) set.add(cat);
     });
-    if (set.size === 0) {
-      return ['Temple', 'Historical Site', 'Palace', 'Nature', 'Museum', 'Dining', 'Island & Beach', 'Cultural & Heritage'];
-    }
     return Array.from(set);
   }, [apiAnalytics, reviews]);
 
@@ -121,7 +111,7 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
     });
   }, [reviews, selectedCategory, ratingFilter, timeframe]);
 
-  // Computed metrics
+  // Computed metrics directly from database / filtered reviews
   const total = useMemo(() => {
     return apiAnalytics?.overview?.total_ratings ?? filteredReviews.length;
   }, [apiAnalytics, filteredReviews]);
@@ -130,7 +120,7 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
     if (apiAnalytics?.overview?.avg_rating !== undefined) {
       return Number(apiAnalytics.overview.avg_rating).toFixed(1);
     }
-    if (filteredReviews.length === 0) return '5.0';
+    if (filteredReviews.length === 0) return '0.0';
     const sum = filteredReviews.reduce((acc, r) => acc + Number(r.rating || 0), 0);
     return (sum / filteredReviews.length).toFixed(1);
   }, [apiAnalytics, filteredReviews]);
@@ -146,7 +136,7 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
     if (apiAnalytics?.overview?.positive_sentiment_pct !== undefined) {
       return Math.round(apiAnalytics.overview.positive_sentiment_pct);
     }
-    if (total === 0) return 100;
+    if (total === 0) return 0;
     return Math.round((positiveCount / total) * 100);
   }, [apiAnalytics, positiveCount, total]);
 
@@ -154,15 +144,15 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
     if (apiAnalytics?.overview?.verification_pct !== undefined) {
       return Math.round(apiAnalytics.overview.verification_pct);
     }
-    if (total === 0) return 98;
+    if (total === 0) return 0;
     const count = filteredReviews.filter(r => {
       const user = r.user;
       return r.is_verified || (typeof user === 'object' && user?.verified);
     }).length;
-    return Math.max(90, Math.round((count / total) * 100));
+    return Math.round((count / total) * 100);
   }, [apiAnalytics, filteredReviews, total]);
 
-  // Monthly trends data
+  // Monthly trends data purely from DB
   const monthlyData = useMemo(() => {
     if (apiAnalytics?.monthly_trends && Array.isArray(apiAnalytics.monthly_trends)) {
       return apiAnalytics.monthly_trends.map(item => ({
@@ -173,39 +163,45 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
     }
 
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const currentMonthIdx = new Date().getMonth();
-
     let runningTotal = 0;
+    let runningSum = 0;
+    let runningCount = 0;
+
     return months.map((month, idx) => {
-      let count = 0;
-      let monthAvg = Number(avgRating);
+      const monthReviews = filteredReviews.filter(r => {
+        const date = r.created_at || r.date;
+        if (!date) return false;
+        return new Date(date).getMonth() === idx;
+      });
 
-      if (filteredReviews.length > 0) {
-        const monthReviews = filteredReviews.filter(r => {
-          const date = r.created_at || r.date;
-          if (!date) return false;
-          return new Date(date).getMonth() === idx;
-        });
-        count = monthReviews.length;
-        if (count > 0) {
-          monthAvg = Number((monthReviews.reduce((a, b) => a + Number(b.rating || 0), 0) / count).toFixed(1));
-        }
-      } else {
-        count = idx <= currentMonthIdx ? Math.round(15 + idx * 6) : 0;
-        monthAvg = Number((4.6 + (idx % 3) * 0.1).toFixed(1));
+      const count = monthReviews.length;
+      if (count > 0) {
+        const sum = monthReviews.reduce((a, b) => a + Number(b.rating || 0), 0);
+        runningSum += sum;
+        runningCount += count;
       }
-
       runningTotal += count;
+
+      const scoreTrajectory = runningCount > 0 ? Number((runningSum / runningCount).toFixed(1)) : 0.0;
+
       return {
         month,
         ratingsCount: count,
-        avgRating: monthAvg,
+        avgRating: scoreTrajectory,
         cumulative: runningTotal
       };
     });
-  }, [apiAnalytics, filteredReviews, avgRating]);
+  }, [apiAnalytics, filteredReviews]);
 
-  // Star breakdown distribution matching Recharts BarChart
+  // Star breakdown distribution matching Recharts BarChart with semantic tier colors
+  const starColors = {
+    5: '#10b981', // 5 Stars: Emerald
+    4: '#3b82f6', // 4 Stars: Blue
+    3: '#f59e0b', // 3 Stars: Amber
+    2: '#f97316', // 2 Stars: Orange
+    1: '#ef4444', // 1 Star: Rose Red
+  };
+
   const ratingDistribution = useMemo(() => {
     let baseData = [];
     if (apiAnalytics?.rating_distribution && Array.isArray(apiAnalytics.rating_distribution)) {
@@ -233,7 +229,7 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
         stars: starValue,
         count: count,
         name: item.name || `${starValue} Stars`,
-        fillColor: '#f59e0b'
+        fillColor: item.fillColor || starColors[starValue] || '#f59e0b'
       };
     });
   }, [apiAnalytics, filteredReviews, total]);
@@ -249,8 +245,17 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
     if (apiAnalytics?.overview?.critical_sentiment_pct !== undefined) {
       return Math.round(apiAnalytics.overview.critical_sentiment_pct);
     }
-    return Math.max(0, 100 - positivePct);
-  }, [apiAnalytics, positivePct]);
+    if (total === 0) return 0;
+    return Math.round((criticalCount / total) * 100);
+  }, [apiAnalytics, criticalCount, total]);
+
+  const isFilterActive = timeframe !== '2026' || selectedCategory !== 'ALL' || ratingFilter !== 'ALL';
+
+  const handleResetFilters = () => {
+    setTimeframe('2026');
+    setSelectedCategory('ALL');
+    setRatingFilter('ALL');
+  };
 
   const displayReviews = useMemo(() => {
     if (apiAnalytics?.recent_reviews && Array.isArray(apiAnalytics.recent_reviews) && apiAnalytics.recent_reviews.length > 0) {
@@ -262,17 +267,9 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
     return filteredReviews;
   }, [apiAnalytics, filteredReviews]);
 
-  const isFilterActive = timeframe !== '2026' || selectedCategory !== 'ALL' || ratingFilter !== 'ALL';
-
-  const handleResetFilters = () => {
-    setTimeframe('2026');
-    setSelectedCategory('ALL');
-    setRatingFilter('ALL');
-  };
-
   const stats = [
     {
-      label: 'Total Ratings',
+      label: 'Total Reviews',
       value: total.toLocaleString(),
       subtext: total === 1 ? '1 review recorded' : `${total.toLocaleString()} reviews recorded`,
       icon: MessageSquare,
@@ -370,7 +367,7 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
               Filter Analytics
             </span>
             <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              ({filteredReviews.length} records)
+              ({total.toLocaleString()} records)
             </span>
           </div>
 
@@ -435,146 +432,166 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
         </div>
       </div>
 
-      {/* 4. Chart 1: Ratings Velocity & Score Trajectory */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+      {/* 4 & 5. Balanced Side-by-Side Analytics Charts Grid with Smooth Animations */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 sm:mb-8">
+        {/* Chart 1: Ratings Velocity & Score Trajectory */}
+        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 flex flex-col justify-between">
           <div>
-            <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
-              <span>Ratings Velocity & Score Trajectory ({timeframe})</span>
-            </h3>
-            <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-              Monthly review volume and average rating trajectory
-            </p>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-[#003E83]" />
-              Reviews
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 bg-amber-500 rounded-full" />
-              Avg Score
-            </span>
-          </div>
-        </div>
-
-        <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
-              <XAxis 
-                dataKey="month" 
-                stroke="#9CA3AF" 
-                fontSize={11} 
-                tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={{ stroke: '#E5E7EB' }}
-              />
-              <YAxis 
-                yAxisId="left" 
-                stroke="#9CA3AF" 
-                fontSize={11} 
-                tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={{ stroke: '#E5E7EB' }}
-                domain={[0, (dataMax) => (Number.isFinite(dataMax) && dataMax > 5 ? Math.ceil(dataMax * 1.1) : 5)]}
-                allowDecimals={false} 
-                width={32}
-              />
-              <YAxis 
-                yAxisId="right" 
-                orientation="right" 
-                stroke="#f59e0b" 
-                fontSize={11} 
-                tick={{ fontSize: 11, fill: '#f59e0b' }}
-                domain={[0, 5]} 
-                tickLine={false}
-                axisLine={false}
-                width={24}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'var(--color-bg-dark-modal, #18181b)',
-                  border: '1px solid var(--color-border-dark, #27272a)',
-                  borderRadius: '0.375rem',
-                  fontSize: '12px',
-                  color: '#fff'
-                }}
-              />
-              <Bar yAxisId="left" dataKey="ratingsCount" fill="#003E83" radius={[3, 3, 0, 0]} name="New Ratings" barSize={16} />
-              <Line yAxisId="right" type="monotone" dataKey="avgRating" stroke="#f59e0b" strokeWidth={2} dot={{ r: 2 }} name="Avg Score" />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* 5. Chart 2: Rating Breakdown (Stacked directly under Ratings Velocity) */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 mb-6 sm:mb-8 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
-            <div>
-              <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
-                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                <span>Rating Breakdown</span>
-              </h3>
-              <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                Score distribution from 1 to 5 stars
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+              <div>
+                <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
+                  <span>Ratings Velocity & Trajectory ({timeframe})</span>
+                </h3>
+                <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+                  Monthly review count vs average rating score
+                </p>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#003E83]" />
+                  Reviews
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-0.5 bg-amber-500 rounded-full" />
+                  Avg Score
+                </span>
+              </div>
             </div>
-            <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              Based on {total.toLocaleString()} ratings
-            </span>
-          </div>
 
-          <div className="h-[230px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ratingDistribution} layout="vertical" margin={{ top: 5, right: 25, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-                <XAxis type="number" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
-                <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  cursor={{ fill: 'rgba(107, 114, 128, 0.05)' }}
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload;
-                      return (
-                        <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
-                          <p className="font-semibold text-gray-900 dark:text-zinc-100 flex items-center gap-1">
-                            {data.stars} <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                          </p>
-                          <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
-                            <span className="text-gray-600 dark:text-zinc-300 font-semibold">
-                              {data.count} records ({data.percentage}%)
-                            </span>
+            <div className="h-[250px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={monthlyData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                  <XAxis 
+                    dataKey="month" 
+                    stroke="#9CA3AF" 
+                    fontSize={11} 
+                    tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#E5E7EB' }}
+                  />
+                  <YAxis 
+                    yAxisId="left" 
+                    stroke="#9CA3AF" 
+                    fontSize={11} 
+                    tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#E5E7EB' }}
+                    domain={[0, (dataMax) => (Number.isFinite(dataMax) && dataMax > 5 ? Math.ceil(dataMax * 1.1) : 5)]}
+                    allowDecimals={false} 
+                    width={32}
+                  />
+                  <YAxis 
+                    yAxisId="right" 
+                    orientation="right" 
+                    stroke="#f59e0b" 
+                    fontSize={11} 
+                    tick={{ fontSize: 11, fill: '#f59e0b' }}
+                    domain={[0, 5]} 
+                    tickLine={false}
+                    axisLine={false}
+                    width={28}
+                  />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const ratingsVal = payload.find(p => p.dataKey === 'ratingsCount')?.value ?? 0;
+                        const scoreVal = payload.find(p => p.dataKey === 'avgRating')?.value;
+                        return (
+                          <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
+                            <p className="font-semibold text-gray-900 dark:text-zinc-100">{label}</p>
+                            <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
+                              <span>New Reviews:</span>
+                              <span className="font-bold text-[#003E83] dark:text-blue-400">{ratingsVal}</span>
+                            </div>
+                            {scoreVal !== undefined && (
+                              <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
+                                <span>Avg Score:</span>
+                                <span className="font-bold text-amber-500">{Number(scoreVal).toFixed(1)} ★</span>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={18}>
-                  {
-                    ratingDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fillColor} />
-                    ))
-                  }
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar yAxisId="left" dataKey="ratingsCount" fill="#003E83" radius={[3, 3, 0, 0]} name="New Ratings" barSize={16} isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
+                  <Line yAxisId="right" type="monotone" dataKey="avgRating" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3, fill: '#f59e0b' }} activeDot={{ r: 5 }} name="Avg Score" isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
-        {/* Sentiment Summary Badges */}
-        <div className="mt-4 pt-3 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-2 gap-3 text-center">
-          <div className="p-2.5 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
-            <p className="text-sm font-bold text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">{positiveCount}</p>
-            <p className="text-xs text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">Positive ({positivePct}%)</p>
+        {/* Chart 2: Rating Breakdown & Sentiment Summary */}
+        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+              <div>
+                <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  <span>Rating Breakdown</span>
+                </h3>
+                <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+                  Score distribution across 1 to 5 stars
+                </p>
+              </div>
+              <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                Based on {total.toLocaleString()} ratings
+              </span>
+            </div>
+
+            <div className="h-[165px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={ratingDistribution} layout="vertical" margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
+                  <YAxis dataKey="name" type="category" interval={0} width={65} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(107, 114, 128, 0.05)' }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
+                            <p className="font-semibold text-gray-900 dark:text-zinc-100 flex items-center gap-1">
+                              {data.stars} <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> ({data.name})
+                            </p>
+                            <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
+                              <span className="text-gray-600 dark:text-zinc-300 font-semibold">
+                                {data.count} {data.count === 1 ? 'review' : 'reviews'} ({data.percentage}%)
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={16} isAnimationActive={true} animationDuration={800} animationEasing="ease-out">
+                    {
+                      ratingDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fillColor} />
+                      ))
+                    }
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="p-2.5 rounded-md bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)]">
-            <p className="text-sm font-bold text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]">{criticalCount}</p>
-            <p className="text-xs text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]">Needs Attention ({criticalPct}%)</p>
+
+          {/* Sentiment Summary Badges */}
+          <div className="mt-3 pt-2.5 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-2 gap-3 text-center">
+            <div className="p-2 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">{positiveCount}</p>
+              <p className="text-[11px] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">Positive ({positivePct}%)</p>
+            </div>
+            <div className="p-2 rounded-md bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]">{criticalCount}</p>
+              <p className="text-[11px] text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]">Needs Attention ({criticalPct}%)</p>
+            </div>
           </div>
         </div>
       </div>
