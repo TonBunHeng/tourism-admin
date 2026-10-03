@@ -20,7 +20,9 @@ import Gallery from '../pages/galleries/Gallery';
 import Events from '../pages/events/Events';
 import Users from '../pages/users/Users';
 import Ratings from '../pages/ratings/Ratings';
+import RatingsAnalytics from '../pages/ratings/RatingsAnalytics';
 import Favorites from '../pages/favorites/Favorites';
+import FavoritesAnalytics from '../pages/favorites/FavoritesAnalytics';
 import DeletionRequests from '../pages/delete/DeletionRequests';
 import Settings from '../pages/settings/Settings';
 import Profile from '../pages/profiles/Profile';
@@ -62,7 +64,9 @@ const AppRoutes = () => {
             <Route path="/events" element={<Events />} />
             <Route path="/reviews" element={<Ratings />} />
             <Route path="/ratings" element={<Ratings />} />
+            <Route path="/ratings/analytics" element={<RatingsAnalytics />} />
             <Route path="/favorites" element={<Favorites />} />
+            <Route path="/favorites/analytics" element={<FavoritesAnalytics />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/notifications" element={<Notifications />} />
 

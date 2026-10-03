@@ -8,13 +8,15 @@ import {
 } from 'lucide-react';
 import {
   ComposedChart,
+  BarChart,
   Bar,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Cell
 } from 'recharts';
 import reportService from '../../services/reportService';
 
@@ -162,15 +164,16 @@ export default function ReportsAnalyticsModal({
   // Composition Breakdown
   const compositionData = useMemo(() => {
     const palette = ['bg-[#003E83]', 'bg-rose-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-cyan-500'];
+    const fillColors = ['#003E83', '#f43f5e', '#10b981', '#f59e0b', '#a855f7', '#06b6d4'];
 
     if (selectedDataset === 'ALL') {
       const total = globalTotalRecords || 1;
       return [
-        { name: 'Places & Attractions', count: places.length, percentage: Math.round((places.length / total) * 100), color: palette[0] },
-        { name: 'Events & Festivals', count: events.length, percentage: Math.round((events.length / total) * 100), color: palette[1] },
-        { name: 'Users & Accounts', count: users.length, percentage: Math.round((users.length / total) * 100), color: palette[2] },
-        { name: 'Ratings & Reviews', count: reviews.length, percentage: Math.round((reviews.length / total) * 100), color: palette[3] },
-        { name: 'Categories', count: categories.length, percentage: Math.round((categories.length / total) * 100), color: palette[4] }
+        { name: 'Places & Attractions', count: places.length, percentage: Math.round((places.length / total) * 100), color: palette[0], fillColor: fillColors[0] },
+        { name: 'Events & Festivals', count: events.length, percentage: Math.round((events.length / total) * 100), color: palette[1], fillColor: fillColors[1] },
+        { name: 'Users & Accounts', count: users.length, percentage: Math.round((users.length / total) * 100), color: palette[2], fillColor: fillColors[2] },
+        { name: 'Ratings & Reviews', count: reviews.length, percentage: Math.round((reviews.length / total) * 100), color: palette[3], fillColor: fillColors[3] },
+        { name: 'Categories', count: categories.length, percentage: Math.round((categories.length / total) * 100), color: palette[4], fillColor: fillColors[4] }
       ].filter(item => item.count > 0);
     }
 
@@ -208,7 +211,8 @@ export default function ReportsAnalyticsModal({
       name,
       count,
       percentage: Math.round((count / total) * 100),
-      color: palette[idx % palette.length]
+      color: palette[idx % palette.length],
+      fillColor: fillColors[idx % fillColors.length]
     }));
   }, [selectedDataset, globalTotalRecords, places, events, users, reviews, categories, currentDatasetItems]);
 
@@ -231,9 +235,9 @@ export default function ReportsAnalyticsModal({
 
     const total = currentDatasetItems.length || 1;
     return [
-      { label: 'Active / Published', count: active, percentage: Math.round((active / total) * 100), color: 'bg-emerald-500' },
-      { label: 'Pending / Upcoming', count: pending, percentage: Math.round((pending / total) * 100), color: 'bg-amber-500' },
-      { label: 'Archived / Inactive', count: archived, percentage: Math.round((archived / total) * 100), color: 'bg-gray-400' }
+      { label: 'Active / Published', name: 'Active / Published', count: active, percentage: Math.round((active / total) * 100), color: 'bg-emerald-500', fillColor: '#10b981' },
+      { label: 'Pending / Upcoming', name: 'Pending / Upcoming', count: pending, percentage: Math.round((pending / total) * 100), color: 'bg-amber-500', fillColor: '#f59e0b' },
+      { label: 'Archived / Inactive', name: 'Archived / Inactive', count: archived, percentage: Math.round((archived / total) * 100), color: 'bg-gray-400', fillColor: '#9ca3af' }
     ];
   }, [currentDatasetItems]);
 
@@ -454,6 +458,56 @@ export default function ReportsAnalyticsModal({
 
           {/* Breakdown Section: Composition & Status */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Status Breakdown Card */}
+            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-1">
+                Operational Status Breakdown
+              </h4>
+              <p className="text-xs text-gray-500 dark:text-zinc-400 mb-3">
+                Publication and workflow state
+              </p>
+
+              {statusBreakdownData.length === 0 ? (
+                <p className="text-xs text-gray-400 text-center py-6">No records found</p>
+              ) : (
+                <div className="h-48 w-full mt-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={statusBreakdownData} layout="vertical" margin={{ top: 5, right: 25, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+                      <XAxis type="number" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
+                      <YAxis dataKey="name" type="category" width={130} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                      <Tooltip
+                        cursor={{ fill: 'rgba(107, 114, 128, 0.05)' }}
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
+                                <p className="font-semibold text-gray-900 dark:text-zinc-100">{data.name}</p>
+                                <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
+                                  <span className="text-gray-600 dark:text-zinc-300 font-semibold">
+                                    {data.count} records ({data.percentage}%)
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={18}>
+                        {
+                          statusBreakdownData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fillColor} />
+                          ))
+                        }
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+
             {/* Composition Breakdown Card */}
             <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
               <h4 className="text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-1">
@@ -466,58 +520,42 @@ export default function ReportsAnalyticsModal({
               {compositionData.length === 0 ? (
                 <p className="text-xs text-gray-400 text-center py-6">No records found</p>
               ) : (
-                <div className="space-y-2.5">
-                  {compositionData.map((item) => (
-                    <div key={item.name} className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span className="font-medium text-gray-700 dark:text-zinc-300 truncate max-w-[180px]">
-                          {item.name}
-                        </span>
-                        <span className="text-gray-500 dark:text-zinc-400 font-medium">
-                          {item.count} ({item.percentage}%)
-                        </span>
-                      </div>
-                      <div className="h-1.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-md overflow-hidden">
-                        <div
-                          className={`h-full ${item.color} rounded-md transition-all duration-300`}
-                          style={{ width: `${item.percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                <div className="h-48 w-full mt-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={compositionData} layout="vertical" margin={{ top: 5, right: 25, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+                      <XAxis type="number" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
+                      <YAxis dataKey="name" type="category" width={130} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+                      <Tooltip
+                        cursor={{ fill: 'rgba(107, 114, 128, 0.05)' }}
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
+                                <p className="font-semibold text-gray-900 dark:text-zinc-100">{data.name}</p>
+                                <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
+                                  <span className="text-gray-600 dark:text-zinc-300 font-semibold">
+                                    {data.count} records ({data.percentage}%)
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={18}>
+                        {
+                          compositionData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fillColor} />
+                          ))
+                        }
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               )}
-            </div>
-
-            {/* Status Breakdown Card */}
-            <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 border border-gray-200 dark:border-zinc-800 shadow-xs">
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-zinc-100 mb-1">
-                Operational Status Breakdown
-              </h4>
-              <p className="text-xs text-gray-500 dark:text-zinc-400 mb-3">
-                Publication and workflow state
-              </p>
-
-              <div className="space-y-2.5">
-                {statusBreakdownData.map((item) => (
-                  <div key={item.label} className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="font-medium text-gray-700 dark:text-zinc-300 truncate max-w-[180px]">
-                        {item.label}
-                      </span>
-                      <span className="text-gray-500 dark:text-zinc-400 font-medium">
-                        {item.count} ({item.percentage}%)
-                      </span>
-                    </div>
-                    <div className="h-1.5 w-full bg-gray-100 dark:bg-zinc-800 rounded-md overflow-hidden">
-                      <div
-                        className={`h-full ${item.color} rounded-md transition-all duration-300`}
-                        style={{ width: `${item.percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
 

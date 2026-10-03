@@ -1,11 +1,11 @@
 import { MessageSquare, Star, ThumbsUp, Clock } from 'lucide-react';
 
-export default function RatingsStats({ reviews = [] }) {
+export default function RatingsStats({ reviews = [], stats: statsOverview }) {
   const safeReviews = Array.isArray(reviews) ? reviews : [];
-  const total = safeReviews.length;
-  const avgRating = total > 0
+  const total = statsOverview?.total_ratings ?? safeReviews.length;
+  const avgRating = statsOverview?.avg_rating !== undefined ? Number(statsOverview.avg_rating).toFixed(1) : (total > 0
     ? (safeReviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / total).toFixed(1)
-    : '0.0';
+    : '0.0');
   const totalLikes = safeReviews.reduce((sum, r) => sum + (Number(r.likes) || 0), 0);
   const pending = safeReviews.filter(r => r.status === 'Pending').length;
 

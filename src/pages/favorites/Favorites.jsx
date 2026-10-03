@@ -16,7 +16,6 @@ import FavoritesList from "./FavoritesList";
 import FavoritesGrid from "./FavoritesGrid";
 import FavoriteModal from "./FavoriteModal";
 import FavoriteDetailsModal from "./FavoriteDetailsModal";
-import FavoritesAnalyticsModal from "./FavoritesAnalyticsModal";
 import favoriteService from "../../services/favoriteService";
 import placeService from "../../services/placeService";
 import categoryService from "../../services/categoryService";
@@ -41,7 +40,6 @@ export default function Favorites() {
 
   // Modal States
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [selectedFavorite, setSelectedFavorite] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -376,12 +374,7 @@ export default function Favorites() {
   return (
     <div className="flex flex-col">
       {/* 1. Header with Add Button */}
-      <FavoritesHeader
-        totalCount={favorites.length}
-        onOpenAnalytics={() => setIsAnalyticsOpen(true)}
-        onAddNew={() => setIsAnalyticsOpen(true)}
-        onAddClick={() => setIsAnalyticsOpen(true)}
-      />
+      <FavoritesHeader />
 
       {/* 2. Key Analytics / Overview Cards */}
       <FavoritesStats favorites={favorites} />
@@ -498,13 +491,6 @@ export default function Favorites() {
         onToggleVisited={handleToggleStatus}
         onToggleStatus={handleToggleStatus}
         onDelete={handleDeleteFavorite}
-      />
-
-      {/* Favorite Places Analytics Modal */}
-      <FavoritesAnalyticsModal
-        isOpen={isAnalyticsOpen}
-        onClose={() => setIsAnalyticsOpen(false)}
-        favorites={favorites}
       />
     </div>
   );

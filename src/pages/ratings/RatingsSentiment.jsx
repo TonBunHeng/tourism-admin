@@ -1,21 +1,21 @@
 import { Star, ThumbsUp, MessageSquare, ThumbsDown } from 'lucide-react';
 
-export default function RatingsSentiment({ reviews = [], ratingDistribution }) {
+export default function RatingsSentiment({ reviews = [], ratingDistribution, stats: statsOverview }) {
   const safeReviews = Array.isArray(reviews) ? reviews : [];
-  const total = safeReviews.length;
+  const total = statsOverview?.total_ratings ?? safeReviews.length;
 
   const distribution = ratingDistribution || [5, 4, 3, 2, 1].map(r => ({
     rating: r,
     count: safeReviews.filter(rev => Number(rev.rating) === r).length
   }));
 
-  const positiveCount = safeReviews.filter(r => Number(r.rating) >= 4).length;
+  const positiveCount = statsOverview?.positive_count ?? safeReviews.filter(r => Number(r.rating) >= 4).length;
   const neutralCount = safeReviews.filter(r => Number(r.rating) === 3).length;
-  const negativeCount = safeReviews.filter(r => Number(r.rating) > 0 && Number(r.rating) <= 2).length;
+  const negativeCount = statsOverview?.critical_count ?? safeReviews.filter(r => Number(r.rating) > 0 && Number(r.rating) <= 2).length;
 
-  const positivePct = total > 0 ? Math.round((positiveCount / total) * 100) : 0;
+  const positivePct = statsOverview?.positive_sentiment_pct !== undefined ? Math.round(statsOverview.positive_sentiment_pct) : (total > 0 ? Math.round((positiveCount / total) * 100) : 0);
   const neutralPct = total > 0 ? Math.round((neutralCount / total) * 100) : 0;
-  const negativePct = total > 0 ? Math.round((negativeCount / total) * 100) : 0;
+  const negativePct = statsOverview?.critical_sentiment_pct !== undefined ? Math.round(statsOverview.critical_sentiment_pct) : (total > 0 ? Math.round((negativeCount / total) * 100) : 0);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 sm:mb-8">

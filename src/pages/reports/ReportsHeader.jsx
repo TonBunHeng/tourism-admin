@@ -77,27 +77,6 @@ export default function ReportsHeader({
               </span>
             </div>
 
-            {/* Submit Button */}
-            <button
-              onClick={onSubmitFilter}
-              disabled={isSubmitting}
-              className={`${actionBtnClass} border border-transparent bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white shadow-sm`}
-              title="Submit Filter"
-            >
-              <Send className={`w-4 h-4 shrink-0 ${isSubmitting ? 'animate-spin' : ''}`} />
-              <span>Submit</span>
-            </button>
-
-            {/* Reset Button */}
-            <button
-              onClick={onResetFilter}
-              disabled={isResetting}
-              className={`${actionBtnClass} border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-sm`}
-              title="Reset Filter"
-            >
-              <RotateCcw className={`w-4 h-4 shrink-0 ${isResetting ? 'animate-spin' : ''}`} />
-              <span>Reset</span>
-            </button>
           </div>
 
           {/* Export PDF & Excel Row */}

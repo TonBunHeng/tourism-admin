@@ -8,7 +8,7 @@ import RatingsGrid from "./RatingsGrid";
 import RatingsTable from "./RatingsTable";
 import ReviewDetailsModal from "./ReviewDetailsModal";
 import ReviewReplyModal from "./ReviewReplyModal";
-import RatingsAnalyticsModal from "./RatingsAnalyticsModal";
+
 import reviewService from "../../services/reviewService";
 import placeService from "../../services/placeService";
 import { useAlert } from "../../context/AlertContext";
@@ -18,6 +18,7 @@ export default function Ratings() {
   const [reviews, setReviews] = useState([]);
   const [places, setPlaces] = useState(["All"]);
   const [isLoading, setIsLoading] = useState(true);
+  const [analyticsData, setAnalyticsData] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
@@ -26,7 +27,7 @@ export default function Ratings() {
   const [selectedReview, setSelectedReview] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
-  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+
   const [replyText, setReplyText] = useState("");
   const [viewMode, setViewMode] = useState("table");
   const [sortBy, setSortBy] = useState("newest");
@@ -52,6 +53,20 @@ export default function Ratings() {
       }
     };
     fetchPlacesList();
+  }, []);
+
+  useEffect(() => {
+    const fetchAnalyticsOverview = async () => {
+      try {
+        const res = await reviewService.getAnalytics();
+        if (res && (res.success || res.data)) {
+          setAnalyticsData(res.data || res);
+        }
+      } catch (e) {
+        console.warn("Failed to load analytics overview for ratings", e);
+      }
+    };
+    fetchAnalyticsOverview();
   }, []);
 
   const loadReviews = async () => {
@@ -158,13 +173,17 @@ export default function Ratings() {
   return (
     <div className="flex flex-col">
       {/* Header with Analytics button */}
-      <RatingsHeader onOpenAnalytics={() => setIsAnalyticsOpen(true)} />
+      <RatingsHeader />
 
       {/* Top 4 Stat Summary Cards */}
-      <RatingsStats reviews={reviews} />
+      <RatingsStats reviews={reviews} stats={analyticsData?.overview} />
 
       {/* Sentiment & Star Distribution Cards */}
-      <RatingsSentiment reviews={reviews} />
+      <RatingsSentiment
+        reviews={reviews}
+        ratingDistribution={analyticsData?.rating_distribution}
+        stats={analyticsData?.overview}
+      />
 
       {/* Main Reviews Container */}
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
@@ -236,12 +255,7 @@ export default function Ratings() {
         onSubmit={handleReplySubmit}
       />
 
-      {/* Analytics Modal */}
-      <RatingsAnalyticsModal
-        isOpen={isAnalyticsOpen}
-        onClose={() => setIsAnalyticsOpen(false)}
-        reviews={reviews}
-      />
+
     </div>
   );
 }
