@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import tourism_app_icon from "../../../public/tourism_app_icon.png";
+import tourism_app_icon from "../../assets/images/tourism_app_icon.png";
 import {
   LayoutGrid, MapPinned, Tags, Images, CalendarDays,
   Star, Heart, Trash2, Settings, LogOut,
