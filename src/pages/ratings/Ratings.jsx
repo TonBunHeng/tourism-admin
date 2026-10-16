@@ -4,7 +4,6 @@ import RatingsHeader from "./RatingsHeader";
 import RatingsStats from "./RatingsStats";
 import RatingsSentiment from "./RatingsSentiment";
 import RatingsToolbar from "./RatingsToolbar";
-import RatingsGrid from "./RatingsGrid";
 import RatingsTable from "./RatingsTable";
 import ReviewDetailsModal from "./ReviewDetailsModal";
 import ReviewReplyModal from "./ReviewReplyModal";
@@ -12,15 +11,16 @@ import ReviewReplyModal from "./ReviewReplyModal";
 import reviewService from "../../services/reviewService";
 import placeService from "../../services/placeService";
 import { useAlert } from "../../context/AlertContext";
+import { useSearch } from "../../context/SearchContext";
 
 export default function Ratings() {
   const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm, setSearchTerm } = useSearch();
   const [reviews, setReviews] = useState([]);
   const [places, setPlaces] = useState(["All"]);
   const [isLoading, setIsLoading] = useState(true);
   const [analyticsData, setAnalyticsData] = useState(null);
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedRating, setSelectedRating] = useState("All");
   const [selectedPlace, setSelectedPlace] = useState("All");
@@ -29,13 +29,12 @@ export default function Ratings() {
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
 
   const [replyText, setReplyText] = useState("");
-  const [viewMode, setViewMode] = useState("table");
   const [sortBy, setSortBy] = useState("newest");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   const statuses = ["All", "Approved", "Pending", "Rejected"];
   const ratings = ["All", "5", "4", "3", "2", "1"];
@@ -106,6 +105,10 @@ export default function Ratings() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     loadReviews();
@@ -188,38 +191,24 @@ export default function Ratings() {
       {/* Main Reviews Container */}
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         <RatingsToolbar
-          searchTerm={searchTerm}
-          onSearchChange={(val) => { setSearchTerm(val); setCurrentPage(1); }}
           selectedStatus={selectedStatus}
           onStatusChange={(val) => { setSelectedStatus(val); setCurrentPage(1); }}
           selectedPlace={selectedPlace}
           onPlaceChange={(val) => { setSelectedPlace(val); }}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
           places={places}
           statuses={statuses}
+          totalCount={totalRecords}
         />
 
-        {viewMode === "table" ? (
-          <RatingsTable
-            reviews={filteredReviews}
-            isLoading={isLoading}
-            onStatusChange={handleStatusChange}
-            onDelete={handleDelete}
-            onView={(rev) => { setSelectedReview(rev); setIsDetailsOpen(true); }}
-            onReply={(rev) => { setSelectedReview(rev); setIsReplyModalOpen(true); }}
-            startIndex={startIndex}
-          />
-        ) : (
-          <RatingsGrid
-            reviews={filteredReviews}
-            isLoading={isLoading}
-            onStatusChange={handleStatusChange}
-            onDelete={handleDelete}
-            onView={(rev) => { setSelectedReview(rev); setIsDetailsOpen(true); }}
-            onReply={(rev) => { setSelectedReview(rev); setIsReplyModalOpen(true); }}
-          />
-        )}
+        <RatingsTable
+          reviews={filteredReviews}
+          isLoading={isLoading}
+          onStatusChange={handleStatusChange}
+          onDelete={handleDelete}
+          onView={(rev) => { setSelectedReview(rev); setIsDetailsOpen(true); }}
+          onReply={(rev) => { setSelectedReview(rev); setIsReplyModalOpen(true); }}
+          startIndex={startIndex}
+        />
 
         {/* Simple Pagination Footer */}
         <SimplePagination

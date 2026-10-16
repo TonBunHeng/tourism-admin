@@ -1,81 +1,47 @@
-import { Search, LayoutList, LayoutGrid, Filter } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 export default function SecurityToolbar({
-  searchTerm,
-  onSearchChange,
-  statusFilter,
-  onStatusFilterChange,
-  viewMode,
-  onViewModeChange,
+  statusFilter = 'all',
+  onStatusFilterChange = () => {},
   totalResults
 }) {
   const statusOptions = [
     { value: 'all', label: 'All Status' },
     { value: 'unread', label: 'Unread Only' },
     { value: 'read', label: 'Read / Acknowledged' },
+    { value: 'blocked', label: 'Blocked IPs Only' },
   ];
 
   return (
-    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-3 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-      {/* Search Input */}
-      <div className="relative flex-1 min-w-[240px]">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search by target email, IP address, or incident description..."
-          className="w-full pl-10 pr-4 py-2 rounded-md bg-white dark:bg-zinc-800 text-xs text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] placeholder-slate-400 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] focus:outline-none focus:ring-1 focus:ring-[#003E83] focus:border-[#003E83] transition-colors"
-        />
-      </div>
-
-      {/* Filter and View Mode Switcher */}
-      <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap justify-between md:justify-end">
-        <div className="flex items-center gap-1.5">
-          <Filter className="w-3.5 h-3.5 text-slate-400" />
-          <select
-            value={statusFilter}
-            onChange={(e) => onStatusFilterChange(e.target.value)}
-            className="py-1.5 px-3 rounded-md bg-white dark:bg-zinc-800 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] text-xs font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-1 focus:ring-[#003E83] focus:border-[#003E83] cursor-pointer transition-colors"
-          >
-            {statusOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+    <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-2.5">
+          <h2 className="text-lg md:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+            All Incidents
+          </h2>
+          {totalResults !== undefined && (
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+              {totalResults} {totalResults === 1 ? 'alert' : 'alerts'}
+            </span>
+          )}
         </div>
 
-        <span className="text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] font-medium">
-          {totalResults} {totalResults === 1 ? 'alert' : 'alerts'}
-        </span>
-
-        {/* View Mode Toggle */}
-        <div className="flex items-center border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md p-0.5 bg-slate-50 dark:bg-zinc-800/40">
-          <button
-            type="button"
-            onClick={() => onViewModeChange('list')}
-            className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-              viewMode === 'list'
-                ? 'bg-white dark:bg-zinc-700 text-[#003E83] dark:text-blue-400 shadow-xs'
-                : 'text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200'
-            }`}
-            title="List view"
-          >
-            <LayoutList className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewModeChange('grid')}
-            className={`p-1.5 rounded-md transition-colors cursor-pointer ${
-              viewMode === 'grid'
-                ? 'bg-white dark:bg-zinc-700 text-[#003E83] dark:text-blue-400 shadow-xs'
-                : 'text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200'
-            }`}
-            title="Grid view"
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </button>
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          {/* Status Filter */}
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(e) => onStatusFilterChange(e.target.value)}
+              className="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-sm cursor-pointer shadow-xs font-medium"
+            >
+              {statusOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+          </div>
         </div>
       </div>
     </div>

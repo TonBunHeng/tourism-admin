@@ -26,6 +26,7 @@ import BackupTab from "./BackupTab";
 import AboutTab from "./AboutTab";
 import settingService from "../../services/settingService";
 import { useAlert } from "../../context/AlertContext";
+import { useSearch } from "../../context/SearchContext";
 
 const KEY_GROUP_MAP = {
   // General
@@ -153,7 +154,7 @@ export default function Settings() {
 
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchTerm: searchQuery, setSearchTerm: setSearchQuery } = useSearch();
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
@@ -396,8 +397,6 @@ export default function Settings() {
         saveSuccess={saveSuccess}
         onSave={handleSave}
         onReset={handleReset}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
       />
 
       {/* KPI Overview Summary Stats */}

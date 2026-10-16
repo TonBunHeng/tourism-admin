@@ -1,6 +1,5 @@
-// src/pages/reports/ReportsHeader.jsx
 import { useRef } from 'react';
-import { Send, Download, FileSpreadsheet, RotateCcw, BarChart2, Calendar } from 'lucide-react';
+import { Download, FileSpreadsheet, BarChart2, Calendar, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function ReportsHeader({
@@ -49,34 +48,49 @@ export default function ReportsHeader({
           {/* Reports Analytics Button */}
           <Link
             to="/reports/analytics"
-            className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md bg-[#003E83] hover:bg-[#002e62] text-white transition-colors shrink-0 cursor-pointer"
+            className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md bg-[#003E83] hover:bg-[#002e62] text-white transition-colors shrink-0 cursor-pointer shadow-xs"
           >
             <BarChart2 className="w-4 h-4 shrink-0" />
             <span>Analytics</span>
           </Link>
 
-          {/* Date Filter, Submit & Reset Controls */}
+          {/* Date Filter Controls */}
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-
             {/* Styled Date Picker Button */}
             <div
               onClick={handleOpenPicker}
-              className="relative flex items-center justify-center gap-1.5 md:gap-2 px-3.5 py-2 text-xs md:text-sm font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] transition-colors shrink-0 cursor-pointer shadow-sm"
+              className="relative flex items-center justify-center gap-1.5 md:gap-2 px-3.5 py-2 text-xs md:text-sm font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] transition-colors shrink-0 cursor-pointer shadow-xs"
             >
               <input
                 ref={dateInputRef}
                 type="date"
                 value={selectedDay || ''}
-                onChange={(e) => setSelectedDay(e.target.value)}
+                onChange={(e) => {
+                  setSelectedDay(e.target.value);
+                  if (onSubmitFilter) onSubmitFilter(e.target.value);
+                }}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 title={selectedDay ? `Selected Date: ${selectedDay}` : 'Select Date Filter'}
               />
               <Calendar className="w-4 h-4 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] shrink-0" />
               <span className="font-semibold text-xs md:text-sm tracking-tight text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-                {selectedDay || 'Date'}
+                {selectedDay || 'Date Filter'}
               </span>
+              {selectedDay && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedDay('');
+                    if (onResetFilter) onResetFilter();
+                  }}
+                  className="relative z-20 p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-400 hover:text-red-500 cursor-pointer ml-1"
+                  title="Clear Date"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
-
           </div>
 
           {/* Export PDF & Excel Row */}

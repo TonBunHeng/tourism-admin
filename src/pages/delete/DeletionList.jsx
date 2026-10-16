@@ -218,7 +218,7 @@ export default function DeletionList({
                     <td className="px-3 py-3.5 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] max-w-xs truncate">
                       <p className="truncate">{request.reason}</p>
                       <span className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] font-mono block mt-0.5">
-                        {request.requestDate}
+                        {request.requestedDate || request.requestDate}
                       </span>
                     </td>
 

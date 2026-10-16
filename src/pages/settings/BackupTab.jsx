@@ -295,65 +295,99 @@ export default function BackupTab({ settings, setSettings }) {
       </div>
 
       {/* Card 3: Snapshot History Table */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] pb-3">
-          <h3 className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
-            <FileSpreadsheet className="w-4 h-4 text-[var(--color-primary)]" />
-            Stored Backup Snapshots
-          </h3>
-          <span className="text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-            Total Archives: {backups.length}
-          </span>
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden shadow-xs space-y-0">
+        <div className="flex items-center justify-between border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] px-4 sm:px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <h3 className="text-sm sm:text-base font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
+              <Database className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
+              Stored Backup Snapshots
+            </h3>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+              {backups.length} {backups.length === 1 ? 'archive' : 'archives'}
+            </span>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-            <thead className="bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] uppercase text-[10px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-semibold border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+          <table className="w-full text-left text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+            <thead className="bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/50 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider text-xs font-medium">
               <tr>
-                <th className="py-2.5 px-3">Archive File Name</th>
-                <th className="py-2.5 px-3">Type</th>
-                <th className="py-2.5 px-3">Timestamp</th>
-                <th className="py-2.5 px-3">Size</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3 text-right">Actions</th>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">#</th>
+                <th className="px-4 py-3.5">Archive File Name</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-44">Type</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-44">Timestamp</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-28">Size</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-28">Status</th>
+                <th className="pl-3 pr-4 py-3.5 text-right w-24 whitespace-nowrap">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)]">
-              {backups.map((b) => (
-                <tr key={b.id} className="hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors">
-                  <td className="py-3 px-3 font-mono font-medium text-[var(--color-primary)] truncate max-w-[220px]">
-                    {b.name}
-                  </td>
-                  <td className="py-3 px-3 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">{b.type}</td>
-                  <td className="py-3 px-3 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">{b.date}</td>
-                  <td className="py-3 px-3 font-medium">{b.size}</td>
-                  <td className="py-3 px-3">
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">
-                      {b.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right">
-                    <div className="flex items-center justify-end space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => showInfo(`Preparing download for backup archive "${b.name}" (${b.size}).`, 'Download Started')}
-                        className="p-1 text-[var(--color-text-muted-light)] hover:text-[var(--color-primary)] cursor-pointer"
-                        title="Download Backup"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteBackup(b.id)}
-                        className="p-1 text-[var(--color-text-muted-light)] hover:text-[var(--color-danger-text)] dark:hover:text-[var(--color-danger-dark-text)] cursor-pointer"
-                        title="Delete Backup"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+            <tbody className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] divide-y divide-[var(--color-border-light)] dark:divide-[var(--color-border-dark)]">
+              {backups.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 text-center text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] font-medium">
+                    No backup archives found. Create a manual snapshot to protect data.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                backups.map((b, idx) => (
+                  <tr key={b.id} className="hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/40 transition-colors">
+                    <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
+                      {idx + 1}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-md bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center shrink-0">
+                          <Database className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs md:text-sm font-mono font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate max-w-xs sm:max-w-md">
+                            {b.name}
+                          </p>
+                          <span className="text-[10px] font-semibold text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">
+                            SQL Database Snapshot Dump
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-3.5 whitespace-nowrap text-xs">
+                      <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-gray-100 dark:bg-zinc-800 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] border border-gray-200 dark:border-zinc-700">
+                        {b.type}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3.5 whitespace-nowrap text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono">
+                      {b.date}
+                    </td>
+                    <td className="px-3 py-3.5 whitespace-nowrap text-xs font-mono font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                      {b.size}
+                    </td>
+                    <td className="px-3 py-3.5 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
+                        {b.status}
+                      </span>
+                    </td>
+                    <td className="pl-3 pr-4 py-3.5 whitespace-nowrap text-right text-xs">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => showInfo(`Preparing download for backup archive "${b.name}" (${b.size}).`, 'Download Started')}
+                          className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="Download Backup"
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBackup(b.id)}
+                          className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="Delete Backup"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

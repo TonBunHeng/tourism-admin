@@ -4,7 +4,6 @@ import SimplePagination from '../../components/common/SimplePagination';
 import ProvincesHeader from './ProvincesHeader';
 import ProvincesStats from './ProvincesStats';
 import ProvincesToolbar from './ProvincesToolbar';
-import ProvincesGrid from './ProvincesGrid';
 import ProvincesList from './ProvincesList';
 import ProvinceDetailsModal from './ProvinceDetailsModal';
 import ProvinceModal from './ProvinceModal';
@@ -12,20 +11,20 @@ import provinceService from '../../services/provinceService';
 import deletionRequestService from '../../services/deletionRequestService';
 import authService, { isSuperAdminRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
+import { useSearch } from '../../context/SearchContext';
 
 const PROVINCE_TYPES = ['All', 'Capital City', 'Province', 'Municipality'];
 
 export default function Provinces() {
   const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm, setSearchTerm } = useSearch();
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = isSuperAdminRole(currentUser?.role);
   const [provinces, setProvinces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
-  const [viewMode, setViewMode] = useState('list');
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProvince, setEditingProvince] = useState(null);
@@ -34,7 +33,7 @@ export default function Provinces() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -88,6 +87,10 @@ export default function Provinces() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     loadProvinces();
@@ -239,8 +242,6 @@ export default function Provinces() {
       {/* Main Content Card */}
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         <ProvincesToolbar
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
           searchTerm={searchTerm}
           onSearchChange={handleSearchChange}
           selectedType={selectedType}
@@ -254,20 +255,13 @@ export default function Provinces() {
           <div className="p-12 text-center text-slate-500 dark:text-zinc-400 font-medium">
             Loading provinces from API...
           </div>
-        ) : viewMode === 'list' ? (
+        ) : (
           <ProvincesList
             provinces={provinces}
             onViewProvince={handleView}
             onEditProvince={openEditModal}
             onDeleteProvince={handleDelete}
             startIndex={startIndex}
-          />
-        ) : (
-          <ProvincesGrid
-            provinces={provinces}
-            onViewProvince={handleView}
-            onEditProvince={openEditModal}
-            onDeleteProvince={handleDelete}
           />
         )}
 

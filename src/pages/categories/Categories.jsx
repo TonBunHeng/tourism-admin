@@ -5,7 +5,6 @@ import SimplePagination from "../../components/common/SimplePagination";
 import CategoriesHeader from "./CategoriesHeader";
 import CategoriesStats from "./CategoriesStats";
 import CategoriesToolbar from "./CategoriesToolbar";
-import CategoriesGrid from "./CategoriesGrid";
 import CategoriesList from "./CategoriesList";
 import CategoryModal from "./CategoryModal";
 import CategoryDetailsModal from "./CategoryDetailsModal";
@@ -13,18 +12,18 @@ import categoryService from "../../services/categoryService";
 import deletionRequestService from "../../services/deletionRequestService";
 import authService, { isSuperAdminRole } from "../../services/authService";
 import { useAlert } from "../../context/AlertContext";
+import { useSearch } from "../../context/SearchContext";
 
 export default function Categories() {
   const location = useLocation();
   const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm } = useSearch();
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = isSuperAdminRole(currentUser?.role);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [viewMode, setViewMode] = useState("list");
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -33,7 +32,7 @@ export default function Categories() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -78,10 +77,13 @@ export default function Categories() {
   };
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  useEffect(() => {
     loadCategories();
   }, [currentPage, searchTerm, statusFilter]);
 
-  const handleSearchChange = (val) => { setSearchTerm(val); setCurrentPage(1); };
   const handleStatusChange = (val) => { setStatusFilter(val); setCurrentPage(1); };
 
   const handleView = (category) => {
@@ -209,19 +211,16 @@ export default function Categories() {
       {/* Main Categories Section */}
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         <CategoriesToolbar
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
           statusFilter={statusFilter}
           onStatusChange={handleStatusChange}
+          totalCount={totalRecords}
         />
 
         {isLoading ? (
           <div className="p-12 text-center text-slate-500 dark:text-zinc-400 font-medium">
             Loading categories from database...
           </div>
-        ) : viewMode === "list" ? (
+        ) : (
           <CategoriesList
             categories={categories}
             onView={handleView}
@@ -231,16 +230,6 @@ export default function Categories() {
             onDelete={handleDelete}
             onDeleteCategory={handleDelete}
             startIndex={startIndex}
-          />
-        ) : (
-          <CategoriesGrid
-            categories={categories}
-            onView={handleView}
-            onViewCategory={handleView}
-            onEdit={openEditModal}
-            onEditCategory={openEditModal}
-            onDelete={handleDelete}
-            onDeleteCategory={handleDelete}
           />
         )}
 

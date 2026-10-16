@@ -7,9 +7,11 @@ import {
 import { getInitialTheme, applyTheme, THEME_CHANGE_EVENT, isDarkTheme } from '../../utils/Theme';
 import LogoutAlert from './LogoutAlert';
 import notificationService from '../../services/notificationService';
+import { useSearch } from '../../context/SearchContext';
 
 export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggleExpand }) {
   const navigate = useNavigate();
+  const { searchTerm, setSearchTerm, placeholder } = useSearch();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -237,8 +239,8 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
     <header className="h-16 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-30 transition-colors duration-200 w-full flex items-center shrink-0">
       <div className="px-3 sm:px-6 lg:px-8 w-full">
         <div className="flex items-center justify-between">
-          {/* Left section - Unified Sidebar Toggle Button */}
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* Left section - Unified Sidebar Toggle Button + Page Search */}
+          <div className="flex items-center gap-2 sm:gap-4 flex-1 max-w-xl min-w-0 mr-2 sm:mr-4">
             <button
               type="button"
               onClick={handleSidebarToggle}
@@ -256,6 +258,31 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
                 <Menu size={20} />
               </span>
             </button>
+
+            {/* Page Search Input right near Collapse Sidebar */}
+            <div className="relative flex-1 max-w-xs sm:max-w-sm md:max-w-md">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-400 pointer-events-none"
+              />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={placeholder}
+                className="w-full pl-9 pr-8 py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-zinc-800/80 hover:bg-gray-100/90 dark:hover:bg-zinc-800 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 border border-gray-200 dark:border-zinc-700/70 rounded-md focus:outline-none focus:ring-1 focus:ring-[#003E83] dark:focus:ring-blue-500 focus:bg-white dark:focus:bg-zinc-900 focus:border-[#003E83] dark:focus:border-blue-500 transition-all duration-150 shadow-xs"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 p-0.5 rounded-full cursor-pointer transition-colors"
+                  title="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Right section - Actions */}
@@ -494,9 +521,9 @@ export default function Header({ toggleSidebar, isSidebarOpen, isExpanded, toggl
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={placeholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 border border-gray-300 dark:border-zinc-700 rounded-md focus:outline-none focus:ring-1 focus:ring-[#003E83] focus:border-[#003E83] transition-colors"
                 autoFocus
               />

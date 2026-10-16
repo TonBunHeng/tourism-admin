@@ -6,7 +6,8 @@ import {
   Smartphone,
   ShieldCheck,
   Monitor,
-  Info
+  Info,
+  Trash2
 } from 'lucide-react';
 import { useAlert } from '../../context/AlertContext';
 
@@ -182,35 +183,41 @@ export default function SecurityTab({ settings, setSettings }) {
       </div>
 
       {/* Card 3: Active Administrative Sessions */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] pb-3">
-          <h3 className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
-            <Monitor className="w-4 h-4 text-[var(--color-primary)]" />
-            Active Administrator Sessions
-          </h3>
-          <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-medium">
-            {sessions.length} Authorized Devices
-          </span>
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden shadow-xs space-y-0">
+        <div className="flex items-center justify-between border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] px-4 sm:px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <h3 className="text-sm sm:text-base font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
+              <Monitor className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
+              Active Administrator Sessions
+            </h3>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+              {sessions.length} Authorized Devices
+            </span>
+          </div>
         </div>
 
         <div className="divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)]">
           {sessions.map((sess) => (
-            <div key={sess.id} className="py-3.5 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
+            <div key={sess.id} className="p-4 sm:px-6 sm:py-3.5 flex items-center justify-between gap-4 hover:bg-[var(--color-surface-hover-light)]/40 dark:hover:bg-[var(--color-surface-hover-dark)]/30 transition-colors">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-md ${sess.isCurrent ? 'bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] text-[var(--color-primary)]' : 'bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]'}`}>
+                <div className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 border ${
+                  sess.isCurrent
+                    ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-100 dark:border-blue-900/40 text-[#003E83] dark:text-blue-400'
+                    : 'bg-gray-100 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400'
+                }`}>
                   <Shield className="w-4 h-4" />
                 </div>
                 <div>
                   <p className="text-xs sm:text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
-                    {sess.device}
+                    <span>{sess.device}</span>
                     {sess.isCurrent && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
                         Current Session
                       </span>
                     )}
                   </p>
-                  <p className="text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                    {sess.location} • <span className="font-mono">{sess.ip}</span> • Last active: {sess.lastActive}
+                  <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+                    {sess.location} • <span className="font-mono text-[var(--color-text-muted-light)] dark:text-zinc-400">{sess.ip}</span> • Last active: {sess.lastActive}
                   </p>
                 </div>
               </div>
@@ -219,9 +226,10 @@ export default function SecurityTab({ settings, setSettings }) {
                 <button
                   type="button"
                   onClick={() => handleRevokeSession(sess.id)}
-                  className="px-3 py-1.5 text-xs font-semibold text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-colors cursor-pointer shrink-0"
+                  className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                  title="Revoke Session"
                 >
-                  Revoke Access
+                  <Trash2 className="w-4 h-4" />
                 </button>
               )}
             </div>

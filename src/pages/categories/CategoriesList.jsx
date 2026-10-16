@@ -150,7 +150,7 @@ export default function CategoriesList({
                   <td className="px-4 py-3.5 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 border"
+                        className="w-9 h-9 rounded-md flex items-center justify-center shrink-0 border"
                         style={{
                           backgroundColor: category.color ? `${category.color}15` : 'rgba(59, 130, 246, 0.1)',
                           borderColor: category.color ? `${category.color}40` : 'rgba(59, 130, 246, 0.2)'

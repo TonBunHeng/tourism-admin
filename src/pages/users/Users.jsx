@@ -4,23 +4,23 @@ import UsersHeader from './UsersHeader';
 import UsersStats from './UsersStats';
 import UsersToolbar from './UsersToolbar';
 import UsersList from './UsersList';
-import UsersGrid from './UsersGrid';
 import UserModal from './UserModal';
 import UserDetailsModal from './UserDetailsModal';
 import userService from '../../services/userService';
 import authService, { normalizeRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
+import { useSearch } from '../../context/SearchContext';
+import SimplePagination from '../../components/common/SimplePagination';
 
 export default function Users() {
   const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm, setSearchTerm } = useSearch();
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [quickFilter, setQuickFilter] = useState("all");
-  const [viewMode, setViewMode] = useState("list");
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -134,6 +134,10 @@ export default function Users() {
 
     return () => clearInterval(interval);
   }, [currentPage, searchTerm, selectedRole, selectedStatus, quickFilter]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const handleManualRefresh = () => {
     loadUsers(false);
@@ -263,6 +267,9 @@ export default function Users() {
     }
   };
 
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + users.length, totalRecords);
+
   return (
     <div className="flex flex-col">
       {/* Header Section */}
@@ -270,8 +277,6 @@ export default function Users() {
         onOpenAddModal={openAddModal}
         onRefresh={handleManualRefresh}
         isRefreshing={isRefreshing}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
       />
 
       {/* Stats Cards */}
@@ -281,8 +286,6 @@ export default function Users() {
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         <UsersToolbar
           totalCount={totalRecords}
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
           selectedRole={selectedRole}
           onRoleChange={handleRoleChange}
           roles={roles}
@@ -300,49 +303,26 @@ export default function Users() {
               <p className="text-xs font-medium text-gray-500 dark:text-zinc-400">Loading user accounts...</p>
             </div>
           </div>
-        ) : viewMode === 'grid' ? (
-          <UsersGrid
-            users={users}
-            onViewDetails={handleView}
-            onEdit={openEditModal}
-            onDelete={handleDelete}
-          />
         ) : (
           <UsersList
             users={users}
-            startIndex={(currentPage - 1) * itemsPerPage}
+            startIndex={startIndex}
             onViewDetails={handleView}
             onEdit={openEditModal}
             onDelete={handleDelete}
           />
         )}
 
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-gray-50/50 dark:bg-zinc-900/30">
-            <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              Showing page <span className="font-bold text-[var(--color-text-primary-light)] dark:text-white">{currentPage}</span> of {totalPages} ({totalRecords} records)
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 text-xs font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              >
-                Previous
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1.5 text-xs font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Simple Pagination Footer */}
+        <SimplePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          totalRecords={totalRecords}
+          label="users"
+        />
       </div>
 
       {/* Create / Edit User Modal */}

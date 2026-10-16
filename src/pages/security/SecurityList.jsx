@@ -197,8 +197,8 @@ export default function SecurityList({
 
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-md bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] flex items-center justify-center shrink-0">
-                          <Mail className="w-3.5 h-3.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)]" />
+                        <div className="w-9 h-9 rounded-md bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)] flex items-center justify-center shrink-0">
+                          <Mail className="w-4 h-4 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)]" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">

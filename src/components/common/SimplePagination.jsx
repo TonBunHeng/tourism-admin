@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 /**
  * SimplePagination
  * Clean and minimal pagination component supporting Light and Dark themes.
+ * Displays 10-page windows (1-10, 11-20, etc.) and record ranges (1-10, 11-20, etc.).
  */
 export default function SimplePagination({
   currentPage = 1,
@@ -20,37 +21,35 @@ export default function SimplePagination({
   const from = Math.min(startIndex + 1, totalRecords);
   const to = Math.min(endIndex, totalRecords);
 
-  // Generate page numbers with smart ellipsis
+  // Generate 10-page window (1-10, 11-20, 21-30, etc.)
+  const startBlock = Math.floor((currentPage - 1) / 10) * 10 + 1;
+  const endBlock = Math.min(startBlock + 9, totalPages);
+
   const getPageNumbers = () => {
-    if (totalPages <= 7) {
+    if (totalPages <= 10) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    if (currentPage <= 4) {
-      return [1, 2, 3, 4, 5, '...', totalPages];
+    const pages = [];
+    if (startBlock > 1) {
+      pages.push(1);
+      if (startBlock > 2) {
+        pages.push('...');
+      }
     }
 
-    if (currentPage >= totalPages - 3) {
-      return [
-        1,
-        '...',
-        totalPages - 4,
-        totalPages - 3,
-        totalPages - 2,
-        totalPages - 1,
-        totalPages,
-      ];
+    for (let i = startBlock; i <= endBlock; i++) {
+      pages.push(i);
     }
 
-    return [
-      1,
-      '...',
-      currentPage - 1,
-      currentPage,
-      currentPage + 1,
-      '...',
-      totalPages,
-    ];
+    if (endBlock < totalPages) {
+      if (endBlock < totalPages - 1) {
+        pages.push('...');
+      }
+      pages.push(totalPages);
+    }
+
+    return pages;
   };
 
   const pageNumbers = getPageNumbers();
@@ -67,24 +66,20 @@ export default function SimplePagination({
         ${className}
       `}
     >
-      {/* Record information */}
+      {/* Record information: 1-10, 11-20, etc. */}
       <div className="text-sm text-gray-500 dark:text-zinc-400">
         Showing{' '}
-        <span className="font-medium text-gray-900 dark:text-white">
-          {from.toLocaleString()}
-        </span>{' '}
-        to{' '}
-        <span className="font-medium text-gray-900 dark:text-white">
-          {to.toLocaleString()}
+        <span className="font-semibold text-gray-900 dark:text-white">
+          {from === to ? from.toLocaleString() : `${from.toLocaleString()}-${to.toLocaleString()}`}
         </span>{' '}
         of{' '}
-        <span className="font-medium text-gray-900 dark:text-white">
+        <span className="font-semibold text-gray-900 dark:text-white">
           {totalRecords.toLocaleString()}
         </span>{' '}
         {label}
       </div>
 
-      {/* Pagination */}
+      {/* Pagination Controls */}
       <div className="flex items-center gap-1.5 flex-wrap">
         {/* Previous */}
         <button
@@ -109,20 +104,31 @@ export default function SimplePagination({
           <span>Previous</span>
         </button>
 
-        {/* Page numbers */}
+        {/* Page numbers (1-10, 11-20, etc.) */}
         {pageNumbers.map((pageNum, index) => {
           if (pageNum === '...') {
+            const isLeftDots = index === 1;
+            const targetPage = isLeftDots ? Math.max(1, startBlock - 1) : Math.min(totalPages, endBlock + 1);
             return (
-              <span
+              <button
                 key={`dots-${index}`}
+                type="button"
+                onClick={() => onPageChange(targetPage)}
+                title={isLeftDots ? `Go to page ${targetPage}` : `Go to page ${targetPage}`}
                 className="
                   w-8 h-8
                   flex items-center justify-center
-                  text-sm text-gray-400 dark:text-zinc-500
+                  rounded-md
+                  border border-transparent
+                  text-sm text-gray-500 dark:text-zinc-400
+                  hover:border-gray-300 dark:hover:border-zinc-700
+                  hover:bg-gray-100 dark:hover:bg-zinc-800
+                  transition-colors
+                  cursor-pointer
                 "
               >
                 ...
-              </span>
+              </button>
             );
           }
 
@@ -143,7 +149,7 @@ export default function SimplePagination({
                 cursor-pointer
                 ${
                   isActive
-                    ? 'border-gray-900 bg-gray-900 text-white dark:border-white dark:bg-white dark:text-zinc-900'
+                    ? 'border-gray-900 bg-gray-900 text-white dark:border-white dark:bg-white dark:text-zinc-900 font-semibold'
                     : 'border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-700'
                 }
               `}

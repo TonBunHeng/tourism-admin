@@ -1,12 +1,10 @@
-import { Save, RotateCcw, Search, CheckCircle2, RefreshCw, X } from 'lucide-react';
+import { Save, RotateCcw, CheckCircle2, RefreshCw } from 'lucide-react';
 
 export default function SettingsHeader({
   saving,
   saveSuccess,
   onSave,
-  onReset,
-  searchQuery,
-  onSearchChange
+  onReset
 }) {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 sm:mb-8">
@@ -20,29 +18,8 @@ export default function SettingsHeader({
         </p>
       </div>
 
-      {/* Controls: Search Bar & Actions */}
+      {/* Controls: Actions */}
       <div className="flex items-center gap-2.5 flex-wrap">
-        {/* Search Bar */}
-        <div className="relative flex-1 sm:w-60">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery || ''}
-            onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-            placeholder="Search configuration..."
-            className="w-full pl-9 pr-8 py-2 text-xs md:text-sm rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-1 focus:ring-[#003E83] focus:border-[#003E83] transition-colors placeholder:text-[var(--color-text-muted-light)]"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => onSearchChange('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-
         {/* Reset Defaults Button */}
         <button
           type="button"

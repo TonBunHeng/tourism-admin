@@ -279,11 +279,16 @@ export default function RatingsTable({
                     </td>
 
                     <td className="px-3 py-3.5 whitespace-nowrap">
-                      <div className="flex items-center gap-1">
-                        {renderStars(review.rating)}
-                        <span className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] ml-1">
+                      <div className="flex items-center gap-1.5">
+                        <Star className="w-3.5 h-3.5 fill-[var(--color-warning-text)] text-[var(--color-warning-text)] shrink-0" />
+                        <span className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
                           {Number(review.rating || 0).toFixed(1)}
                         </span>
+                        {review.likes > 0 && (
+                          <span className="text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">
+                            ({review.likes})
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -295,6 +300,24 @@ export default function RatingsTable({
 
                     <td className="pl-3 pr-4 py-3.5 whitespace-nowrap text-right text-xs">
                       <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleView(review)}
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        {onReply && (
+                          <button
+                            type="button"
+                            onClick={() => onReply(review)}
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            title="Reply"
+                          >
+                            <Reply className="w-4 h-4" />
+                          </button>
+                        )}
                         {review.status === 'Pending' && onStatusChange && (
                           <>
                             <button
@@ -315,24 +338,6 @@ export default function RatingsTable({
                             </button>
                           </>
                         )}
-                        {onReply && (
-                          <button
-                            type="button"
-                            onClick={() => onReply(review)}
-                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
-                            title="Reply"
-                          >
-                            <Reply className="w-4 h-4" />
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleView(review)}
-                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
-                          title="View Details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
                         {onDelete && (
                           <button
                             type="button"

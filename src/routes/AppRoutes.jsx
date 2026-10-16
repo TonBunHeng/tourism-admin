@@ -32,6 +32,8 @@ import Notifications from '../pages/notifications/Notifications';
 import Security from '../pages/security/Security';
 import Businesses from '../pages/businesses/Businesses';
 
+import { SearchProvider } from '../context/SearchContext';
+
 // Role Groups
 const ALL_ADMIN_ROLES = ['super_admin', 'admin', 'guide_editor', 'Super Admin', 'Admin', 'Guide / Editor', 'Tourism Content Editor'];
 const PRIVILEGED_ADMIN_ROLES = ['super_admin', 'admin', 'Super Admin', 'Admin'];
@@ -40,7 +42,8 @@ const SUPER_ADMIN_ONLY_ROLES = ['super_admin', 'Super Admin'];
 const AppRoutes = () => {
   return (
     <BrowserRouter>
-      <Routes>
+      <SearchProvider>
+        <Routes>
 
         {/* Public / Guest Routes */}
         <Route element={<PublicRoute />}>
@@ -94,6 +97,7 @@ const AppRoutes = () => {
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
 
       </Routes>
+      </SearchProvider>
     </BrowserRouter>
   );
 };

@@ -3,7 +3,6 @@ import SimplePagination from "../../components/common/SimplePagination";
 import GalleryHeader from "./GalleryHeader";
 import GalleryStats from "./GalleryStats";
 import GalleryToolbar from "./GalleryToolbar";
-import GalleryGrid from "./GalleryGrid";
 import GalleryList from "./GalleryList";
 import GalleryUploadModal from "./GalleryUploadModal";
 import GalleryEditModal from "./GalleryEditModal";
@@ -13,18 +12,18 @@ import categoryService from "../../services/categoryService";
 import deletionRequestService from "../../services/deletionRequestService";
 import authService, { isSuperAdminRole } from "../../services/authService";
 import { useAlert } from "../../context/AlertContext";
+import { useSearch } from "../../context/SearchContext";
 
 export default function Gallery() {
   const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm, setSearchTerm } = useSearch();
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = isSuperAdminRole(currentUser?.role);
   const [mediaItems, setMediaItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
-  const [viewMode, setViewMode] = useState("list");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [editingMedia, setEditingMedia] = useState(null);
   const [selectedMedia, setSelectedMedia] = useState(null);
@@ -34,7 +33,7 @@ export default function Gallery() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   const [categoriesList, setCategoriesList] = useState(["All", "Temple", "Nature", "Culture", "City", "Festival", "Food"]);
   const types = ["All", "Image", "Video"];
@@ -100,6 +99,10 @@ export default function Gallery() {
   useEffect(() => {
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     loadMedia();
@@ -226,16 +229,13 @@ export default function Gallery() {
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         {/* Toolbar */}
         <GalleryToolbar
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           categories={categoriesList}
           selectedType={selectedType}
           onTypeChange={handleTypeChange}
           types={types}
+          totalCount={totalRecords}
         />
 
         {/* Content View */}
@@ -243,7 +243,7 @@ export default function Gallery() {
           <div className="p-12 text-center text-slate-500 dark:text-zinc-400 font-medium">
             Loading gallery media from database...
           </div>
-        ) : viewMode === "list" ? (
+        ) : (
           <GalleryList
             media={mediaItems}
             mediaItems={mediaItems}
@@ -251,14 +251,6 @@ export default function Gallery() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             startIndex={startIndex}
-          />
-        ) : (
-          <GalleryGrid
-            media={mediaItems}
-            mediaItems={mediaItems}
-            onPreview={handlePreview}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
           />
         )}
 

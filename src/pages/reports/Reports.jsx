@@ -11,9 +11,11 @@ import eventService from '../../services/eventService';
 import userService from '../../services/userService';
 import reviewService from '../../services/reviewService';
 import categoryService from '../../services/categoryService';
+import { useSearch } from '../../context/SearchContext';
 
 export default function Reports() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { searchTerm, setSearchTerm } = useSearch();
 
   // Tab persistence via search param + sessionStorage
   const [activeTab, setActiveTab] = useState(() => {
@@ -25,7 +27,6 @@ export default function Reports() {
 
   const [selectedDay, setSelectedDay] = useState('');
   const [appliedDay, setAppliedDay] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
@@ -136,11 +137,12 @@ export default function Reports() {
     const itemDate = item.createdAt || item.startDate || item.joinedDate || item.date;
 
     let matchesDate = true;
-    if (itemDate && appliedDay) {
+    const activeDate = appliedDay || selectedDay;
+    if (itemDate && activeDate) {
       if (item.startDate && item.endDate) {
-        matchesDate = appliedDay >= item.startDate && appliedDay <= item.endDate;
+        matchesDate = activeDate >= item.startDate && activeDate <= item.endDate;
       } else {
-        matchesDate = itemDate === appliedDay || itemDate.startsWith(appliedDay);
+        matchesDate = itemDate === activeDate || itemDate.startsWith(activeDate);
       }
     }
 

@@ -10,12 +10,13 @@ import DeletionDetailsModal from "./DeletionDetailsModal";
 import DeletionConfirmModal from "./DeletionConfirmModal";
 import deletionRequestService from "../../services/deletionRequestService";
 import { useAlert } from "../../context/AlertContext";
+import { useSearch } from "../../context/SearchContext";
 
 export default function DeleteAccount() {
   const { showSuccess, showError } = useAlert();
+  const { searchTerm, setSearchTerm } = useSearch();
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedUrgency, setSelectedUrgency] = useState("All");
@@ -24,7 +25,7 @@ export default function DeleteAccount() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
 
   // Modal states
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -96,6 +97,10 @@ export default function DeleteAccount() {
   };
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  useEffect(() => {
     loadRequests();
   }, [currentPage, searchTerm, selectedStatus, selectedType, selectedUrgency, sortBy]);
 
@@ -128,8 +133,8 @@ export default function DeleteAccount() {
   });
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + sortedRequests.length, totalRecords);
-  const paginatedRequests = sortedRequests.slice(0, itemsPerPage);
+  const endIndex = Math.min(startIndex + itemsPerPage, totalRecords);
+  const paginatedRequests = sortedRequests.slice(startIndex, endIndex);
 
   const handleSearchChange = (val) => { setSearchTerm(val); setCurrentPage(1); };
   const handleTypeChange = (val) => { setSelectedType(val); setCurrentPage(1); };
@@ -210,8 +215,6 @@ export default function DeleteAccount() {
         {/* Toolbar */}
         <DeletionToolbar
           totalCount={filteredRequests.length}
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
           selectedType={selectedType}
           onTypeChange={handleTypeChange}
           types={types}

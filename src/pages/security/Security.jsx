@@ -1,16 +1,19 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useAlert } from '../../context/AlertContext';
+import { useSearch } from '../../context/SearchContext';
 import securityService from '../../services/securityService';
 import SecurityHeader from './SecurityHeader';
 import SecurityStats from './SecurityStats';
 import SecurityList from './SecurityList';
 import SecurityDetailsModal from './SecurityDetailsModal';
 import SecurityExportModal from './SecurityExportModal';
+import SecurityToolbar from './SecurityToolbar';
 import SimplePagination from '../../components/common/SimplePagination';
 
 export default function Security() {
   const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm } = useSearch();
 
   const [alerts, setAlerts] = useState([]);
   const [meta, setMeta] = useState({});
@@ -21,8 +24,9 @@ export default function Security() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
-  // Pagination States (10 items per page)
+  // Pagination & Filter States
   const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('all');
   const itemsPerPage = 10;
 
   const fetchSecurityAlerts = useCallback(async () => {
@@ -45,11 +49,32 @@ export default function Security() {
     fetchSecurityAlerts();
   }, [fetchSecurityAlerts]);
 
-  const totalRecords = alerts.length;
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
+  const filteredAlerts = useMemo(() => {
+    return alerts.filter(a => {
+      const q = (searchTerm || '').toLowerCase();
+      const matchesSearch = !q || (
+        (a.target_email || a.email || '').toLowerCase().includes(q) ||
+        (a.ip_address || a.ip || '').toLowerCase().includes(q) ||
+        (a.description || a.incident || a.message || '').toLowerCase().includes(q)
+      );
+      const matchesStatus = statusFilter === 'all' || 
+        (statusFilter === 'unread' && !a.is_read) ||
+        (statusFilter === 'read' && a.is_read) ||
+        (statusFilter === 'blocked' && a.is_ip_blocked);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [alerts, searchTerm, statusFilter]);
+
+  const totalRecords = filteredAlerts.length;
   const totalPages = Math.ceil(totalRecords / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalRecords);
-  const paginatedAlerts = alerts.slice(startIndex, endIndex);
+  const paginatedAlerts = filteredAlerts.slice(startIndex, endIndex);
 
   const handleOpenDetails = (alert) => {
     setSelectedAlert(alert);
@@ -201,6 +226,11 @@ export default function Security() {
         </div>
       ) : (
         <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden shadow-xs">
+          <SecurityToolbar
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            totalResults={totalRecords}
+          />
           <SecurityList
             alerts={paginatedAlerts}
             loading={loading}

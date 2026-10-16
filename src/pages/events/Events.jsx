@@ -5,30 +5,29 @@ import EventsHeader from './EventsHeader';
 import EventsStats from './EventsStats';
 import EventsToolbar from './EventsToolbar';
 import EventsList from './EventsList';
-import EventsGrid from './EventsGrid';
 import EventModal, { calculateAutoStatus } from './EventModal';
 import EventDetailsModal from './EventDetailsModal';
 import eventService from '../../services/eventService';
 import deletionRequestService from '../../services/deletionRequestService';
 import authService, { isSuperAdminRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
+import { useSearch } from '../../context/SearchContext';
 
 export default function Events() {
   const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm, setSearchTerm } = useSearch();
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = isSuperAdminRole(currentUser?.role);
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
 
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -102,6 +101,10 @@ export default function Events() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     loadEvents();
@@ -287,35 +290,25 @@ export default function Events() {
       {/* Main Content Section */}
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         <EventsToolbar
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           categories={categoriesList}
           selectedStatus={selectedStatus}
           onStatusChange={handleStatusChange}
+          totalCount={totalRecords}
         />
 
         {isLoading ? (
           <div className="p-12 text-center text-slate-500 dark:text-zinc-400 font-medium">
             Loading events from API...
           </div>
-        ) : viewMode === 'list' ? (
+        ) : (
           <EventsList
             events={events}
             onViewEvent={handleView}
             onEditEvent={openEditModal}
             onDeleteEvent={handleDelete}
             startIndex={startIndex}
-          />
-        ) : (
-          <EventsGrid
-            events={events}
-            onViewEvent={handleView}
-            onEditEvent={openEditModal}
-            onDeleteEvent={handleDelete}
           />
         )}
 

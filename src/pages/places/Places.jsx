@@ -16,7 +16,6 @@ import PlacesStats from './PlacesStats';
 import FeaturedPlaces from './FeaturedPlaces';
 import PlacesToolbar from './PlacesToolbar';
 import PlacesList from './PlacesList';
-import PlacesGrid from './PlacesGrid';
 import PlaceModal from './PlaceModal';
 import PlaceDetailsModal from './PlaceDetailsModal';
 import placeService from '../../services/placeService';
@@ -24,24 +23,24 @@ import categoryService from '../../services/categoryService';
 import deletionRequestService from '../../services/deletionRequestService';
 import authService, { isSuperAdminRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
+import { useSearch } from '../../context/SearchContext';
 
 export default function Places() {
   const location = useLocation();
   const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm, setSearchTerm } = useSearch();
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = isSuperAdminRole(currentUser?.role);
   const [places, setPlaces] = useState([]);
   const [categoriesList, setCategoriesList] = useState(['All', 'Temple', 'Palace', 'Beach', 'Nature', 'Market', 'Farm']);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -137,6 +136,10 @@ export default function Places() {
   useEffect(() => {
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   useEffect(() => {
     loadPlaces();
@@ -335,27 +338,17 @@ export default function Places() {
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         {/* Search & Filter Toolbar */}
         <PlacesToolbar
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
           categories={categoriesList}
+          totalCount={totalRecords}
         />
 
-        {/* Places List or Grid View */}
+        {/* Places List View */}
         {isLoading ? (
           <div className="p-12 text-center text-slate-500 dark:text-zinc-400 font-medium">
             Loading places from database...
           </div>
-        ) : viewMode === 'grid' ? (
-          <PlacesGrid
-            places={places}
-            onViewPlace={handleView}
-            onEditPlace={openEditModal}
-            onDeletePlace={handleDelete}
-          />
         ) : (
           <PlacesList
             places={places}

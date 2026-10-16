@@ -13,27 +13,26 @@ import FavoritesHeader from "./FavoritesHeader";
 import FavoritesStats from "./FavoritesStats";
 import FavoritesToolbar from "./FavoritesToolbar";
 import FavoritesList from "./FavoritesList";
-import FavoritesGrid from "./FavoritesGrid";
 import FavoriteModal from "./FavoriteModal";
 import FavoriteDetailsModal from "./FavoriteDetailsModal";
 import favoriteService from "../../services/favoriteService";
 import placeService from "../../services/placeService";
 import categoryService from "../../services/categoryService";
 import { useAlert } from "../../context/AlertContext";
+import { useSearch } from "../../context/SearchContext";
 
 export default function Favorites() {
   const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm, setSearchTerm } = useSearch();
   const [favorites, setFavorites] = useState([]);
   const [categories, setCategories] = useState(["All"]);
   const [availablePlaces, setAvailablePlaces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Filter & Search States
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [sortBy, setSortBy] = useState("recent");
-  const [viewMode, setViewMode] = useState("list");
 
   // Selection / Bulk action
   const [selectedFavorites, setSelectedFavorites] = useState([]);
@@ -59,7 +58,7 @@ export default function Favorites() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   const statuses = ["All", "Visited", "To Visit"];
 
@@ -164,6 +163,10 @@ export default function Favorites() {
   useEffect(() => {
     loadFavorites();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   // Handlers
   const handleSearchChange = (val) => {
@@ -385,8 +388,6 @@ export default function Favorites() {
         <FavoritesToolbar
           totalCount={filteredFavorites.length}
           selectedCount={selectedFavorites.length}
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
           categories={categories}
@@ -395,8 +396,6 @@ export default function Favorites() {
           statuses={statuses}
           sortBy={sortBy}
           onSortChange={handleSortChange}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
           onClearFilters={handleClearFilters}
           onBulkDelete={handleBulkDelete}
           onBulkMarkVisited={handleBulkMarkVisited}
@@ -412,24 +411,6 @@ export default function Favorites() {
                 Loading favorite destinations...
               </p>
             </div>
-          ) : viewMode === "grid" ? (
-            <FavoritesGrid
-              favorites={paginatedFavorites}
-              selectedFavorites={selectedFavorites}
-              setSelectedFavorites={setSelectedFavorites}
-              onToggleSelect={handleToggleSelect}
-              onToggleVisited={handleToggleStatus}
-              onToggleStatus={handleToggleStatus}
-              onDelete={handleDeleteFavorite}
-              onViewDetails={(fav) => {
-                setSelectedFavorite(fav);
-                setIsDetailsOpen(true);
-              }}
-              onView={(fav) => {
-                setSelectedFavorite(fav);
-                setIsDetailsOpen(true);
-              }}
-            />
           ) : (
             <FavoritesList
               favorites={paginatedFavorites}

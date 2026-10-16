@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Building2, Search, CheckCircle, XCircle, AlertCircle, Eye, ShieldAlert,
-  Plus, RefreshCw, AlertTriangle, Edit, Trash2, ShieldCheck, Filter, X
+  Building2, CheckCircle, XCircle, AlertCircle, Eye, ShieldAlert,
+  Plus, RefreshCw, AlertTriangle, Edit, Trash2, ShieldCheck, Filter, X, ChevronDown
 } from 'lucide-react';
 import businessService from '../../services/businessService';
 import SimplePagination from '../../components/common/SimplePagination';
@@ -9,6 +9,7 @@ import BusinessDetailsModal from './BusinessDetailsModal';
 import BusinessModal from './BusinessModal';
 import BusinessReasonModal from './BusinessReasonModal';
 import { useAlert } from '../../context/AlertContext';
+import { useSearch } from '../../context/SearchContext';
 import { getBusinessVerificationStatusColor } from '../../utils/StatusUtils';
 
 const INITIAL_MOCK_BUSINESSES = [
@@ -109,12 +110,12 @@ export default function Businesses() {
   const [loading, setLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [search, setSearch] = useState('');
+  const { searchTerm: search, setSearchTerm: setSearch } = useSearch();
   const [actionLoading, setActionLoading] = useState(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
 
   // Modals
   const [viewingBusiness, setViewingBusiness] = useState(null);
@@ -480,49 +481,35 @@ export default function Businesses() {
       {/* Main Business Table Container */}
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         {/* Toolbar Header */}
-        <div className="px-4 sm:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+        <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
-              {[
-                { id: 'all', label: 'All Businesses' },
-                { id: 'pending', label: 'Pending Review' },
-                { id: 'approved', label: 'Approved' },
-                { id: 'suspended', label: 'Suspended' },
-                { id: 'rejected', label: 'Rejected' },
-              ].map((st) => (
-                <button
-                  key={st.id}
-                  onClick={() => { setStatusFilter(st.id); setCurrentPage(1); }}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                    statusFilter === st.id
-                      ? 'bg-[#003E83] text-white'
-                      : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]'
-                  }`}
-                >
-                  {st.label}
-                </button>
-              ))}
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-lg md:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                All Businesses
+              </h2>
+              {totalRecords !== undefined && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+                  {totalRecords} {totalRecords === 1 ? 'business' : 'businesses'}
+                </span>
+              )}
             </div>
 
-            {/* Search */}
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]" />
-              <input
-                type="text"
-                placeholder="Search name, owner, license or province..."
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                className="pl-9 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent w-full text-xs bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]"
-              />
-              {search && (
-                <button
-                  onClick={() => setSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300"
+            <div className="flex items-center gap-3 self-start sm:self-auto">
+              {/* Status Filter Dropdown */}
+              <div className="relative">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+                  className="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-sm cursor-pointer shadow-xs font-medium"
                 >
-                  <X size={14} />
-                </button>
-              )}
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending Review</option>
+                  <option value="approved">Approved</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+              </div>
             </div>
           </div>
         </div>
@@ -532,6 +519,9 @@ export default function Businesses() {
           <table className="min-w-full divide-y divide-[var(--color-border-light)] dark:divide-[var(--color-border-dark)]">
             <thead className="bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/50">
               <tr>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">
+                  #
+                </th>
                 <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
                   BUSINESS NAME & CATEGORY
                 </th>
@@ -552,14 +542,14 @@ export default function Businesses() {
             <tbody className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] divide-y divide-[var(--color-border-light)] dark:divide-[var(--color-border-dark)]">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-10 text-[var(--color-text-muted-light)]">
+                  <td colSpan={6} className="text-center py-10 text-[var(--color-text-muted-light)]">
                     <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#003E83]" />
                     Loading business registrations...
                   </td>
                 </tr>
               ) : paginatedBusinesses.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-12 px-4">
+                  <td colSpan={6} className="text-center py-12 px-4">
                     <Building2 className="w-12 h-12 text-[#003E83] mx-auto mb-2 opacity-80" />
                     <h3 className="text-base font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mb-1">
                       No business profile records found
@@ -570,10 +560,13 @@ export default function Businesses() {
                   </td>
                 </tr>
               ) : (
-                paginatedBusinesses.map((b) => {
+                paginatedBusinesses.map((b, index) => {
                   const status = String(b.verification_status || 'pending').toLowerCase();
                   return (
                     <tr key={b.id} className="hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors">
+                      <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
+                        {startIndex + index + 1}
+                      </td>
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700 overflow-hidden font-bold text-[#003E83] dark:text-blue-400">
