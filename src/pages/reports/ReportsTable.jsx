@@ -68,6 +68,8 @@ export default function ReportsTable({
       case 'suspended':
       case 'flagged':
       case 'inactive':
+      case 'rejected':
+      case 'cancelled':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)] text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] border border-[var(--color-danger-border)] dark:border-[var(--color-danger-dark-border)]">
             {status || 'Inactive'}
@@ -84,39 +86,6 @@ export default function ReportsTable({
 
   return (
     <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-sm overflow-hidden transition-colors duration-200">
-      {/* Category Navigation Tabs - System Settings Style */}
-      <div className="w-full border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-2.5 sm:p-3 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)]">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isSelected = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => { onTabChange(tab.id); setCurrentPage(1); }}
-                className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-md text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 cursor-pointer ${
-                  isSelected
-                    ? 'bg-[#003E83] text-white font-semibold'
-                    : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-text-primary-light)] dark:hover:text-[var(--color-white)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]'
-                }`}
-              >
-                {Icon && (
-                  <Icon
-                    className={`w-4 h-4 shrink-0 ${
-                      isSelected
-                        ? 'text-[var(--color-white)]'
-                        : 'text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]'
-                    }`}
-                  />
-                )}
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Table Toolbar Filter */}
       <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
@@ -128,8 +97,25 @@ export default function ReportsTable({
           </span>
         </div>
 
-        <div className="flex items-center gap-3 self-start sm:self-auto">
-          <div className="relative">
+        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap self-start sm:self-auto w-full sm:w-auto">
+          {/* Report Type Dropdown */}
+          <div className="relative w-full sm:w-auto">
+            <select
+              value={activeTab}
+              onChange={(e) => { onTabChange(e.target.value); setCurrentPage(1); }}
+              className="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-sm cursor-pointer shadow-xs font-medium"
+            >
+              {tabs.map((tab) => (
+                <option key={tab.id} value={tab.id}>
+                  {tab.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+          </div>
+
+          {/* Status Filter Dropdown */}
+          <div className="relative w-full sm:w-auto">
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
@@ -220,23 +206,40 @@ export default function ReportsTable({
 
               {activeTab === 'reviews' && (
                 <>
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="font-bold text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-                      {row.userName}
-                    </h4>
-                    <span className="font-semibold text-xs text-amber-500 inline-flex items-center gap-0.5">
-                      <Star className="w-3 h-3 fill-amber-400" /> {row.rating}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-slate-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center shrink-0">
+                      {row.avatar ? (
+                        <img src={row.avatar} alt={row.userName} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-4 h-4 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="font-bold text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
+                          {row.userName}
+                        </h4>
+                        <span className="font-semibold text-xs text-amber-500 inline-flex items-center gap-1 shrink-0">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {Number(row.rating || 0).toFixed(1)}
+                        </span>
+                      </div>
+                      <p className="text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center gap-1 truncate mt-0.5" title={row.placeName}>
+                        <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
+                        <span className="truncate">{row.placeName}</span>
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                    On: <span className="font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">{row.placeName}</span>
-                  </p>
-                  <p className="text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] italic line-clamp-2">
-                    "{row.comment}"
-                  </p>
-                  <p className="text-[11px] text-right text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] pt-1">
-                    {row.date}
-                  </p>
+                  {row.comment && (
+                    <div className="p-2.5 rounded-md bg-[var(--color-surface-hover-light)]/60 dark:bg-zinc-800/50 border border-[var(--color-border-subtle-light)] dark:border-zinc-800 mt-1">
+                      <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-zinc-300 italic line-clamp-2">
+                        "{row.comment}"
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] pt-1">
+                    <span>Submitted date:</span>
+                    <span className="font-mono">{row.date}</span>
+                  </div>
                 </>
               )}
 
@@ -508,30 +511,34 @@ export default function ReportsTable({
                       <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
                         {startIndex + i + 1}
                       </td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-3.5 min-w-[240px]">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/40 flex items-center justify-center shrink-0">
-                            <User className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                          <div className="w-9 h-9 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-slate-200 dark:border-zinc-700 flex items-center justify-center shrink-0 overflow-hidden">
+                            {row.avatar ? (
+                              <img src={row.avatar} alt={row.userName} className="w-full h-full object-cover" />
+                            ) : (
+                              <User className="w-4 h-4 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]" />
+                            )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="text-xs md:text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
                               {row.userName}
                             </p>
-                            <p className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] truncate line-clamp-1">
-                              {row.comment || 'Tourist review'}
+                            <p className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] truncate max-w-xs italic" title={row.comment}>
+                              {row.comment ? `"${row.comment}"` : 'Tourist review'}
                             </p>
                           </div>
                         </div>
                       </td>
                       <td className="px-3 py-3.5 whitespace-nowrap text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5 max-w-[180px] truncate" title={row.placeName}>
                           <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                          <span>{row.placeName}</span>
+                          <span className="truncate font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">{row.placeName}</span>
                         </div>
                       </td>
                       <td className="px-3 py-3.5 whitespace-nowrap">
                         <div className="flex items-center gap-1">
-                          <Star className="w-3.5 h-3.5 fill-[var(--color-warning-text)] text-[var(--color-warning-text)] shrink-0" />
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500 shrink-0" />
                           <span className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
                             {Number(row.rating || 0).toFixed(1)}
                           </span>
@@ -748,33 +755,45 @@ export default function ReportsTable({
 
               {activeTab === 'reviews' && (
                 <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
+                    <div className="w-10 h-10 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700">
+                      {selectedItem.avatar ? (
+                        <img src={selectedItem.avatar} alt={selectedItem.userName} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-5 h-5 text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
+                        {selectedItem.userName}
+                      </h4>
+                      <p className="text-xs text-[var(--color-text-muted-light)] dark:text-zinc-400 font-mono">
+                        Submitted on {selectedItem.date}
+                      </p>
+                    </div>
+                    <div>{getStatusBadge(selectedItem.status)}</div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-3 p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
                     <div>
                       <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Target Place</span>
-                      <span className="font-semibold text-[var(--color-text-primary-light)] dark:text-white flex items-center gap-1">
+                      <span className="font-semibold text-[var(--color-text-primary-light)] dark:text-white flex items-center gap-1.5 mt-0.5 truncate" title={selectedItem.placeName}>
                         <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                        {selectedItem.placeName}
+                        <span className="truncate">{selectedItem.placeName}</span>
                       </span>
                     </div>
                     <div>
-                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Rating</span>
+                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Rating Score</span>
                       <span className="font-bold text-amber-500 inline-flex items-center gap-1 mt-0.5">
                         <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                         {Number(selectedItem.rating || 0).toFixed(1)} / 5.0
                       </span>
                     </div>
-                    <div>
-                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Submission Date</span>
-                      <span className="font-semibold font-mono text-[var(--color-text-primary-light)] dark:text-white">{selectedItem.date}</span>
-                    </div>
-                    <div>
-                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Moderation Status</span>
-                      <div className="mt-0.5">{getStatusBadge(selectedItem.status)}</div>
-                    </div>
                   </div>
+
                   <div className="p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
                     <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block mb-1">Tourist Feedback</span>
-                    <p className="italic text-xs text-[var(--color-text-secondary-light)] dark:text-zinc-300 leading-relaxed bg-[var(--color-white)] dark:bg-zinc-800 p-2.5 rounded-md border border-[var(--color-border-subtle-light)] dark:border-zinc-700">
+                    <p className="italic text-xs text-[var(--color-text-secondary-light)] dark:text-zinc-300 leading-relaxed bg-[var(--color-white)] dark:bg-zinc-800/80 p-2.5 rounded-md border border-[var(--color-border-subtle-light)] dark:border-zinc-700">
                       "{selectedItem.comment || 'No comment text provided.'}"
                     </p>
                   </div>
