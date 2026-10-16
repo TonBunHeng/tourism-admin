@@ -109,13 +109,26 @@ const SNAKE_TO_CAMEL = {
   emergency_fire: 'emergencyFire',
   default_language: 'defaultLanguage',
   default_currency: 'defaultCurrency',
+  timezone: 'timezone',
   date_format: 'dateFormat',
   terms_of_service_url: 'termsOfServiceUrl',
   privacy_policy_url: 'privacyPolicyUrl',
   maintenance_mode: 'maintenanceMode',
   maintenance_message: 'maintenanceMessage',
   logo_url: 'logoUrl',
+  logo_file_name: 'logoFileName',
   favicon_url: 'faviconUrl',
+  favicon_file_name: 'faviconFileName',
+  theme: 'theme',
+  sidebar_style: 'sidebarStyle',
+  push_notifications: 'pushNotifications',
+  email_notifications: 'emailNotifications',
+  sms_notifications: 'smsNotifications',
+  new_user_alert: 'newUserAlert',
+  new_review_alert: 'newReviewAlert',
+  new_event_alert: 'newEventAlert',
+  deletion_request_alert: 'deletionRequestAlert',
+  security_alert: 'securityAlert',
   two_factor_auth: 'twoFactorAuth',
   session_timeout: 'sessionTimeout',
   password_policy: 'passwordPolicy',
@@ -134,6 +147,29 @@ const SNAKE_TO_CAMEL = {
   backup_retention: 'backupRetention'
 };
 
+const BOOLEAN_KEYS = new Set([
+  'maintenanceMode',
+  'maintenance_mode',
+  'pushNotifications',
+  'push_notifications',
+  'emailNotifications',
+  'email_notifications',
+  'smsNotifications',
+  'sms_notifications',
+  'newUserAlert',
+  'new_user_alert',
+  'newReviewAlert',
+  'new_review_alert',
+  'newEventAlert',
+  'new_event_alert',
+  'deletionRequestAlert',
+  'deletion_request_alert',
+  'securityAlert',
+  'security_alert',
+  'twoFactorAuth',
+  'two_factor_auth'
+]);
+
 const SETTING_TABS = [
   { id: "general", label: "General", icon: SettingsIcon },
   { id: "appearance", label: "Appearance", icon: Palette },
@@ -151,24 +187,37 @@ export default function Settings() {
   // Tab persistence via search param + sessionStorage
   const [activeTab, setActiveTab] = useState(() => {
     const tabFromUrl = searchParams.get('tab');
-    if (tabFromUrl) return tabFromUrl;
+    if (tabFromUrl && SETTING_TABS.some(t => t.id === tabFromUrl)) return tabFromUrl;
     const tabFromStorage = sessionStorage.getItem('settings_active_tab');
     return tabFromStorage || "general";
   });
 
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const { searchTerm: searchQuery, setSearchTerm: setSearchQuery } = useSearch();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { searchTerm: searchQuery } = useSearch();
+
+  // Keep activeTab reactive to browser search param changes
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl && tabFromUrl !== activeTab && SETTING_TABS.some(t => t.id === tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+      sessionStorage.setItem('settings_active_tab', tabFromUrl);
+    }
+  }, [searchParams, activeTab]);
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
     sessionStorage.setItem('settings_active_tab', tabId);
     if (tabId === 'general') {
-      searchParams.delete('tab');
-      setSearchParams(searchParams, { replace: true });
+      setSearchParams({}, { replace: true });
     } else {
       setSearchParams({ tab: tabId }, { replace: true });
     }
+    // Scroll to top smoothly when section changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const mainEl = document.querySelector('main');
+    if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Comprehensive System Settings State
@@ -218,16 +267,16 @@ export default function Settings() {
     loginAttempts: "5",
 
     // Integrations
-    googleMapsApiKey: "",
-    mapboxApiKey: "",
-    weatherApiKey: "",
+    googleMapsApiKey: "AIzaSyC_AngkorVersesMapsPlatform2026Key",
+    mapboxApiKey: "pk.eyJ1IjoiYW5na29ydmVyc2VzIiwiYSI6ImNsdG91cmlzbTIwMjZtYXBib3hrZXkifQ.mockMapboxToken",
+    weatherApiKey: "owm_live_cambodia_climate_api_key_2026",
     aiProvider: "gemini",
-    aiApiKey: "",
+    aiApiKey: "AIzaSyD_Gemini20FlashAngkorVersesTourismKey",
     smtpHost: "smtp.mailtrap.io",
     smtpPort: "587",
     smtpEncryption: "tls",
     smtpUsername: "mailer@tourism.gov.kh",
-    smtpPassword: "",
+    smtpPassword: "khmer_tourism_smtp_2026",
 
     // Backup
     backupSchedule: "daily",
@@ -236,44 +285,63 @@ export default function Settings() {
 
   const [settings, setSettings] = useState(defaultSettings);
 
+  const loadSettingsData = async (silent = false) => {
+    try {
+      const res = await settingService.getSettings();
+      if (res.success && res.data && res.data.length > 0) {
+        const loaded = { ...defaultSettings };
+        res.data.forEach((item) => {
+          const rawKey = item.key || item.setting_key;
+          let val = item.value !== undefined ? item.value : item.setting_value;
+          if (rawKey && val !== undefined && val !== null) {
+            const camelKey = SNAKE_TO_CAMEL[rawKey];
+            const isBool = BOOLEAN_KEYS.has(rawKey) || (camelKey && BOOLEAN_KEYS.has(camelKey));
+
+            if (isBool) {
+              val = val === true || val === "true" || val === 1 || val === "1";
+            }
+
+            if (Object.prototype.hasOwnProperty.call(loaded, rawKey)) {
+              loaded[rawKey] = val;
+            }
+            if (camelKey && Object.prototype.hasOwnProperty.call(loaded, camelKey)) {
+              loaded[camelKey] = val;
+            }
+          }
+        });
+
+        loaded.theme = getInitialTheme();
+        setSettings(loaded);
+        if (!silent) {
+          showSuccess("Settings reloaded and synchronized with server.", "Settings Synced");
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load settings from API:", e);
+      if (!silent) {
+        showError(e.message || "Failed to load settings from server.", "Sync Failed");
+      }
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
-    const fetchSettings = async () => {
-      try {
-        const res = await settingService.getSettings();
-        if (isMounted && res.success && res.data && res.data.length > 0) {
-          const loaded = { ...defaultSettings };
-          res.data.forEach((item) => {
-            const rawKey = item.key || item.setting_key;
-            let val = item.value !== undefined ? item.value : item.setting_value;
-            if (rawKey && val !== undefined && val !== null) {
-              if (val === "true") val = true;
-              if (val === "false") val = false;
-
-              if (Object.prototype.hasOwnProperty.call(loaded, rawKey)) {
-                loaded[rawKey] = val;
-              }
-              const camelKey = SNAKE_TO_CAMEL[rawKey];
-              if (camelKey && Object.prototype.hasOwnProperty.call(loaded, camelKey)) {
-                loaded[camelKey] = val;
-              }
-            }
-          });
-
-          loaded.theme = getInitialTheme();
-          setSettings(loaded);
-        }
-      } catch (e) {
-        console.error("Failed to load settings from API:", e);
-      }
-    };
-
-    fetchSettings();
-
+    if (isMounted) {
+      loadSettingsData(true);
+    }
     return () => {
       isMounted = false;
     };
   }, [defaultSettings]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await loadSettingsData(false);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // Search Match Calculator
   const searchMatchCounts = useMemo(() => {
@@ -309,7 +377,9 @@ export default function Settings() {
       Object.keys(settings).forEach((key) => {
         const group = KEY_GROUP_MAP[key] || 'general';
         const rawVal = settings[key];
-        const valStr = typeof rawVal === "object" && rawVal !== null
+        const valStr = typeof rawVal === "boolean"
+          ? (rawVal ? "true" : "false")
+          : typeof rawVal === "object" && rawVal !== null
           ? JSON.stringify(rawVal)
           : String(rawVal ?? "");
 
@@ -326,7 +396,7 @@ export default function Settings() {
         { key: 'app_name', val: settings.appName || settings.siteName, group: 'general' },
         { key: 'support_email', val: settings.contactEmail, group: 'general' },
         { key: 'support_phone', val: settings.contactPhone, group: 'general' },
-        { key: 'maintenance_mode', val: String(Boolean(settings.maintenanceMode)), group: 'general' },
+        { key: 'maintenance_mode', val: settings.maintenanceMode ? 'true' : 'false', group: 'general' },
         { key: 'default_language', val: settings.defaultLanguage, group: 'general' },
         { key: 'default_currency', val: settings.defaultCurrency, group: 'general' },
         { key: 'terms_of_service_url', val: settings.termsOfServiceUrl, group: 'general' },
@@ -401,6 +471,8 @@ export default function Settings() {
         saveSuccess={saveSuccess}
         onSave={handleSave}
         onReset={handleReset}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
 
       {/* KPI Overview Summary Stats */}

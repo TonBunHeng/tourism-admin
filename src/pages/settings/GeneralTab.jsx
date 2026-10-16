@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Globe,
   Mail,
@@ -11,14 +11,27 @@ import {
   AlertCircle,
   ShieldAlert,
   FileText,
-  AlertTriangle
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 import { validateImageFile } from '../../utils/fileValidation';
+import uploadService from '../../services/uploadService';
 
 export default function GeneralTab({ settings, setSettings }) {
   const [logoPreview, setLogoPreview] = useState(settings.logoUrl || null);
   const [faviconPreview, setFaviconPreview] = useState(settings.faviconUrl || null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
   const [uploadError, setUploadError] = useState('');
+
+  // Sync previews whenever settings change from server
+  useEffect(() => {
+    setLogoPreview(settings.logoUrl || null);
+  }, [settings.logoUrl]);
+
+  useEffect(() => {
+    setFaviconPreview(settings.faviconUrl || null);
+  }, [settings.faviconUrl]);
 
   const handleChange = (field, value) => {
     setSettings((prev) => ({
@@ -27,7 +40,7 @@ export default function GeneralTab({ settings, setSettings }) {
     }));
   };
 
-  const handleLogoUpload = (e) => {
+  const handleLogoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -39,17 +52,33 @@ export default function GeneralTab({ settings, setSettings }) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result;
-      setLogoPreview(base64);
-      handleChange('logoUrl', base64);
-      handleChange('logoFileName', file.name);
-    };
-    reader.readAsDataURL(file);
+    setUploadingLogo(true);
+    try {
+      // Attempt server file upload first
+      const res = await uploadService.uploadFile(file, 'settings');
+      if (res.success && res.data?.url) {
+        setLogoPreview(res.data.url);
+        handleChange('logoUrl', res.data.url);
+        handleChange('logoFileName', file.name);
+      } else {
+        throw new Error('Server returned invalid file response');
+      }
+    } catch {
+      // Graceful local preview fallback
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result;
+        setLogoPreview(base64);
+        handleChange('logoUrl', base64);
+        handleChange('logoFileName', file.name);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setUploadingLogo(false);
+    }
   };
 
-  const handleFaviconUpload = (e) => {
+  const handleFaviconUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -64,25 +93,39 @@ export default function GeneralTab({ settings, setSettings }) {
       }
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result;
-      setFaviconPreview(base64);
-      handleChange('faviconUrl', base64);
-      handleChange('faviconFileName', file.name);
-    };
-    reader.readAsDataURL(file);
+    setUploadingFavicon(true);
+    try {
+      const res = await uploadService.uploadFile(file, 'settings');
+      if (res.success && res.data?.url) {
+        setFaviconPreview(res.data.url);
+        handleChange('faviconUrl', res.data.url);
+        handleChange('faviconFileName', file.name);
+      } else {
+        throw new Error('Server returned invalid file response');
+      }
+    } catch {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result;
+        setFaviconPreview(base64);
+        handleChange('faviconUrl', base64);
+        handleChange('faviconFileName', file.name);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setUploadingFavicon(false);
+    }
   };
 
   const removeLogo = () => {
     setLogoPreview(null);
-    handleChange('logoUrl', null);
+    handleChange('logoUrl', '');
     handleChange('logoFileName', '');
   };
 
   const removeFavicon = () => {
     setFaviconPreview(null);
-    handleChange('faviconUrl', null);
+    handleChange('faviconUrl', '');
     handleChange('faviconFileName', '');
   };
 
@@ -189,19 +232,6 @@ export default function GeneralTab({ settings, setSettings }) {
 
           <div>
             <label className="block text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1">
-              Tourist Police Emergency Number
-            </label>
-            <input
-              type="text"
-              value={settings.emergencyTouristPolice || '+855 31 322 2117'}
-              onChange={(e) => handleChange('emergencyTouristPolice', e.target.value)}
-              placeholder="+855 31 322 2117"
-              className="w-full px-3 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1">
               National Police Hotline
             </label>
             <input
@@ -209,6 +239,45 @@ export default function GeneralTab({ settings, setSettings }) {
               value={settings.emergencyPolice || '117'}
               onChange={(e) => handleChange('emergencyPolice', e.target.value)}
               placeholder="117"
+              className="w-full px-3 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1">
+              National Ambulance / Medical Emergency
+            </label>
+            <input
+              type="text"
+              value={settings.emergencyAmbulance || '119'}
+              onChange={(e) => handleChange('emergencyAmbulance', e.target.value)}
+              placeholder="119"
+              className="w-full px-3 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1">
+              Fire & Rescue Emergency Hotline
+            </label>
+            <input
+              type="text"
+              value={settings.emergencyFire || '118'}
+              onChange={(e) => handleChange('emergencyFire', e.target.value)}
+              placeholder="118"
+              className="w-full px-3 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mb-1">
+              Tourist Police Emergency Number
+            </label>
+            <input
+              type="text"
+              value={settings.emergencyTouristPolice || '+855 31 322 2117'}
+              onChange={(e) => handleChange('emergencyTouristPolice', e.target.value)}
+              placeholder="+855 31 322 2117"
               className="w-full px-3 py-2 text-sm font-mono rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] transition-all"
             />
           </div>
@@ -366,7 +435,13 @@ export default function GeneralTab({ settings, setSettings }) {
               Upload System Logo
             </label>
 
-            {logoPreview ? (
+            {uploadingLogo ? (
+              <div className="border-2 border-dashed border-[#003E83] dark:border-blue-500 rounded-md p-6 flex flex-col items-center justify-center bg-blue-50/50 dark:bg-blue-950/30 text-[#003E83] dark:text-blue-400">
+                <RefreshCw className="w-6 h-6 animate-spin mb-1.5" />
+                <span className="text-xs font-semibold">Uploading system logo to server...</span>
+                <span className="text-[10px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">Please wait a moment</span>
+              </div>
+            ) : logoPreview ? (
               <div className="relative border-2 border-dashed border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md p-4 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-14 h-14 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-center overflow-hidden">
@@ -406,7 +481,13 @@ export default function GeneralTab({ settings, setSettings }) {
               Upload Favicon
             </label>
 
-            {faviconPreview ? (
+            {uploadingFavicon ? (
+              <div className="border-2 border-dashed border-[#003E83] dark:border-blue-500 rounded-md p-6 flex flex-col items-center justify-center bg-blue-50/50 dark:bg-blue-950/30 text-[#003E83] dark:text-blue-400">
+                <RefreshCw className="w-6 h-6 animate-spin mb-1.5" />
+                <span className="text-xs font-semibold">Uploading favicon to server...</span>
+                <span className="text-[10px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">Please wait a moment</span>
+              </div>
+            ) : faviconPreview ? (
               <div className="relative border-2 border-dashed border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md p-4 bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-center overflow-hidden">

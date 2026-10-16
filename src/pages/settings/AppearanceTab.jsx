@@ -1,5 +1,22 @@
-import { Sun, Moon, Monitor, Check, LayoutDashboard } from 'lucide-react';
-import { applyTheme } from '../../utils/Theme';
+import {
+  Sun,
+  Moon,
+  Monitor,
+  Check,
+  LayoutDashboard,
+  Type,
+  Maximize2
+} from 'lucide-react';
+import {
+  applyTheme,
+  applySidebarStyle,
+  applyCompactSidebar,
+  applyFontSize,
+  applyFontFamily,
+  getInitialCompactSidebar,
+  getInitialFontSize,
+  getInitialFontFamily
+} from '../../utils/Theme';
 
 export default function AppearanceTab({ settings, setSettings }) {
   const handleChange = (field, value) => {
@@ -10,6 +27,14 @@ export default function AppearanceTab({ settings, setSettings }) {
 
     if (field === 'theme') {
       applyTheme(value);
+    } else if (field === 'sidebarStyle') {
+      applySidebarStyle(value);
+    } else if (field === 'compactSidebar') {
+      applyCompactSidebar(value);
+    } else if (field === 'fontSize') {
+      applyFontSize(value);
+    } else if (field === 'fontFamily') {
+      applyFontFamily(value);
     }
   };
 
@@ -21,9 +46,27 @@ export default function AppearanceTab({ settings, setSettings }) {
 
   const sidebarOptions = [
     { id: 'brand', name: 'Brand Navy', color: 'bg-[#003E83]', desc: 'Official Ministry of Tourism deep navy blue' },
-    { id: 'slate', name: 'Dark Slate', color: 'bg-slate-900', desc: 'Neutral modern dark charcoal navigation' },
+    { id: 'modern', name: 'Modern Charcoal', color: 'bg-slate-900 dark:bg-zinc-900', desc: 'Neutral modern dark charcoal navigation' },
     { id: 'light', name: 'Clean White', color: 'bg-white border border-gray-300', desc: 'High-contrast light minimalist sidebar' }
   ];
+
+  const fontSizeOptions = [
+    { id: 'small', name: 'Compact (14px)', desc: 'High information density for large monitors' },
+    { id: 'medium', name: 'Standard (16px)', desc: 'Optimal balance of legibility and density' },
+    { id: 'large', name: 'Comfort (18px)', desc: 'Enlarged text for higher reading comfort' }
+  ];
+
+  const fontFamilyOptions = [
+    { id: 'inter', name: 'Inter Display', desc: 'Modern geometric sans-serif standard' },
+    { id: 'jakarta', name: 'Plus Jakarta Sans', desc: 'Contemporary high-contrast humanist font' },
+    { id: 'outfit', name: 'Outfit Modern', desc: 'Distinctive brand display typography' }
+  ];
+
+  const activeTheme = settings.theme || 'system';
+  const activeSidebarStyle = settings.sidebarStyle || 'brand';
+  const activeCompact = settings.compactSidebar !== undefined ? Boolean(settings.compactSidebar) : getInitialCompactSidebar();
+  const activeFontSize = settings.fontSize || getInitialFontSize();
+  const activeFontFamily = settings.fontFamily || getInitialFontFamily();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -33,7 +76,7 @@ export default function AppearanceTab({ settings, setSettings }) {
           Appearance & Theme Settings
         </h2>
         <p className="text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-1">
-          Customize the administrative portal visual theme, contrast mode, and sidebar appearance.
+          Customize the administrative portal visual theme, contrast mode, typography, and navigation sidebar styling.
         </p>
       </div>
 
@@ -47,7 +90,7 @@ export default function AppearanceTab({ settings, setSettings }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {themeOptions.map((opt) => {
             const Icon = opt.icon;
-            const isSelected = (settings.theme || 'system') === opt.id;
+            const isSelected = activeTheme === opt.id;
             return (
               <button
                 key={opt.id}
@@ -79,14 +122,28 @@ export default function AppearanceTab({ settings, setSettings }) {
 
       {/* Card 2: Sidebar Accent Preference */}
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 shadow-xs space-y-4">
-        <h3 className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] pb-3">
-          <LayoutDashboard className="w-4 h-4 text-[var(--color-primary)]" />
-          Navigation Sidebar Style
-        </h3>
+        <div className="flex items-center justify-between border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] pb-3">
+          <h3 className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
+            <LayoutDashboard className="w-4 h-4 text-[var(--color-primary)]" />
+            Navigation Sidebar Style
+          </h3>
+
+          <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+            <Maximize2 className="w-3.5 h-3.5" />
+            <span>Compact Mode:</span>
+            <input
+              type="checkbox"
+              checked={activeCompact}
+              onChange={(e) => handleChange('compactSidebar', e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-md peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-md after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-primary)] relative"></div>
+          </label>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {sidebarOptions.map((opt) => {
-            const isSelected = (settings.sidebarStyle || 'brand') === opt.id;
+            const isSelected = activeSidebarStyle === opt.id;
             return (
               <button
                 key={opt.id}
@@ -115,6 +172,84 @@ export default function AppearanceTab({ settings, setSettings }) {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Card 3: Typography Scale & Font Family */}
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 shadow-xs space-y-4">
+        <h3 className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] pb-3">
+          <Type className="w-4 h-4 text-[var(--color-primary)]" />
+          Typography & Base Font Sizing
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Base Font Size */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+              Interface Base Scale
+            </label>
+            <div className="space-y-2">
+              {fontSizeOptions.map((opt) => {
+                const isSelected = activeFontSize === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => handleChange('fontSize', opt.id)}
+                    className={`w-full flex items-center justify-between p-3 rounded-md border text-left transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--color-primary)] bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] ring-1 ring-[var(--color-primary)]/20'
+                        : 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]'
+                    }`}
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] block">
+                        {opt.name}
+                      </span>
+                      <span className="text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                        {opt.desc}
+                      </span>
+                    </div>
+                    {isSelected && <Check className="w-4 h-4 text-[var(--color-primary)] shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Font Family */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+              Primary Font Family
+            </label>
+            <div className="space-y-2">
+              {fontFamilyOptions.map((opt) => {
+                const isSelected = activeFontFamily === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => handleChange('fontFamily', opt.id)}
+                    className={`w-full flex items-center justify-between p-3 rounded-md border text-left transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--color-primary)] bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] ring-1 ring-[var(--color-primary)]/20'
+                        : 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]'
+                    }`}
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] block">
+                        {opt.name}
+                      </span>
+                      <span className="text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                        {opt.desc}
+                      </span>
+                    </div>
+                    {isSelected && <Check className="w-4 h-4 text-[var(--color-primary)] shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>

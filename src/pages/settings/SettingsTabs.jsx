@@ -13,10 +13,10 @@ export default function SettingsTabs({ tabs, activeTab, onTabChange, searchMatch
             <CurrentIcon className="w-4 h-4" />
           </div>
           <h2 className="text-lg md:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-            {currentTab?.label || 'General'} Settings
+            {currentTab?.id === 'about' ? currentTab.label : `${currentTab?.label || 'General'} Settings`}
           </h2>
           <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
-            {tabs.length} sections
+            Section {Math.max(1, tabs.findIndex((t) => t.id === activeTab) + 1)} of {tabs.length}
           </span>
         </div>
 

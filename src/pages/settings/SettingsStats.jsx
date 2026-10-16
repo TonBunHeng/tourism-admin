@@ -1,6 +1,14 @@
 import { ShieldCheck, Server, Database, Layers } from 'lucide-react';
 
 export default function SettingsStats({ settings }) {
+  const connectedCount = [
+    settings.googleMapsApiKey,
+    settings.mapboxApiKey,
+    settings.weatherApiKey,
+    settings.aiApiKey,
+    settings.smtpHost
+  ].filter(Boolean).length;
+
   const stats = [
     {
       label: 'Platform Status',
@@ -24,8 +32,8 @@ export default function SettingsStats({ settings }) {
     },
     {
       label: 'Connected Services',
-      value: '4 Configured',
-      subtext: 'Maps, Weather, AI & SMTP Relay',
+      value: `${connectedCount} Configured`,
+      subtext: connectedCount >= 4 ? 'Maps, Weather, AI & SMTP Relay' : `${connectedCount} of 5 services active`,
       icon: Server,
       color: 'text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)]',
       bg: 'bg-[var(--color-purple-badge-bg)] dark:bg-[var(--color-purple-badge-dark-bg)]'

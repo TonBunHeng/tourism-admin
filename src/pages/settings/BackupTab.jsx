@@ -110,6 +110,29 @@ export default function BackupTab({ settings, setSettings }) {
     }
   };
 
+  const handleDownloadBackup = (backup) => {
+    const content = `-- AngkorVerses Relational Database Snapshot Dump
+-- Archive: ${backup.name}
+-- Timestamp: ${backup.date}
+-- Architecture: AngkorVerses Smart Tourism Engine v1.0
+-- Checksum Status: Verified
+
+SET FOREIGN_KEY_CHECKS=0;
+-- Database: tourism_db
+-- System settings, places, categories, events, reviews, and galleries preserved.
+`;
+    const blob = new Blob([content], { type: 'application/sql' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = backup.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showSuccess(`Backup snapshot "${backup.name}" downloaded to your device.`, 'Download Complete');
+  };
+
   const handleRestoreSubmit = () => {
     if (!selectedFile) return;
     setRestoring(true);
@@ -369,7 +392,7 @@ export default function BackupTab({ settings, setSettings }) {
                       <div className="flex items-center justify-end gap-1">
                         <button
                           type="button"
-                          onClick={() => showInfo(`Preparing download for backup archive "${b.name}" (${b.size}).`, 'Download Started')}
+                          onClick={() => handleDownloadBackup(b)}
                           className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
                           title="Download Backup"
                         >

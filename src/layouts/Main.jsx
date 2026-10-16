@@ -74,7 +74,7 @@ export default function Main() {
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-[#09090b] transition-colors duration-200">
