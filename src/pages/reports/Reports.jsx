@@ -66,50 +66,48 @@ export default function Reports() {
         categoryService.getCategories({ per_page: 200 })
       ]);
 
-      const rawPlaces = (placesRes.status === 'fulfilled' && placesRes.value)
-        ? (Array.isArray(placesRes.value) ? placesRes.value : (placesRes.value.data || []))
-        : [];
-      const rawEvents = (eventsRes.status === 'fulfilled' && eventsRes.value)
-        ? (Array.isArray(eventsRes.value) ? eventsRes.value : (eventsRes.value.data || []))
-        : [];
-      const rawUsers = (usersRes.status === 'fulfilled' && usersRes.value)
-        ? (Array.isArray(usersRes.value) ? usersRes.value : (usersRes.value.data || []))
-        : [];
-      const rawReviews = (reviewsRes.status === 'fulfilled' && reviewsRes.value)
-        ? (Array.isArray(reviewsRes.value) ? reviewsRes.value : (reviewsRes.value.data || []))
-        : [];
-      const rawCategories = (categoriesRes.status === 'fulfilled' && categoriesRes.value)
-        ? (Array.isArray(categoriesRes.value) ? categoriesRes.value : (categoriesRes.value.data || []))
-        : [];
+      const extractArray = (resVal) => {
+        if (!resVal) return [];
+        if (Array.isArray(resVal)) return resVal;
+        if (Array.isArray(resVal.data)) return resVal.data;
+        if (Array.isArray(resVal.data?.data)) return resVal.data.data;
+        return [];
+      };
+
+      const rawPlaces = placesRes.status === 'fulfilled' ? extractArray(placesRes.value) : [];
+      const rawEvents = eventsRes.status === 'fulfilled' ? extractArray(eventsRes.value) : [];
+      const rawUsers = usersRes.status === 'fulfilled' ? extractArray(usersRes.value) : [];
+      const rawReviews = reviewsRes.status === 'fulfilled' ? extractArray(reviewsRes.value) : [];
+      const rawCategories = categoriesRes.status === 'fulfilled' ? extractArray(categoriesRes.value) : [];
 
       const formattedPlaces = rawPlaces.map(p => ({
         id: p.id,
-        name: p.name,
+        name: p.name || 'Unnamed Place',
         category: p.category_name || (typeof p.category === 'object' ? p.category?.name : p.category) || 'General',
         province: p.province_name || (typeof p.province === 'object' ? p.province?.name : p.province) || 'Siem Reap',
         rating: Number(p.rating || 4.5),
         reviews: Number(p.reviews_count || 0),
         status: p.status || 'Active',
-        createdAt: p.created_at ? p.created_at.split('T')[0] : '2026-08-18',
+        createdAt: p.created_at ? String(p.created_at).split('T')[0] : (p.createdAt ? String(p.createdAt).split('T')[0] : '2026-08-18'),
         location: p.address || 'Cambodia'
       }));
 
       const formattedEvents = rawEvents.map(e => ({
         id: e.id,
-        title: e.title,
+        title: e.title || 'Upcoming Event',
         location: e.location || 'Phnom Penh',
-        startDate: e.start_date || '2026-08-18',
-        endDate: e.end_date || '2026-08-20',
+        startDate: e.start_date ? String(e.start_date).split('T')[0] : (e.startDate ? String(e.startDate).split('T')[0] : '2026-08-18'),
+        endDate: e.end_date ? String(e.end_date).split('T')[0] : (e.endDate ? String(e.endDate).split('T')[0] : '2026-08-20'),
         attendees: Number(e.attendees_count || 500),
         status: e.status || 'Upcoming'
       }));
 
       const formattedUsers = rawUsers.map(u => ({
         id: u.id,
-        name: u.name,
-        email: u.email,
+        name: u.name || 'User',
+        email: u.email || 'N/A',
         role: u.role || 'User',
-        joinedDate: u.created_at ? u.created_at.split('T')[0] : '2026-08-18',
+        joinedDate: u.created_at ? String(u.created_at).split('T')[0] : (u.joinedDate ? String(u.joinedDate).split('T')[0] : '2026-08-18'),
         reviewsCount: Number(u.reviews_count || 0),
         status: u.status || 'Active'
       }));
@@ -121,14 +119,14 @@ export default function Reports() {
         placeName: r.place_name || (typeof r.place === 'object' ? r.place?.name : r.place) || 'Attraction',
         rating: Number(r.rating || 5),
         comment: r.comment || r.title || '',
-        createdAt: r.created_at ? r.created_at.split('T')[0] : '2026-08-18',
-        date: r.date || (r.created_at ? r.created_at.split('T')[0] : '2026-08-18'),
+        createdAt: r.created_at ? String(r.created_at).split('T')[0] : (r.date || '2026-08-18'),
+        date: r.date || (r.created_at ? String(r.created_at).split('T')[0] : '2026-08-18'),
         status: r.status || 'Approved'
       }));
 
       const formattedCategories = rawCategories.map(c => ({
         id: c.id,
-        name: c.name,
+        name: c.name || 'Category',
         description: c.description || 'Category description',
         totalPlaces: Number(c.places_count || 0),
         status: c.status || 'Active'
@@ -160,15 +158,17 @@ export default function Reports() {
     let matchesDate = true;
     const activeDate = appliedDay || selectedDay;
     if (itemDate && activeDate) {
+      const itemDateStr = String(itemDate);
       if (item.startDate && item.endDate) {
-        matchesDate = activeDate >= item.startDate && activeDate <= item.endDate;
+        matchesDate = activeDate >= String(item.startDate) && activeDate <= String(item.endDate);
       } else {
-        matchesDate = itemDate === activeDate || itemDate.startsWith(activeDate);
+        matchesDate = itemDateStr === activeDate || itemDateStr.startsWith(activeDate);
       }
     }
 
-    const matchesSearch = Object.values(item).some(val =>
-      String(val).toLowerCase().includes(searchTerm.toLowerCase())
+    const term = (searchTerm || '').trim().toLowerCase();
+    const matchesSearch = !term || Object.values(item).some(val =>
+      val !== null && val !== undefined && String(val).toLowerCase().includes(term)
     );
 
     let matchesStatus = true;
@@ -345,7 +345,7 @@ export default function Reports() {
       <ReportsStats
         totalCount={totalCount}
         activeCount={activeCount}
-        avgRating={avgRating ? avgRating.toFixed(1) : null}
+        avgRating={avgRating || '5.0'}
         totalExports={totalExports}
       />
 

@@ -1,34 +1,46 @@
-export default function SettingsTabs({ tabs, activeTab, onTabChange, searchMatchCounts = {} }) {
-  return (
-    <div className="w-full border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-2.5 sm:p-3 bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)]">
-      {/* Horizontal Tabs List */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          const matchCount = searchMatchCounts[tab.id];
+import { ChevronDown, Sliders } from 'lucide-react';
 
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onTabChange(tab.id)}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-md text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 cursor-pointer ${
-                isActive
-                  ? 'bg-[#003E83] text-white font-semibold shadow-xs'
-                  : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-[var(--color-text-primary-light)] dark:hover:text-[var(--color-white)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]'
-              }`}
+export default function SettingsTabs({ tabs, activeTab, onTabChange, searchMatchCounts = {} }) {
+  const currentTab = tabs.find((t) => t.id === activeTab) || tabs[0];
+  const CurrentIcon = currentTab?.icon || Sliders;
+
+  return (
+    <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Title with icon & badge matching other pages */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-md bg-blue-50 dark:bg-blue-950/50 text-[#003E83] dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center shrink-0">
+            <CurrentIcon className="w-4 h-4" />
+          </div>
+          <h2 className="text-lg md:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+            {currentTab?.label || 'General'} Settings
+          </h2>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+            {tabs.length} sections
+          </span>
+        </div>
+
+        {/* Section Dropdown Selector */}
+        <div className="flex items-center gap-3 self-start sm:self-auto w-full sm:w-auto">
+          <div className="relative w-full sm:w-auto">
+            <select
+              value={activeTab}
+              onChange={(e) => onTabChange(e.target.value)}
+              className="appearance-none w-full sm:w-64 pl-4 pr-9 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-sm cursor-pointer shadow-xs font-medium"
             >
-              <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]'}`} />
-              <span>{tab.label}</span>
-              {Boolean(matchCount) && (
-                <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-[#003E83]/10 text-[#003E83] dark:bg-blue-900/40 dark:text-blue-300'}`}>
-                  {matchCount}
-                </span>
-              )}
-            </button>
-          );
-        })}
+              {tabs.map((tab) => {
+                const matchCount = searchMatchCounts[tab.id];
+                const labelSuffix = tab.id !== 'about' && !tab.label.includes('Settings') ? ' Settings' : '';
+                return (
+                  <option key={tab.id} value={tab.id}>
+                    {tab.label}{labelSuffix}{matchCount ? ` (${matchCount} matches)` : ''}
+                  </option>
+                );
+              })}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+          </div>
+        </div>
       </div>
     </div>
   );

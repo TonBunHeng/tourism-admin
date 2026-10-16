@@ -72,73 +72,77 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
             categoryService.getCategories({ per_page: 100 })
           ]);
 
-          const formattedPlaces = placesRes.status === 'fulfilled' && placesRes.value?.data
-            ? placesRes.value.data.map(p => ({
-                id: p.id,
-                name: p.name,
-                category: p.category_name || (typeof p.category === 'object' ? p.category?.name : p.category) || 'General',
-                province: p.province_name || (typeof p.province === 'object' ? p.province?.name : p.province) || 'Cambodia',
-                rating: Number(p.rating || 0),
-                reviews: Number(p.reviews_count || 0),
-                status: p.status || 'Active',
-                createdAt: p.created_at ? p.created_at.split('T')[0] : null,
-                type: 'Place'
-              }))
-            : [];
+          const extractArray = (resVal) => {
+            if (!resVal) return [];
+            if (Array.isArray(resVal)) return resVal;
+            if (Array.isArray(resVal.data)) return resVal.data;
+            if (Array.isArray(resVal.data?.data)) return resVal.data.data;
+            return [];
+          };
 
-          const formattedEvents = eventsRes.status === 'fulfilled' && eventsRes.value?.data
-            ? eventsRes.value.data.map(e => ({
-                id: e.id,
-                title: e.title,
-                name: e.title,
-                location: e.location || 'Cambodia',
-                startDate: e.start_date || (e.created_at ? e.created_at.split('T')[0] : null),
-                endDate: e.end_date || null,
-                attendees: Number(e.attendees_count || 0),
-                status: e.status || 'Upcoming',
-                createdAt: e.created_at ? e.created_at.split('T')[0] : null,
-                type: 'Event'
-              }))
-            : [];
+          const rawPlaces = placesRes.status === 'fulfilled' ? extractArray(placesRes.value) : [];
+          const rawEvents = eventsRes.status === 'fulfilled' ? extractArray(eventsRes.value) : [];
+          const rawUsers = usersRes.status === 'fulfilled' ? extractArray(usersRes.value) : [];
+          const rawReviews = reviewsRes.status === 'fulfilled' ? extractArray(reviewsRes.value) : [];
+          const rawCategories = categoriesRes.status === 'fulfilled' ? extractArray(categoriesRes.value) : [];
 
-          const formattedUsers = usersRes.status === 'fulfilled' && usersRes.value?.data
-            ? usersRes.value.data.map(u => ({
-                id: u.id,
-                name: u.name,
-                email: u.email,
-                role: u.role || 'User',
-                joinedDate: u.created_at ? u.created_at.split('T')[0] : null,
-                createdAt: u.created_at ? u.created_at.split('T')[0] : null,
-                status: u.status || 'Active',
-                type: 'User'
-              }))
-            : [];
+          const formattedPlaces = rawPlaces.map(p => ({
+            id: p.id,
+            name: p.name || 'Unnamed Place',
+            category: p.category_name || (typeof p.category === 'object' ? p.category?.name : p.category) || 'General',
+            province: p.province_name || (typeof p.province === 'object' ? p.province?.name : p.province) || 'Cambodia',
+            rating: Number(p.rating || 0),
+            reviews: Number(p.reviews_count || 0),
+            status: p.status || 'Active',
+            createdAt: p.created_at ? String(p.created_at).split('T')[0] : null,
+            type: 'Place'
+          }));
 
-          const formattedReviews = reviewsRes.status === 'fulfilled' && reviewsRes.value?.data
-            ? reviewsRes.value.data.map(r => ({
-                id: r.id,
-                name: `${r.place_name || (typeof r.place === 'object' ? r.place?.name : 'Attraction')} Review`,
-                userName: r.user_name || (typeof r.user === 'object' ? r.user?.name : r.user) || 'Traveler',
-                rating: Number(r.rating || 0),
-                comment: r.comment || '',
-                date: r.created_at ? r.created_at.split('T')[0] : null,
-                createdAt: r.created_at ? r.created_at.split('T')[0] : null,
-                status: r.status || 'Approved',
-                type: 'Review'
-              }))
-            : [];
+          const formattedEvents = rawEvents.map(e => ({
+            id: e.id,
+            title: e.title || 'Event',
+            name: e.title || 'Event',
+            location: e.location || 'Cambodia',
+            startDate: e.start_date ? String(e.start_date).split('T')[0] : (e.created_at ? String(e.created_at).split('T')[0] : null),
+            endDate: e.end_date ? String(e.end_date).split('T')[0] : null,
+            attendees: Number(e.attendees_count || 0),
+            status: e.status || 'Upcoming',
+            createdAt: e.created_at ? String(e.created_at).split('T')[0] : null,
+            type: 'Event'
+          }));
 
-          const formattedCategories = categoriesRes.status === 'fulfilled' && categoriesRes.value?.data
-            ? categoriesRes.value.data.map(c => ({
-                id: c.id,
-                name: c.name,
-                description: c.description || '',
-                totalPlaces: Number(c.places_count || 0),
-                status: c.status || 'Active',
-                createdAt: c.created_at ? c.created_at.split('T')[0] : null,
-                type: 'Category'
-              }))
-            : [];
+          const formattedUsers = rawUsers.map(u => ({
+            id: u.id,
+            name: u.name || 'User',
+            email: u.email || '',
+            role: u.role || 'User',
+            joinedDate: u.created_at ? String(u.created_at).split('T')[0] : null,
+            createdAt: u.created_at ? String(u.created_at).split('T')[0] : null,
+            status: u.status || 'Active',
+            type: 'User'
+          }));
+
+          const formattedReviews = rawReviews.map(r => ({
+            id: r.id,
+            name: `${r.place_name || (typeof r.place === 'object' ? r.place?.name : 'Attraction')} Review`,
+            userName: r.user_name || (typeof r.user === 'object' ? r.user?.name : r.user) || 'Traveler',
+            rating: Number(r.rating || 0),
+            comment: r.comment || '',
+            date: r.created_at ? String(r.created_at).split('T')[0] : null,
+            createdAt: r.created_at ? String(r.created_at).split('T')[0] : null,
+            status: r.status || 'Approved',
+            type: 'Review'
+          }));
+
+          const formattedCategories = rawCategories.map(c => ({
+            id: c.id,
+            name: c.name || 'Category',
+            description: c.description || '',
+            totalPlaces: Number(c.places_count || 0),
+            status: c.status || 'Active',
+            createdAt: c.created_at ? String(c.created_at).split('T')[0] : null,
+            type: 'Category'
+          }));
 
           setDatasets({
             places: formattedPlaces,

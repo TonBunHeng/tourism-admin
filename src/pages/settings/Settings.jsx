@@ -11,7 +11,11 @@ import {
   Shield,
   Server,
   Database,
-  Info
+  Info,
+  Save,
+  RotateCcw,
+  CheckCircle2,
+  RefreshCw
 } from "lucide-react";
 
 import SettingsHeader from "./SettingsHeader";
@@ -415,6 +419,47 @@ export default function Settings() {
         {/* Tab Content Body */}
         <div className="flex-1 p-5 md:p-7 min-w-0">
           {renderTabContent()}
+        </div>
+
+        {/* Card Footer Action Bar */}
+        <div className="px-4 md:px-6 py-4 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-surface-hover-light)]/40 dark:bg-[var(--color-surface-hover-dark)]/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+            Active Section: <strong className="text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] font-semibold">{SETTING_TABS.find(t => t.id === activeTab)?.label || 'General'}</strong>
+          </div>
+          <div className="flex items-center gap-2 justify-end">
+            <button
+              type="button"
+              onClick={handleReset}
+              disabled={saving}
+              className="p-2 sm:px-3.5 sm:py-2 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] text-xs md:text-sm font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 disabled:opacity-50"
+            >
+              <RotateCcw className="w-4 h-4 shrink-0" />
+              <span>Reset</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md bg-[#003E83] hover:bg-[#002e62] active:scale-[0.98] text-white transition-all shrink-0 cursor-pointer shadow-xs disabled:opacity-50"
+            >
+              {saving ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin shrink-0" />
+                  <span>Saving...</span>
+                </>
+              ) : saveSuccess ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
+                  <span>Saved!</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 shrink-0" />
+                  <span>Save Changes</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
