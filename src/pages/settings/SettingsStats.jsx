@@ -1,14 +1,6 @@
-import { ShieldCheck, Server, Database, Layers } from 'lucide-react';
+import { ShieldCheck, Globe, Database, Layers } from 'lucide-react';
 
 export default function SettingsStats({ settings }) {
-  const connectedCount = [
-    settings.googleMapsApiKey,
-    settings.mapboxApiKey,
-    settings.weatherApiKey,
-    settings.aiApiKey,
-    settings.smtpHost
-  ].filter(Boolean).length;
-
   const stats = [
     {
       label: 'Platform Status',
@@ -31,10 +23,10 @@ export default function SettingsStats({ settings }) {
       bg: 'bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)]'
     },
     {
-      label: 'Connected Services',
-      value: `${connectedCount} Configured`,
-      subtext: connectedCount >= 4 ? 'Maps, Weather, AI & SMTP Relay' : `${connectedCount} of 5 services active`,
-      icon: Server,
+      label: 'Regional Locale',
+      value: settings.defaultLanguage === 'km' ? 'Khmer (KM)' : 'English (EN)',
+      subtext: `${settings.defaultCurrency || 'USD'} currency • Asia/Phnom_Penh`,
+      icon: Globe,
       color: 'text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)]',
       bg: 'bg-[var(--color-purple-badge-bg)] dark:bg-[var(--color-purple-badge-dark-bg)]'
     },

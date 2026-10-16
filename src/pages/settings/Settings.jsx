@@ -9,9 +9,7 @@ import {
   Palette,
   Bell,
   Shield,
-  Server,
   Database,
-  Info,
   Save,
   RotateCcw,
   CheckCircle2,
@@ -25,9 +23,7 @@ import GeneralTab from "./GeneralTab";
 import AppearanceTab from "./AppearanceTab";
 import NotificationTab from "./NotificationTab";
 import SecurityTab from "./SecurityTab";
-import IntegrationTab from "./IntegrationTab";
 import BackupTab from "./BackupTab";
-import AboutTab from "./AboutTab";
 import settingService from "../../services/settingService";
 import { useAlert } from "../../context/AlertContext";
 import { useSearch } from "../../context/SearchContext";
@@ -175,9 +171,7 @@ const SETTING_TABS = [
   { id: "appearance", label: "Appearance", icon: Palette },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "security", label: "Security", icon: Shield },
-  { id: "integrations", label: "Integrations", icon: Server },
-  { id: "backup", label: "Backup & Restore", icon: Database },
-  { id: "about", label: "About System", icon: Info }
+  { id: "backup", label: "Backup & Restore", icon: Database }
 ];
 
 export default function Settings() {
@@ -189,7 +183,8 @@ export default function Settings() {
     const tabFromUrl = searchParams.get('tab');
     if (tabFromUrl && SETTING_TABS.some(t => t.id === tabFromUrl)) return tabFromUrl;
     const tabFromStorage = sessionStorage.getItem('settings_active_tab');
-    return tabFromStorage || "general";
+    if (tabFromStorage && SETTING_TABS.some(t => t.id === tabFromStorage)) return tabFromStorage;
+    return "general";
   });
 
   const [saving, setSaving] = useState(false);
@@ -452,12 +447,8 @@ export default function Settings() {
         return <NotificationTab settings={settings} setSettings={setSettings} />;
       case "security":
         return <SecurityTab settings={settings} setSettings={setSettings} />;
-      case "integrations":
-        return <IntegrationTab settings={settings} setSettings={setSettings} />;
       case "backup":
         return <BackupTab settings={settings} setSettings={setSettings} />;
-      case "about":
-        return <AboutTab />;
       default:
         return null;
     }
@@ -466,14 +457,7 @@ export default function Settings() {
   return (
     <div className="flex flex-col relative pb-10">
       {/* Settings Header */}
-      <SettingsHeader
-        saving={saving}
-        saveSuccess={saveSuccess}
-        onSave={handleSave}
-        onReset={handleReset}
-        onRefresh={handleRefresh}
-        isRefreshing={isRefreshing}
-      />
+      <SettingsHeader />
 
       {/* KPI Overview Summary Stats */}
       <SettingsStats settings={settings} />
