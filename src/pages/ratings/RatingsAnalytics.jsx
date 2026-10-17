@@ -8,7 +8,8 @@ import {
   Filter,
   RotateCcw,
   User,
-  Calendar
+  Calendar,
+  ChevronDown
 } from 'lucide-react';
 import {
   ComposedChart,
@@ -319,7 +320,7 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
           <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
             <Link
               to="/ratings"
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-xs transition-colors cursor-pointer shrink-0"
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-xs transition-colors cursor-pointer shrink-0 w-full sm:w-auto"
             >
               <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span>Back to Reviews</span>
@@ -373,32 +374,38 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {/* Category Select */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-1.5 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs focus:outline-none focus:ring-1 focus:ring-[#003E83] cursor-pointer"
-            >
-              <option value="ALL">All Categories</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="appearance-none w-full sm:w-auto pl-3.5 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent cursor-pointer shadow-xs"
+              >
+                <option value="ALL">All Categories</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+            </div>
 
             {/* Rating Stars Filter */}
-            <select
-              value={ratingFilter}
-              onChange={(e) => setRatingFilter(e.target.value)}
-              className="px-3 py-1.5 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs focus:outline-none focus:ring-1 focus:ring-[#003E83] cursor-pointer"
-            >
-              <option value="ALL">All Star Ratings</option>
-              <option value="5">5 Stars Only</option>
-              <option value="4">4 Stars Only</option>
-              <option value="3">3 Stars Only</option>
-              <option value="2">2 Stars Only</option>
-              <option value="1">1 Star Only</option>
-              <option value="positive">Positive (4★ & 5★)</option>
-              <option value="critical">Needs Attention (1★ - 3★)</option>
-            </select>
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={ratingFilter}
+                onChange={(e) => setRatingFilter(e.target.value)}
+                className="appearance-none w-full sm:w-auto pl-3.5 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent cursor-pointer shadow-xs"
+              >
+                <option value="ALL">All Star Ratings</option>
+                <option value="5">5 Stars Only</option>
+                <option value="4">4 Stars Only</option>
+                <option value="3">3 Stars Only</option>
+                <option value="2">2 Stars Only</option>
+                <option value="1">1 Star Only</option>
+                <option value="positive">Positive (4★ & 5★)</option>
+                <option value="critical">Needs Attention (1★ - 3★)</option>
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+            </div>
 
             {/* Timeframe Selector */}
             <div className="inline-flex rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-0.5">
@@ -407,9 +414,9 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
                   key={tf}
                   type="button"
                   onClick={() => setTimeframe(tf)}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                     timeframe === tf
-                      ? 'bg-[#003E83] text-white'
+                      ? 'bg-[#003E83] text-white shadow-xs'
                       : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-gray-100 dark:hover:bg-zinc-800'
                   }`}
                 >
@@ -422,9 +429,9 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 font-medium px-2 py-1 cursor-pointer transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-md cursor-pointer transition-colors"
               >
-                <RotateCcw className="w-3 h-3" />
+                <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset</span>
               </button>
             )}
@@ -543,7 +550,7 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
               </span>
             </div>
 
-            <div className="h-[165px] w-full">
+            <div className="h-[175px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={ratingDistribution} layout="vertical" margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
@@ -597,22 +604,26 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
       </div>
 
       {/* 6. Destination Reviews Explorer List */}
-      {displayReviews.length > 0 && (
-        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden">
-          <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-                Recent Tourist Reviews
-              </h3>
-              <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                Displaying tourist ratings matching active filter criteria
-              </p>
-            </div>
-            <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              {displayReviews.length} {displayReviews.length === 1 ? 'review' : 'reviews'}
-            </span>
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden">
+        <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+              Recent Tourist Reviews
+            </h3>
+            <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+              Displaying tourist ratings matching active filter criteria
+            </p>
           </div>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+            {displayReviews.length} {displayReviews.length === 1 ? 'review' : 'reviews'}
+          </span>
+        </div>
 
+        {displayReviews.length === 0 ? (
+          <div className="py-10 px-4 text-center text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] font-medium">
+            No tourist reviews found matching active filter criteria.
+          </div>
+        ) : (
           <div className="divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)]">
             {displayReviews.slice(0, 10).map((review, index) => {
               const placeName = typeof review.place === 'object'
@@ -668,8 +679,8 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

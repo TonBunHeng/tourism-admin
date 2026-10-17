@@ -10,7 +10,8 @@ import {
   Filter,
   RotateCcw,
   Landmark,
-  Calendar
+  Calendar,
+  ChevronDown
 } from 'lucide-react';
 import {
   ComposedChart,
@@ -264,7 +265,7 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
           <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
             <Link
               to="/favorites"
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-xs transition-colors cursor-pointer shrink-0"
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-xs transition-colors cursor-pointer shrink-0 w-full sm:w-auto"
             >
               <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span>Back to Favorites</span>
@@ -318,26 +319,32 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {/* Category Select */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-1.5 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs focus:outline-none focus:ring-1 focus:ring-[#003E83] cursor-pointer"
-            >
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat === 'ALL' ? 'All Categories' : cat}</option>
-              ))}
-            </select>
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="appearance-none w-full sm:w-auto pl-3.5 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent cursor-pointer shadow-xs"
+              >
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat === 'ALL' ? 'All Categories' : cat}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+            </div>
 
             {/* Visit Status Filter */}
-            <select
-              value={visitFilter}
-              onChange={(e) => setVisitFilter(e.target.value)}
-              className="px-3 py-1.5 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs focus:outline-none focus:ring-1 focus:ring-[#003E83] cursor-pointer"
-            >
-              <option value="ALL">All Journey Status</option>
-              <option value="VISITED">Visited Places</option>
-              <option value="PLANNED">To Visit (Planned)</option>
-            </select>
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={visitFilter}
+                onChange={(e) => setVisitFilter(e.target.value)}
+                className="appearance-none w-full sm:w-auto pl-3.5 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent cursor-pointer shadow-xs"
+              >
+                <option value="ALL">All Journey Status</option>
+                <option value="VISITED">Visited Places</option>
+                <option value="PLANNED">To Visit (Planned)</option>
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+            </div>
 
             {/* Timeframe Selector */}
             <div className="inline-flex rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-0.5">
@@ -346,9 +353,9 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
                   key={tf}
                   type="button"
                   onClick={() => setTimeframe(tf)}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                     timeframe === tf
-                      ? 'bg-[#003E83] text-white'
+                      ? 'bg-[#003E83] text-white shadow-xs'
                       : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-gray-100 dark:hover:bg-zinc-800'
                   }`}
                 >
@@ -361,9 +368,9 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 font-medium px-2 py-1 cursor-pointer transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-md cursor-pointer transition-colors"
               >
-                <RotateCcw className="w-3 h-3" />
+                <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset</span>
               </button>
             )}
@@ -522,24 +529,28 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
       </div>
 
       {/* 6. Destination Favorites Explorer List */}
-      {displayFavorites.length > 0 && (
-        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden">
-          <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-                Saved Destinations
-              </h3>
-              <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                Displaying destinations matching active filter criteria
-              </p>
-            </div>
-            <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              {displayFavorites.length} {displayFavorites.length === 1 ? 'place' : 'places'}
-            </span>
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden">
+        <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+              Saved Destinations
+            </h3>
+            <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+              Displaying destinations matching active filter criteria
+            </p>
           </div>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+            {displayFavorites.length} {displayFavorites.length === 1 ? 'place' : 'places'}
+          </span>
+        </div>
 
+        {displayFavorites.length === 0 ? (
+          <div className="py-10 px-4 text-center text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] font-medium">
+            No saved destinations found matching active filter criteria.
+          </div>
+        ) : (
           <div className="divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)]">
-            {displayFavorites.map((fav, index) => {
+            {displayFavorites.slice(0, 10).map((fav, index) => {
               const placeName = fav.name || fav.place?.name || 'Attraction';
               const locationName = fav.location || fav.place?.location || fav.place?.address || 'Cambodia';
               const catName = fav.category || fav.place?.category || 'General';
@@ -583,8 +594,8 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

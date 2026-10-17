@@ -12,7 +12,8 @@ import {
   Sparkles,
   Download,
   Filter,
-  RotateCcw
+  RotateCcw,
+  ChevronDown
 } from 'lucide-react';
 import {
   ComposedChart,
@@ -418,7 +419,7 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
           <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
             <Link
               to="/reports"
-              className="flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-xs transition-colors cursor-pointer shrink-0"
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] hover:bg-gray-100 dark:hover:bg-gray-800 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-xs transition-colors cursor-pointer shrink-0 w-full sm:w-auto"
             >
               <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span>Back to Reports</span>
@@ -472,30 +473,36 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {/* Dataset Selector */}
-            <select
-              value={selectedDataset}
-              onChange={(e) => setSelectedDataset(e.target.value)}
-              className="px-3 py-1.5 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs focus:outline-none focus:ring-1 focus:ring-[#003E83] cursor-pointer"
-            >
-              <option value="ALL">All Datasets (Global)</option>
-              <option value="places">Places & Attractions</option>
-              <option value="events">Events & Festivals</option>
-              <option value="users">Users & Accounts</option>
-              <option value="reviews">Ratings & Reviews</option>
-              <option value="categories">Categories</option>
-            </select>
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={selectedDataset}
+                onChange={(e) => setSelectedDataset(e.target.value)}
+                className="appearance-none w-full sm:w-auto pl-3.5 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent cursor-pointer shadow-xs"
+              >
+                <option value="ALL">All Datasets (Global)</option>
+                <option value="places">Places & Attractions</option>
+                <option value="events">Events & Festivals</option>
+                <option value="users">Users & Accounts</option>
+                <option value="reviews">Ratings & Reviews</option>
+                <option value="categories">Categories</option>
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+            </div>
 
             {/* Status Selector */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-1.5 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs focus:outline-none focus:ring-1 focus:ring-[#003E83] cursor-pointer"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="Active">Active / Published</option>
-              <option value="Pending">Pending / Upcoming</option>
-              <option value="Archived">Archived / Inactive</option>
-            </select>
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none w-full sm:w-auto pl-3.5 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent cursor-pointer shadow-xs"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="Active">Active / Published</option>
+                <option value="Pending">Pending / Upcoming</option>
+                <option value="Archived">Archived / Inactive</option>
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+            </div>
 
             {/* Timeframe Selector */}
             <div className="inline-flex rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-0.5">
@@ -504,9 +511,9 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
                   key={tf}
                   type="button"
                   onClick={() => setTimeframe(tf)}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                     timeframe === tf
-                      ? 'bg-[#003E83] text-white'
+                      ? 'bg-[#003E83] text-white shadow-xs'
                       : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-gray-100 dark:hover:bg-zinc-800'
                   }`}
                 >
@@ -519,9 +526,9 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
               <button
                 type="button"
                 onClick={handleReset}
-                className="flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 font-medium px-2 py-1 cursor-pointer transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-md cursor-pointer transition-colors"
               >
-                <RotateCcw className="w-3 h-3" />
+                <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset</span>
               </button>
             )}
@@ -580,12 +587,25 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
                     width={32}
                   />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--color-bg-dark-modal, #18181b)',
-                      border: '1px solid var(--color-border-dark, #27272a)',
-                      borderRadius: '0.375rem',
-                      fontSize: '12px',
-                      color: '#fff'
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const newRecs = payload.find(p => p.dataKey === 'recordsIngested')?.value ?? 0;
+                        const cum = payload.find(p => p.dataKey === 'cumulative')?.value ?? 0;
+                        return (
+                          <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
+                            <p className="font-semibold text-gray-900 dark:text-zinc-100">{label}</p>
+                            <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
+                              <span>New Records:</span>
+                              <span className="font-bold text-[#003E83] dark:text-blue-400">{newRecs}</span>
+                            </div>
+                            <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
+                              <span>Cumulative Total:</span>
+                              <span className="font-bold text-emerald-500">{cum}</span>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
                     }}
                   />
                   <Bar dataKey="recordsIngested" fill="#003E83" radius={[3, 3, 0, 0]} name="New Records" barSize={16} isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
@@ -667,22 +687,26 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
       </div>
 
       {/* 6. Recent Dataset Records Explorer List */}
-      {filteredItems.length > 0 && (
-        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden">
-          <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-                Database Records Overview
-              </h3>
-              <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                Displaying tourism database entities matching active filter criteria
-              </p>
-            </div>
-            <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              {filteredItems.length} {filteredItems.length === 1 ? 'record' : 'records'}
-            </span>
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden">
+        <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+              Database Records Overview
+            </h3>
+            <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+              Displaying tourism database entities matching active filter criteria
+            </p>
           </div>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+            {filteredItems.length} {filteredItems.length === 1 ? 'record' : 'records'}
+          </span>
+        </div>
 
+        {filteredItems.length === 0 ? (
+          <div className="py-10 px-4 text-center text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] font-medium">
+            No database records found matching active filter criteria.
+          </div>
+        ) : (
           <div className="divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)]">
             {filteredItems.slice(0, 10).map((item, index) => {
               const itemName = item.name || item.title || 'Database Entity';
@@ -723,8 +747,8 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
