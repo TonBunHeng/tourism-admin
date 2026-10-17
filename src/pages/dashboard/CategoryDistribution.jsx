@@ -15,7 +15,7 @@ const donutColors = [
   '#0284C7', // sky-600
 ];
 
-export default function CategoryDistribution({ distribution }) {
+export default function CategoryDistribution({ distribution, timeRange = 'weekly', isLoading = false }) {
   const navigate = useNavigate();
 
   // Purely database-driven: no static or default categories
@@ -44,8 +44,36 @@ export default function CategoryDistribution({ distribution }) {
     };
   });
 
+  const getSubtitle = () => {
+    switch (timeRange) {
+      case 'today':
+        return 'Category engagement & shares from database (Today)';
+      case 'weekly':
+        return 'Category engagement & shares from database (Last 7 Days)';
+      case 'monthly':
+        return 'Category engagement & shares from database (This Month)';
+      case 'yearly':
+      default:
+        return 'Proportional distribution by destination count from database';
+    }
+  };
+
+  const getCenterLabel = () => {
+    switch (timeRange) {
+      case 'today':
+        return "Today's Total";
+      case 'weekly':
+        return 'Weekly Total';
+      case 'monthly':
+        return 'Monthly Total';
+      case 'yearly':
+      default:
+        return 'Total Places';
+    }
+  };
+
   return (
-    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 flex flex-col justify-between h-full">
+    <div className={`bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 flex flex-col justify-between h-full transition-opacity duration-200 ${isLoading ? 'opacity-60' : 'opacity-100'}`}>
       <div>
         <div className="flex items-center justify-between mb-3 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
           <div>
@@ -57,7 +85,7 @@ export default function CategoryDistribution({ distribution }) {
               </span>
             </h3>
             <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              Proportional distribution by destination count from database
+              {getSubtitle()}
             </p>
           </div>
           <button
@@ -83,12 +111,12 @@ export default function CategoryDistribution({ distribution }) {
                   {totalPlacesCount}
                 </span>
                 <span className="text-[11px] text-gray-500 dark:text-zinc-400 font-medium">
-                  Total Places
+                  {getCenterLabel()}
                 </span>
               </div>
 
               <div className="w-full h-full relative z-10">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" key={`cat-dist-${timeRange}`}>
                   <PieChart>
                     <Pie
                       data={chartData}

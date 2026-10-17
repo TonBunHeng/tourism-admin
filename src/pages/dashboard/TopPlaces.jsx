@@ -15,7 +15,7 @@ const barColors = [
   '#6D28D9', // purple-700
 ];
 
-export default function TopPlaces({ places, topPlaces }) {
+export default function TopPlaces({ places, topPlaces, timeRange = 'weekly', isLoading = false }) {
   const navigate = useNavigate();
 
   const rawList = (Array.isArray(places) && places.length > 0)
@@ -27,6 +27,7 @@ export default function TopPlaces({ places, topPlaces }) {
 
   const chartData = placesList.map((place, index) => {
     const reviewsCount = Number(place.reviews ?? place.reviews_count) || 0;
+    const periodReviews = Number(place.period_reviews) || 0;
     const ratingVal = Number(place.rating || 0).toFixed(1);
     const shortName = (place.name || '').length > 16 ? place.name.slice(0, 15) + '…' : (place.name || `Place ${index + 1}`);
 
@@ -35,14 +36,29 @@ export default function TopPlaces({ places, topPlaces }) {
       fullName: place.name || 'Unnamed Place',
       name: shortName,
       reviews: reviewsCount,
+      periodReviews,
       rating: ratingVal,
       category: place.category?.name || place.category || 'Attraction',
       rank: index + 1,
     };
   });
 
+  const getSubtitle = () => {
+    switch (timeRange) {
+      case 'today':
+        return 'Trending destinations by review activity (Today)';
+      case 'weekly':
+        return 'Trending destinations by review activity (Last 7 Days)';
+      case 'monthly':
+        return 'Top destinations by review activity (This Month)';
+      case 'yearly':
+      default:
+        return 'Highest rated destinations by review volume (2026)';
+    }
+  };
+
   return (
-    <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 flex flex-col justify-between h-full">
+    <div className={`bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 flex flex-col justify-between h-full transition-opacity duration-200 ${isLoading ? 'opacity-60' : 'opacity-100'}`}>
       <div>
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
           <div>
@@ -54,7 +70,7 @@ export default function TopPlaces({ places, topPlaces }) {
               </span>
             </h3>
             <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-              Highest rated destinations by review volume from database
+              {getSubtitle()}
             </p>
           </div>
           <button
@@ -73,7 +89,7 @@ export default function TopPlaces({ places, topPlaces }) {
               <p>No destination records available in database</p>
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" key={`top-places-${timeRange}`}>
               <BarChart
                 data={chartData}
                 layout="vertical"

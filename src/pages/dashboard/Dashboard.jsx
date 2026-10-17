@@ -9,14 +9,19 @@ import dashboardService from '../../services/dashboardService';
 export default function Dashboard() {
   const [timeRange, setTimeRange] = useState('weekly');
   const [isLoading, setIsLoading] = useState(false);
-  const [dashboardData, setDashboardData] = useState(null);
+  const [cache, setCache] = useState({});
 
-  const fetchStats = async () => {
+  const dashboardData = cache[timeRange] || null;
+
+  const fetchStats = async (range = timeRange) => {
     setIsLoading(true);
     try {
-      const res = await dashboardService.getStats();
+      const res = await dashboardService.getStats(range);
       if (res.success && res.data) {
-        setDashboardData(res.data);
+        setCache((prev) => ({
+          ...prev,
+          [range]: res.data,
+        }));
       }
     } catch (e) {
       console.error('Failed to load dashboard stats from API', e);
@@ -26,11 +31,11 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    fetchStats(timeRange);
+  }, [timeRange]);
 
   const handleRefresh = () => {
-    fetchStats();
+    fetchStats(timeRange);
   };
 
   return (
@@ -39,31 +44,43 @@ export default function Dashboard() {
       <DashboardHeader
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
+        isLoading={isLoading}
       />
 
-      {/* Stats Cards Rows 1 and 2 */}
-      <DashboardStats apiStats={dashboardData?.stats} />
-
       {/* Charts Section */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         {/* User Growth Chart */}
-        <UserGrowthChart growthData={dashboardData?.user_growth} />
+        <UserGrowthChart
+          growthData={dashboardData?.user_growth}
+          timeRange={timeRange}
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Bottom Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 sm:mb-8">
         {/* Top Places */}
         <TopPlaces
           places={dashboardData?.top_places}
           topPlaces={dashboardData?.top_places}
+          timeRange={timeRange}
+          isLoading={isLoading}
         />
 
         {/* Category Distribution & User Status Summary */}
         <CategoryDistribution
           distribution={dashboardData?.category_distribution}
           userStatus={dashboardData?.user_status}
+          timeRange={timeRange}
+          isLoading={isLoading}
         />
       </div>
+
+      {/* Stats Cards Rows 1 and 2 */}
+      <DashboardStats
+        apiStats={dashboardData?.stats}
+        timeRange={timeRange}
+      />
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import api from './api';
 
 export const dashboardService = {
-  async getStats() {
-    return await api.get('/dashboard/stats');
+  async getStats(timeRange = 'weekly') {
+    return await api.get('/dashboard/stats', {
+      params: { range: timeRange, time_range: timeRange }
+    });
   }
 };
 
