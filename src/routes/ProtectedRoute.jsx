@@ -65,14 +65,14 @@ export default function ProtectedRoute({ allowedRoles = ['super_admin', 'admin',
               isAuthenticated: true,
               isAllowedRole: isAllowed,
             });
-          } else {
+          } else if (res?.status === 401) {
             authService.clearSession();
             setAuthStatus({ isAuthenticated: false, isAllowedRole: false });
           }
         }
       } catch (err) {
         if (isMounted) {
-          if (!authService.getToken()) {
+          if (!authService.getToken() || err?.status === 401 || err?.response?.status === 401) {
             setAuthStatus({ isAuthenticated: false, isAllowedRole: false });
           }
         }

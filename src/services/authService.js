@@ -68,7 +68,9 @@ export const authService = {
       }
       return res;
     } catch (error) {
-      this.clearSession();
+      if (error?.status === 401 || error?.response?.status === 401) {
+        this.clearSession();
+      }
       throw error;
     }
   },
