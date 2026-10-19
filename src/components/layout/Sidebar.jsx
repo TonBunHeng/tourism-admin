@@ -4,7 +4,8 @@ import tourism_app_icon from "../../assets/images/tourism_app_icon.png";
 import {
   LayoutGrid, MapPinned, Tags, Images, CalendarDays,
   Star, Heart, Trash2, Settings, LogOut,
-  Users, User, X, FileText, ShieldCheck, Bell, Globe, Building2
+  Users, User, X, FileText, ShieldCheck, Bell, Globe, Building2,
+  CalendarCheck, Sparkles, UserCheck
 } from "lucide-react";
 import LogoutAlert from './LogoutAlert';
 import { isFullAdminRole, normalizeRole } from '../../services/authService';
@@ -67,6 +68,9 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
   // Navigation Items defined per role
   const managementItems = [
     { name: "Dashboard", icon: LayoutGrid, path: "/dashboard" },
+    { name: "Bookings Queue", icon: CalendarCheck, path: "/bookings" },
+    { name: "Tour Packages", icon: Sparkles, path: "/tours" },
+    { name: "Tour Guides", icon: UserCheck, path: "/guides" },
     { name: "Categories", icon: Tags, path: "/categories" },
     { name: "Places", icon: MapPinned, path: "/place" },
     ...(isPrivileged ? [

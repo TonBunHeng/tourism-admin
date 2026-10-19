@@ -31,6 +31,9 @@ import ReportsAnalytics from '../pages/reports/ReportsAnalytics';
 import Notifications from '../pages/notifications/Notifications';
 import Security from '../pages/security/Security';
 import Businesses from '../pages/businesses/Businesses';
+import Bookings from '../pages/bookings/Bookings';
+import Tours from '../pages/tours/Tours';
+import Guides from '../pages/guides/Guides';
 
 import { SearchProvider } from '../context/SearchContext';
 
@@ -60,6 +63,9 @@ const AppRoutes = () => {
           <Route element={<Main />}>
             {/* General Administrative Pages */}
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/bookings" element={<Bookings />} />
+            <Route path="/tours" element={<Tours />} />
+            <Route path="/guides" element={<Guides />} />
             <Route path="/place" element={<Places />} />
             <Route path="/places" element={<Places />} />
             <Route path="/categories" element={<Categories />} />
