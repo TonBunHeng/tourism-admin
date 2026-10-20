@@ -232,10 +232,22 @@ export default function Tours() {
     setTours(prev => prev.filter(t => t.id !== id));
   };
 
-  const handleToggleStatus = (id) => {
+  const handleToggleStatus = async (id) => {
+    const tour = tours.find(t => t.id === id);
+    const newStatus = tour?.status === 'active' ? 'draft' : 'active';
+    try {
+      if (newStatus === 'active') {
+        await businessService.activate(id);
+      } else {
+        await businessService.suspend(id, { reason: 'Set to draft by administrator.' });
+      }
+    } catch (err) {
+      console.warn('Backend status toggle notice:', err.message);
+    }
+
     setTours(prev => prev.map(t => {
       if (t.id === id) {
-        return { ...t, status: t.status === 'active' ? 'draft' : 'active' };
+        return { ...t, status: newStatus };
       }
       return t;
     }));

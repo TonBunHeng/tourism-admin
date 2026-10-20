@@ -140,10 +140,13 @@ export default function Bookings() {
     try {
       const res = await bookingService.getBookings();
       const list = res?.data?.bookings || res?.data || res || [];
-      if (Array.isArray(list) && list.length > 0) {
-        setBookings(list);
-      } else {
-        setBookings(SAMPLE_FALLBACK_BOOKINGS);
+      if (Array.isArray(list)) {
+        const normalized = list.map((b) => ({
+          ...b,
+          business_name: b.business?.name || b.business_name || 'Hospitality Partner',
+          service_name: b.service?.name || b.service_name || 'Travel Experience',
+        }));
+        setBookings(normalized);
       }
     } catch (err) {
       console.warn('Backend bookings endpoint fallback:', err);
@@ -202,7 +205,9 @@ export default function Bookings() {
         b.customer_name?.toLowerCase().includes(q) ||
         b.customer_email?.toLowerCase().includes(q) ||
         b.business_name?.toLowerCase().includes(q) ||
-        b.service_name?.toLowerCase().includes(q);
+        b.business?.name?.toLowerCase().includes(q) ||
+        b.service_name?.toLowerCase().includes(q) ||
+        b.service?.name?.toLowerCase().includes(q);
       return matchStatus && matchSearch;
     });
   }, [bookings, statusFilter, search]);
