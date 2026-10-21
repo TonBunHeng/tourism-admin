@@ -15,7 +15,7 @@ const donutColors = [
   '#0284C7', // sky-600
 ];
 
-export default function CategoryDistribution({ distribution, timeRange = 'weekly', isLoading = false }) {
+export default function CategoryDistribution({ distribution, timeRange = 'yearly', isLoading = false }) {
   const navigate = useNavigate();
 
   // Purely database-driven: no static or default categories

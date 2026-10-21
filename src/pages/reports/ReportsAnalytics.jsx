@@ -13,19 +13,26 @@ import {
   Download,
   Filter,
   RotateCcw,
-  ChevronDown
+  ChevronDown,
+  TrendingUp,
+  Database,
+  Server
 } from 'lucide-react';
 import {
   ComposedChart,
   BarChart,
   Bar,
   Line,
+  LineChart,
+  Legend,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell
+  Cell,
+  PieChart,
+  Pie
 } from 'recharts';
 import { Link } from 'react-router-dom';
 import placeService from '../../services/placeService';
@@ -36,11 +43,21 @@ import categoryService from '../../services/categoryService';
 import reportService from '../../services/reportService';
 
 export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
-  const [timeframe, setTimeframe] = useState('2026');
+  const [timeframe, setTimeframe] = useState('Year');
   const [selectedDataset, setSelectedDataset] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [isLoading, setIsLoading] = useState(false);
   const [apiAnalytics, setApiAnalytics] = useState(null);
+
+  const timeframeLabel = useMemo(() => {
+    switch (timeframe) {
+      case 'Day': return 'Today';
+      case 'Week': return 'This Week';
+      case 'Month': return 'This Month';
+      case 'Year':
+      default: return '2026';
+    }
+  }, [timeframe]);
 
   // Raw dataset holders
   const [datasets, setDatasets] = useState({
@@ -165,7 +182,8 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
   // Fetch server analytics
   useEffect(() => {
     reportService.getAnalytics({
-      timeframe,
+      timeframe: timeframe.toLowerCase(),
+      range: timeframe.toLowerCase(),
       dataset: selectedDataset,
       status: statusFilter
     })
@@ -197,34 +215,90 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
     }
   }, [selectedDataset, places, events, users, reviews, categories]);
 
-  // Filter items by status if statusFilter is active
+  // Filter items by status and timeframe
   const filteredItems = useMemo(() => {
-    if (statusFilter === 'ALL') return currentDatasetItems;
-    return currentDatasetItems.filter(item => {
-      const s = (item.status || '').toLowerCase();
-      if (statusFilter === 'Active') return s === 'active' || s === 'published' || s === 'approved';
-      if (statusFilter === 'Pending') return s === 'pending' || s === 'upcoming';
-      if (statusFilter === 'Archived') return s === 'archived' || s === 'inactive' || s === 'completed';
-      return true;
-    });
-  }, [currentDatasetItems, statusFilter]);
+    let items = currentDatasetItems;
+    if (statusFilter !== 'ALL') {
+      items = items.filter(item => {
+        const s = (item.status || '').toLowerCase();
+        if (statusFilter === 'Active') return s === 'active' || s === 'published' || s === 'approved';
+        if (statusFilter === 'Pending') return s === 'pending' || s === 'upcoming';
+        if (statusFilter === 'Archived') return s === 'archived' || s === 'inactive' || s === 'completed';
+        return true;
+      });
+    }
+
+    const now = new Date();
+    if (timeframe === 'Day') {
+      const dayFiltered = items.filter(item => {
+        const dStr = item.createdAt || item.startDate || item.joinedDate || item.date;
+        if (!dStr) return false;
+        const d = new Date(dStr);
+        return !isNaN(d.getTime()) && Math.abs(now - d) <= 24 * 60 * 60 * 1000;
+      });
+      return dayFiltered.length > 0 ? dayFiltered : items;
+    } else if (timeframe === 'Week') {
+      const weekFiltered = items.filter(item => {
+        const dStr = item.createdAt || item.startDate || item.joinedDate || item.date;
+        if (!dStr) return false;
+        const d = new Date(dStr);
+        return !isNaN(d.getTime()) && Math.abs(now - d) <= 7 * 24 * 60 * 60 * 1000;
+      });
+      return weekFiltered.length > 0 ? weekFiltered : items;
+    } else if (timeframe === 'Month') {
+      const monthFiltered = items.filter(item => {
+        const dStr = item.createdAt || item.startDate || item.joinedDate || item.date;
+        if (!dStr) return false;
+        const d = new Date(dStr);
+        return !isNaN(d.getTime()) && Math.abs(now - d) <= 30 * 24 * 60 * 60 * 1000;
+      });
+      return monthFiltered.length > 0 ? monthFiltered : items;
+    } else if (timeframe === 'Year') {
+      const yearFiltered = items.filter(item => {
+        const dStr = item.createdAt || item.startDate || item.joinedDate || item.date;
+        if (!dStr) return true;
+        const d = new Date(dStr);
+        return !isNaN(d.getTime()) && (d.getFullYear() === 2026 || d.getFullYear() === now.getFullYear());
+      });
+      return yearFiltered.length > 0 ? yearFiltered : items;
+    }
+
+    return items;
+  }, [currentDatasetItems, statusFilter, timeframe]);
 
   const totalRecords = filteredItems.length;
   const globalTotalRecords = places.length + events.length + users.length + reviews.length + categories.length;
 
-  // Active items calculation
-  const { activeCount, activePct } = useMemo(() => {
+  // Active items and operational breakdown calculation
+  const { activeCount, activePct, pendingCount, archivedCount } = useMemo(() => {
     const itemsToCheck = currentDatasetItems;
-    if (itemsToCheck.length === 0) return { activeCount: 0, activePct: 0 };
-    const active = itemsToCheck.filter(item => {
+    if (itemsToCheck.length === 0) return { activeCount: 0, activePct: 0, pendingCount: 0, archivedCount: 0 };
+    let active = 0;
+    let pending = 0;
+    let archived = 0;
+    itemsToCheck.forEach(item => {
       const s = (item.status || 'active').toLowerCase();
-      return s === 'active' || s === 'published' || s === 'approved' || s === 'upcoming';
-    }).length;
+      if (s === 'active' || s === 'published' || s === 'approved') {
+        active += 1;
+      } else if (s === 'pending' || s === 'upcoming') {
+        pending += 1;
+      } else {
+        archived += 1;
+      }
+    });
     return {
       activeCount: active,
-      activePct: Math.round((active / itemsToCheck.length) * 100)
+      activePct: Math.round((active / itemsToCheck.length) * 100),
+      pendingCount: pending,
+      archivedCount: archived
     };
   }, [currentDatasetItems]);
+
+  const healthStatus = useMemo(() => {
+    if (activePct >= 80) return { label: 'Optimal Health', color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' };
+    if (activePct >= 60) return { label: 'Good Standing', color: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800' };
+    return { label: 'Attention Needed', color: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800' };
+  }, [activePct]);
 
   // Quality & Rating score
   const avgScore = useMemo(() => {
@@ -237,48 +311,92 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
       : '0.0';
   }, [places, reviews]);
 
-  // Real Monthly Ingestion Trends
+  // Real Ingestion Trends dynamically partitioned by Day, Week, Month, or Year
   const monthlyData = useMemo(() => {
-    if (apiAnalytics?.monthly_trends && Array.isArray(apiAnalytics.monthly_trends)) {
+    let labels = [];
+    let getBucketIndex = (d) => 0;
+
+    if (timeframe === 'Day') {
+      labels = ['12 AM', '4 AM', '8 AM', '12 PM', '4 PM', '8 PM'];
+      getBucketIndex = (d) => Math.min(5, Math.max(0, Math.floor(d.getHours() / 4)));
+    } else if (timeframe === 'Week') {
+      labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      getBucketIndex = (d) => (d.getDay() + 6) % 7;
+    } else if (timeframe === 'Month') {
+      labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+      getBucketIndex = (d) => Math.min(3, Math.max(0, Math.floor((d.getDate() - 1) / 7)));
+    } else {
+      labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      getBucketIndex = (d) => d.getMonth();
+    }
+
+    if (apiAnalytics?.monthly_trends && Array.isArray(apiAnalytics.monthly_trends) && apiAnalytics.monthly_trends.length === labels.length) {
       let run = 0;
-      return apiAnalytics.monthly_trends.map(item => {
+      return apiAnalytics.monthly_trends.map((item, idx) => {
+        const label = labels[idx];
         const count = Number(item.recordsIngested ?? item.count ?? 0);
+        const active = Number(item.active ?? Math.round(count * 0.8));
+        const other = Math.max(0, count - active);
         run += count;
         return {
-          month: item.month,
+          month: label,
+          label: label,
+          period: label,
           recordsIngested: count,
+          active,
+          other,
           cumulative: run
         };
       });
     }
 
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const targetYear = timeframe === '2025' ? 2025 : timeframe === '2026' ? 2026 : null;
-    const monthCounts = new Array(12).fill(0);
-
-    currentDatasetItems.forEach(item => {
+    const bucketItems = labels.map(() => []);
+    filteredItems.forEach(item => {
       const dStr = item.createdAt || item.startDate || item.joinedDate || item.date;
       if (dStr) {
         const d = new Date(dStr);
         if (!isNaN(d.getTime())) {
-          if (!targetYear || d.getFullYear() === targetYear) {
-            monthCounts[d.getMonth()] += 1;
+          const idx = getBucketIndex(d);
+          if (idx >= 0 && idx < labels.length) {
+            bucketItems[idx].push(item);
           }
         }
       }
     });
 
     let runningIngested = 0;
-    return months.map((month, idx) => {
-      const count = monthCounts[idx];
+    return labels.map((label, idx) => {
+      const itemsInBucket = bucketItems[idx];
+      let active = 0;
+      let other = 0;
+
+      itemsInBucket.forEach(item => {
+        const s = (item.status || 'active').toLowerCase();
+        if (s === 'active' || s === 'published' || s === 'approved') {
+          active += 1;
+        } else {
+          other += 1;
+        }
+      });
+
+      const count = active + other;
       runningIngested += count;
+
       return {
-        month,
+        month: label,
+        label: label,
+        period: label,
         recordsIngested: count,
+        active,
+        other,
         cumulative: runningIngested
       };
     });
-  }, [apiAnalytics, currentDatasetItems, timeframe]);
+  }, [apiAnalytics, filteredItems, timeframe]);
+
+  const peakMonth = useMemo(() => {
+    return monthlyData.reduce((max, curr) => curr.recordsIngested > max.count ? { name: curr.month, count: curr.recordsIngested } : max, { name: monthlyData[0]?.month || 'Jan', count: 0 });
+  }, [monthlyData]);
 
   // Composition Breakdown
   const compositionData = useMemo(() => {
@@ -334,35 +452,20 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
     }));
   }, [selectedDataset, globalTotalRecords, places, events, users, reviews, categories, currentDatasetItems]);
 
-  // Operational Status Breakdown Data
+  // Operational Status Breakdown Data (for Donut Hub)
   const statusBreakdownData = useMemo(() => {
-    let active = 0;
-    let pending = 0;
-    let archived = 0;
-
-    currentDatasetItems.forEach(item => {
-      const s = (item.status || 'active').toLowerCase();
-      if (s === 'active' || s === 'published' || s === 'approved') {
-        active += 1;
-      } else if (s === 'pending' || s === 'upcoming') {
-        pending += 1;
-      } else {
-        archived += 1;
-      }
-    });
-
     const total = currentDatasetItems.length || 1;
     return [
-      { label: 'Active / Published', name: 'Active / Published', count: active, percentage: Math.round((active / total) * 100), color: 'bg-emerald-500', fillColor: '#10b981' },
-      { label: 'Pending / Upcoming', name: 'Pending / Upcoming', count: pending, percentage: Math.round((pending / total) * 100), color: 'bg-amber-500', fillColor: '#f59e0b' },
-      { label: 'Archived / Inactive', name: 'Archived / Inactive', count: archived, percentage: Math.round((archived / total) * 100), color: 'bg-gray-400', fillColor: '#9ca3af' }
-    ];
-  }, [currentDatasetItems]);
+      { name: 'Active / Published', count: activeCount, percentage: Math.round((activeCount / total) * 100), color: '#10b981', bgClass: 'bg-emerald-500' },
+      { name: 'Pending / Review', count: pendingCount, percentage: Math.round((pendingCount / total) * 100), color: '#f59e0b', bgClass: 'bg-amber-500' },
+      { name: 'Archived / Inactive', count: archivedCount, percentage: Math.round((archivedCount / total) * 100), color: '#94a3b8', bgClass: 'bg-gray-400' }
+    ].filter(item => item.count > 0 || currentDatasetItems.length === 0);
+  }, [currentDatasetItems, activeCount, pendingCount, archivedCount]);
 
-  const isFilterActive = timeframe !== '2026' || selectedDataset !== 'ALL' || statusFilter !== 'ALL';
+  const isFilterActive = timeframe !== 'Year' || selectedDataset !== 'ALL' || statusFilter !== 'ALL';
 
   const handleReset = () => {
-    setTimeframe('2026');
+    setTimeframe('Year');
     setSelectedDataset('ALL');
     setStatusFilter('ALL');
   };
@@ -504,22 +607,19 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
               <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
             </div>
 
-            {/* Timeframe Selector */}
-            <div className="inline-flex rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-0.5">
-              {['2026', '2025', 'ALL'].map((tf) => (
-                <button
-                  key={tf}
-                  type="button"
-                  onClick={() => setTimeframe(tf)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
-                    timeframe === tf
-                      ? 'bg-[#003E83] text-white shadow-xs'
-                      : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-gray-100 dark:hover:bg-zinc-800'
-                  }`}
-                >
-                  {tf}
-                </button>
-              ))}
+            {/* Timeframe Selector Dropdown */}
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={timeframe === '2026' ? 'Year' : (timeframe || 'Year')}
+                onChange={(e) => setTimeframe(e.target.value)}
+                className="appearance-none w-full sm:w-auto pl-3.5 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent cursor-pointer shadow-xs"
+              >
+                <option value="Year">Year</option>
+                <option value="Month">Month</option>
+                <option value="Week">Week</option>
+                <option value="Day">Day</option>
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
             </div>
 
             {isFilterActive && (
@@ -536,37 +636,43 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
         </div>
       </div>
 
-      {/* 4 & 5. Balanced Side-by-Side Analytics Charts Grid with Smooth Animations */}
+      {/* 4. Balanced Side-by-Side Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 sm:mb-8">
         
-        {/* Chart 1: Record Ingestion Activity */}
+        {/* Chart 1: Record Ingestion Velocity */}
         <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 flex flex-col justify-between">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            {/* Header: Title + Volume Badge */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <div>
                 <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
-                  <span>Record Ingestion Activity ({timeframe})</span>
+                  <span>Record Ingestion Velocity ({timeframeLabel})</span>
                 </h3>
                 <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                  Monthly new records and cumulative database volume
+                  {timeframe === 'Day' ? 'Hourly' : timeframe === 'Week' ? 'Daily' : timeframe === 'Month' ? 'Weekly' : 'Monthly'} distribution of active/published vs pending records
                 </p>
               </div>
-              <div className="flex items-center gap-3 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#003E83]" />
-                  New Records
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-0.5 bg-emerald-500 rounded-full" />
-                  Cumulative Total
-                </span>
-              </div>
+              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-md border border-blue-100 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 text-[#003E83] dark:text-blue-400 shrink-0 self-start sm:self-center">
+                Total: {totalRecords.toLocaleString()} Records
+              </span>
+            </div>
+
+            {/* Clean Non-Wrapped Legend Under Title */}
+            <div className="flex items-center gap-3 sm:gap-4 flex-wrap mb-3 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+              <span className="inline-flex items-center gap-1.5 font-medium">
+                <span className="w-2.5 h-2.5 rounded-xs bg-[#10b981]" />
+                <span>Active / Published</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 font-medium">
+                <span className="w-2.5 h-2.5 rounded-xs bg-[#003E83]" />
+                <span>Pending / Review</span>
+              </span>
             </div>
 
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={monthlyData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
                   <XAxis 
                     dataKey="month" 
@@ -589,18 +695,31 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
                   <Tooltip
                     content={({ active, payload, label }) => {
                       if (active && payload && payload.length) {
-                        const newRecs = payload.find(p => p.dataKey === 'recordsIngested')?.value ?? 0;
-                        const cum = payload.find(p => p.dataKey === 'cumulative')?.value ?? 0;
+                        const mData = payload[0]?.payload;
+                        const actCount = mData?.active || 0;
+                        const othCount = mData?.other || 0;
+                        const totM = actCount + othCount;
                         return (
-                          <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
-                            <p className="font-semibold text-gray-900 dark:text-zinc-100">{label}</p>
-                            <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
-                              <span>New Records:</span>
-                              <span className="font-bold text-[#003E83] dark:text-blue-400">{newRecs}</span>
+                          <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1.5 min-w-[170px]">
+                            <div className="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-1">
+                              <p className="font-bold text-gray-900 dark:text-zinc-100">{label}</p>
+                              <span className="text-[11px] font-semibold text-gray-500 dark:text-zinc-400">{totM} {totM === 1 ? 'record' : 'records'}</span>
                             </div>
-                            <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
-                              <span>Cumulative Total:</span>
-                              <span className="font-bold text-emerald-500">{cum}</span>
+                            <div className="space-y-1 text-gray-600 dark:text-zinc-300">
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="flex items-center gap-1.5">
+                                  <span className="w-2 h-2 rounded-xs bg-[#10b981]" />
+                                  Active:
+                                </span>
+                                <span className="font-bold text-[#10b981]">{actCount}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="flex items-center gap-1.5">
+                                  <span className="w-2 h-2 rounded-xs bg-[#003E83]" />
+                                  Pending / Other:
+                                </span>
+                                <span className="font-bold text-[#003E83] dark:text-blue-400">{othCount}</span>
+                              </div>
                             </div>
                           </div>
                         );
@@ -608,146 +727,256 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
                       return null;
                     }}
                   />
-                  <Bar dataKey="recordsIngested" fill="#003E83" radius={[3, 3, 0, 0]} name="New Records" barSize={16} isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
-                  <Line type="monotone" dataKey="cumulative" stroke="#10B981" strokeWidth={2.5} dot={{ r: 3, fill: '#10B981' }} activeDot={{ r: 5 }} name="Cumulative Total" isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
-                </ComposedChart>
+                  <Bar dataKey="active" stackId="recs" fill="#10b981" radius={[0, 0, 0, 0]} name="Active / Published" barSize={16} isAnimationActive={true} animationDuration={800} />
+                  <Bar dataKey="other" stackId="recs" fill="#003E83" radius={[3, 3, 0, 0]} name="Pending / Review" barSize={16} isAnimationActive={true} animationDuration={800} />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
+
+          {/* Symmetrical 3-Card Metrics Footer */}
+          <div className="mt-3 pt-2.5 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-3 gap-2 text-center">
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">{timeframeLabel}</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] truncate">Timeframe</p>
+            </div>
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+              <p className="text-xs sm:text-sm font-bold text-[#003E83] dark:text-blue-400">{totalRecords.toLocaleString()}</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] truncate">Total Ingested</p>
+            </div>
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">{peakMonth.name} ({peakMonth.count})</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] truncate">Peak Ingestion</p>
+            </div>
+          </div>
         </div>
 
-        {/* Chart 2: Dataset Composition Breakdown */}
+        {/* Chart 2: System Health & Dataset Distribution Hub */}
         <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <div>
                 <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
-                  <span>Dataset Composition ({selectedDataset === 'ALL' ? 'Global' : selectedDataset})</span>
+                  <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>System Health & Dataset Hub</span>
                 </h3>
                 <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                  Volume distribution by entity category
+                  Entity operational status and cross-dataset distribution
                 </p>
               </div>
-              <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                Based on {totalRecords.toLocaleString()} records
+              <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md border shrink-0 ${healthStatus.color}`}>
+                Health {activePct}% • {healthStatus.label}
               </span>
             </div>
 
-            {compositionData.length === 0 ? (
-              <p className="text-xs text-gray-400 text-center py-10">No dataset composition data</p>
-            ) : (
-              <div className="h-[175px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={compositionData} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-                    <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
-                    <YAxis dataKey="name" type="category" interval={0} width={130} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      cursor={{ fill: 'rgba(107, 114, 128, 0.05)' }}
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const data = payload[0].payload;
-                          return (
-                            <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
-                              <p className="font-semibold text-gray-900 dark:text-zinc-100">{data.name}</p>
-                              <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
-                                <span className="text-gray-600 dark:text-zinc-300 font-semibold">
-                                  {data.count} records ({data.percentage}%)
-                                </span>
+            {/* Split Panel: Donut on Left, Dataset Matrix on Right */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              {/* Left Column: Donut Operational Health Gauge */}
+              <div className="sm:col-span-5 flex flex-col items-center justify-center">
+                <div className="relative w-full h-[160px] flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={statusBreakdownData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={46}
+                        outerRadius={68}
+                        paddingAngle={3}
+                        dataKey="count"
+                        isAnimationActive={true}
+                        animationDuration={800}
+                      >
+                        {statusBreakdownData.map((entry, index) => (
+                          <Cell key={`donut-cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2 rounded-md shadow-md text-xs space-y-0.5">
+                                <p className="font-semibold text-gray-900 dark:text-zinc-100">{data.name}</p>
+                                <p className="text-gray-600 dark:text-zinc-400">{data.count} records ({data.percentage}%)</p>
                               </div>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={16} isAnimationActive={true} animationDuration={800} animationEasing="ease-out">
-                      {compositionData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fillColor} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-
-          {/* Composition Badges */}
-          <div className="mt-3 pt-2.5 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
-            {compositionData.slice(0, 3).map((item, idx) => (
-              <div key={idx} className="p-2 rounded-md bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)]">
-                <p className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">{item.count} ({item.percentage}%)</p>
-                <p className="text-[10px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] truncate">{item.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>
-
-      {/* 6. Recent Dataset Records Explorer List */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden">
-        <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-              Database Records Overview
-            </h3>
-            <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-              Displaying tourism database entities matching active filter criteria
-            </p>
-          </div>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
-            {filteredItems.length} {filteredItems.length === 1 ? 'record' : 'records'}
-          </span>
-        </div>
-
-        {filteredItems.length === 0 ? (
-          <div className="py-10 px-4 text-center text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] font-medium">
-            No database records found matching active filter criteria.
-          </div>
-        ) : (
-          <div className="divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)]">
-            {filteredItems.slice(0, 10).map((item, index) => {
-              const itemName = item.name || item.title || 'Database Entity';
-              const itemType = item.type || (item.category ? 'Place' : item.location ? 'Event' : item.email ? 'User' : 'Record');
-              const itemDate = item.createdAt || item.startDate || item.joinedDate || item.date || 'Recent';
-              const statusStr = item.status || 'Active';
-              const isActive = ['active', 'published', 'approved'].includes(statusStr.toLowerCase());
-
-              return (
-                <div key={item.id || index} className="px-4 md:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <span className="w-6 h-6 rounded-md bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center justify-center font-semibold text-[11px] shrink-0 mt-0.5">
-                      {index + 1}
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  {/* Center Metric */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] tracking-tight">
+                      {activePct}%
                     </span>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
-                        {itemName}
-                      </p>
-                      <p className="text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] mt-1">
-                        Logged date: {itemDate}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                    <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                      {itemType}
-                    </span>
-                    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-semibold border ${
-                      isActive
-                        ? 'bg-[var(--color-success-bg)] text-[var(--color-success-text)] dark:bg-[var(--color-success-dark-bg)] dark:text-[var(--color-success-dark-text)] border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]'
-                        : 'bg-[var(--color-warning-bg)] text-[var(--color-warning-text)] dark:bg-[var(--color-warning-dark-bg)] dark:text-[var(--color-warning-dark-text)] border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)]'
-                    }`}>
-                      {statusStr}
+                    <span className="text-[10px] font-semibold uppercase text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] tracking-wider">
+                      Operational
                     </span>
                   </div>
                 </div>
-              );
-            })}
+
+                <div className="text-center mt-1">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-[#003E83] dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
+                    Total Entities: {totalRecords.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Column: Dataset Composition Progress Matrix */}
+              <div className="sm:col-span-7 flex flex-col justify-center space-y-2">
+                {compositionData.length === 0 ? (
+                  <p className="text-xs text-gray-400 text-center py-6">No dataset composition data</p>
+                ) : (
+                  compositionData.slice(0, 5).map((item) => (
+                    <div key={item.name} className="flex items-center gap-2 text-xs">
+                      <span className="w-28 font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate shrink-0" title={item.name}>
+                        {item.name}
+                      </span>
+                      <div className="flex-1 bg-gray-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-700 ease-out"
+                          style={{
+                            width: `${item.percentage}%`,
+                            backgroundColor: item.fillColor
+                          }}
+                        />
+                      </div>
+                      <span className="w-14 text-right font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] text-[11px] shrink-0">
+                        {item.count} ({item.percentage}%)
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Symmetrical 3-Card Metrics Footer */}
+          <div className="mt-3 pt-2.5 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-3 gap-2 text-center">
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">{activeCount.toLocaleString()}</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] truncate">Active ({activePct}%)</p>
+            </div>
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]">{pendingCount.toLocaleString()}</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)] truncate">Pending Review</p>
+            </div>
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-purple-badge-bg)] dark:bg-[var(--color-purple-badge-dark-bg)] border border-[var(--color-purple-badge-border)] dark:border-[var(--color-purple-badge-dark-border)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)]">{Object.keys(datasets).length} Datasets</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] truncate">Schema Scope</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Cumulative Database Growth & Ingestion Trajectory Line Chart (Modeled after UserGrowthChart) */}
+      <div className="w-full bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-6 mb-6 sm:mb-8 transition-opacity duration-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+          <div>
+            <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
+              <span>Cumulative Database Growth & Ingestion Trajectory ({timeframeLabel})</span>
+            </h3>
+            <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+              Total cumulative database footprint vs {timeframe === 'Day' ? 'hourly' : timeframe === 'Week' ? 'daily' : timeframe === 'Month' ? 'weekly' : 'monthly'} new record intake
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-900/50">
+              <TrendingUp className="w-3.5 h-3.5" />
+              {totalRecords.toLocaleString()} Total System Records ({timeframeLabel})
+            </span>
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center gap-4 mb-4 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-3 h-3 rounded-full bg-[#003E83]" />
+            {timeframe === 'Day' ? 'Hourly' : timeframe === 'Week' ? 'Daily' : timeframe === 'Month' ? 'Weekly' : 'Monthly'} New Records
+          </span>
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-3 h-3 rounded-full bg-[#10b981]" />
+            Cumulative Database Volume
+          </span>
+        </div>
+
+        <div className="h-72 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={monthlyData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" opacity={0.15} vertical={false} />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 12, fill: '#6B7280' }}
+                axisLine={{ stroke: '#D1D5DB' }}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: '#6B7280' }}
+                axisLine={false}
+                tickLine={false}
+                width={36}
+                domain={[0, (dataMax) => (Number.isFinite(dataMax) && dataMax > 5 ? Math.ceil(dataMax * 1.1) : 5)]}
+                allowDecimals={false}
+              />
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    const rec = payload.find(p => p.dataKey === 'recordsIngested')?.value ?? 0;
+                    const cum = payload.find(p => p.dataKey === 'cumulative')?.value ?? 0;
+                    return (
+                      <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-3 rounded-md shadow-md text-xs space-y-1.5 min-w-[190px]">
+                        <p className="font-bold text-gray-900 dark:text-zinc-100 border-b border-gray-100 dark:border-zinc-800 pb-1">{label} ({timeframeLabel})</p>
+                        <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-[#003E83]" />
+                            {timeframe === 'Day' ? 'Hourly' : timeframe === 'Week' ? 'Daily' : timeframe === 'Month' ? 'Weekly' : 'Monthly'} Ingested:
+                          </span>
+                          <span className="font-bold text-[#003E83] dark:text-blue-400">{rec} records</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
+                            Cumulative Volume:
+                          </span>
+                          <span className="font-bold text-[#10b981]">{cum} total</span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="recordsIngested"
+                stroke="#003E83"
+                strokeWidth={2.5}
+                dot={{ r: 3.5, fill: '#003E83' }}
+                activeDot={{ r: 6 }}
+                name="New Records Ingested"
+                isAnimationActive={true}
+                animationDuration={800}
+                animationEasing="ease-out"
+              />
+              <Line
+                type="monotone"
+                dataKey="cumulative"
+                stroke="#10b981"
+                strokeWidth={2.5}
+                dot={{ r: 3.5, fill: '#10b981' }}
+                activeDot={{ r: 6 }}
+                name="Cumulative Total"
+                isAnimationActive={true}
+                animationDuration={800}
+                animationEasing="ease-out"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ const barColors = [
   '#6D28D9', // purple-700
 ];
 
-export default function TopPlaces({ places, topPlaces, timeRange = 'weekly', isLoading = false }) {
+export default function TopPlaces({ places, topPlaces, timeRange = 'yearly', isLoading = false }) {
   const navigate = useNavigate();
 
   const rawList = (Array.isArray(places) && places.length > 0)

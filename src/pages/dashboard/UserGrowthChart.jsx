@@ -6,7 +6,7 @@ const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const monthWeeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
 const todayHours = ['12 AM', '4 AM', '8 AM', '12 PM', '4 PM', '8 PM'];
 
-export default function UserGrowthChart({ growthData, timeRange = 'weekly', isLoading = false }) {
+export default function UserGrowthChart({ growthData, timeRange = 'yearly', isLoading = false }) {
   // Purely database-driven: if growthData is empty or loading, fallback appropriately by timeRange
   const fallbackList = timeRange === 'today'
     ? todayHours

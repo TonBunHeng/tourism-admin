@@ -167,16 +167,7 @@ export default function FavoritesList({
         <table className="w-full text-left divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)] table-auto">
           <thead className="bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/50">
             <tr>
-              <th className="w-10 pl-4 pr-1 py-3.5 text-center">
-                <input
-                  type="checkbox"
-                  checked={isAllSelected}
-                  onChange={onSelectAll}
-                  aria-label="Select all favorites"
-                  className="w-4 h-4 rounded-md text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-zinc-600 cursor-pointer"
-                />
-              </th>
-              <th className="pl-2 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-8 text-center">
+              <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">
                 #
               </th>
               <th className="px-4 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider">
@@ -218,17 +209,7 @@ export default function FavoritesList({
                       isSelected ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''
                     }`}
                   >
-                    <td className="w-10 pl-4 pr-1 py-3.5 text-center">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleSelectOne(favorite.id)}
-                        aria-label={`Select ${favorite.name}`}
-                        className="w-4 h-4 rounded-md text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-zinc-600 cursor-pointer"
-                      />
-                    </td>
-
-                    <td className="pl-2 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
+                    <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
                       {startIndex + index + 1}
                     </td>
 

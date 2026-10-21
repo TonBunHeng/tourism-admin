@@ -205,8 +205,11 @@ export default function RatingsTable({
               <th className="px-3 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap w-44">
                 Target Place
               </th>
-              <th className="px-3 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap w-32">
+              <th className="px-3 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap w-28">
                 Rating
+              </th>
+              <th className="px-3 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap w-32">
+                Date
               </th>
               <th className="px-3 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap w-28">
                 Status
@@ -259,14 +262,11 @@ export default function RatingsTable({
                           <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] line-clamp-1 mt-0.5">
                             {review.title || review.comment}
                           </p>
-                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">
-                            <span>{reviewDate}</span>
-                            {review.images && review.images.length > 0 && (
-                              <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400 font-medium">
-                                <ImageIcon className="w-3 h-3" /> {review.images.length} photos
-                              </span>
-                            )}
-                          </div>
+                          {review.images && review.images.length > 0 && (
+                            <div className="flex items-center gap-1 mt-0.5 text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+                              <ImageIcon className="w-3 h-3" /> {review.images.length} {review.images.length === 1 ? 'photo' : 'photos'}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -290,6 +290,10 @@ export default function RatingsTable({
                           </span>
                         )}
                       </div>
+                    </td>
+
+                    <td className="px-3 py-3.5 whitespace-nowrap text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono">
+                      {reviewDate}
                     </td>
 
                     <td className="px-3 py-3.5 whitespace-nowrap">
@@ -355,7 +359,7 @@ export default function RatingsTable({
               })
             ) : (
               <tr>
-                <td colSpan="6" className="text-center py-12 px-4">
+                <td colSpan="7" className="text-center py-12 px-4">
                   <MessageSquare className="w-12 h-12 text-blue-500 mx-auto mb-2 opacity-80" />
                   <h3 className="text-base font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mb-1">
                     No reviews found

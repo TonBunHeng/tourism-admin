@@ -26,10 +26,10 @@ const NAV_SECTIONS = [
         name: 'Tours & Bookings',
         icon: Compass,
         children: [
-          { name: 'Bookings Queue', icon: CalendarCheck, path: '/bookings' },
+          { name: 'Businesses', icon: Building2, path: '/businesses', match: ['/businesses', '/business'], requires: 'privileged' },
+          { name: 'Bookings', icon: CalendarCheck, path: '/bookings' },
           { name: 'Tour Packages', icon: Sparkles, path: '/tours' },
           { name: 'Tour Guides', icon: UserCheck, path: '/guides' },
-          { name: 'Businesses', icon: Building2, path: '/businesses', match: ['/businesses', '/business'], requires: 'privileged' },
         ],
       },
       {
@@ -70,7 +70,7 @@ const NAV_SECTIONS = [
           { name: 'Users', icon: Users, path: '/users', match: ['/users', '/user'], requires: 'privileged' },
           { name: 'Security Alerts', icon: ShieldCheck, path: '/security', requires: 'privileged' },
           { name: 'Deletion Requests', icon: Trash2, path: '/deletion-requests', requires: 'super_admin' },
-          { name: 'Settings', icon: Settings, path: '/settings', requires: 'privileged' },
+
         ],
       },
       {
@@ -82,6 +82,7 @@ const NAV_SECTIONS = [
         ],
       },
       { name: 'Profile', icon: User, path: '/profile' },
+      { name: 'Settings', icon: Settings, path: '/settings' },
       { name: 'Logout', icon: LogOut, action: 'logout' },
     ],
   },

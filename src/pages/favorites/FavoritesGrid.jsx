@@ -110,16 +110,6 @@ export default function FavoritesGrid({
               {/* Dark overlay for contrast */}
               <div className="absolute inset-0 bg-black/40" />
 
-              {/* Selection Checkbox */}
-              <div className="absolute top-3 left-3 z-10">
-                <input
-                  type="checkbox"
-                  checked={isSelected}
-                  onChange={(e) => handleSelect(favorite.id, e)}
-                  aria-label={`Select ${favorite.name}`}
-                  className="w-4 h-4 rounded-md text-[#003E83] focus:ring-[#003E83] border-gray-300 bg-white cursor-pointer shadow-xs"
-                />
-              </div>
 
               {/* Heart Badge (Top Right) */}
               <div className="absolute top-3 right-3 z-10">

@@ -5,7 +5,7 @@ import {
   CalendarCheck, Sparkles
 } from 'lucide-react';
 
-export default function DashboardStats({ apiStats, timeRange = 'weekly' }) {
+export default function DashboardStats({ apiStats, timeRange = 'yearly' }) {
   const periodChanges = apiStats?.period_changes || {};
 
   const periodLabel = timeRange === 'today'

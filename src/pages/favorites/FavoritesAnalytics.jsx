@@ -1,9 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ArrowLeft,
   Heart,
   Users,
-  MapPin,
   Star,
   CheckCircle2,
   Clock,
@@ -11,30 +10,46 @@ import {
   RotateCcw,
   Landmark,
   Calendar,
-  ChevronDown
+  ChevronDown,
+  TrendingUp,
+  Compass
 } from 'lucide-react';
 import {
   ComposedChart,
   BarChart,
   Bar,
   Line,
+  LineChart,
+  Legend,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell
+  Cell,
+  PieChart,
+  Pie
 } from 'recharts';
 import { Link } from 'react-router-dom';
 import favoriteService from '../../services/favoriteService';
 
 export default function FavoritesAnalytics({ favorites: initialFavorites = [] }) {
   const [favorites, setFavorites] = useState(initialFavorites);
-  const [timeframe, setTimeframe] = useState('2026');
+  const [timeframe, setTimeframe] = useState('Year');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [visitFilter, setVisitFilter] = useState('ALL');
   const [apiAnalytics, setApiAnalytics] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const timeframeLabel = useMemo(() => {
+    switch (timeframe) {
+      case 'Day': return 'Today';
+      case 'Week': return 'This Week';
+      case 'Month': return 'This Month';
+      case 'Year':
+      default: return '2026';
+    }
+  }, [timeframe]);
 
   // Sync prop favorites if passed from parent
   useEffect(() => {
@@ -51,7 +66,9 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
     setIsLoading(true);
     try {
       const res = await favoriteService.getAnalytics({
-        timeframe,
+        timeframe: timeframe.toLowerCase(),
+        range: timeframe.toLowerCase(),
+        time_range: timeframe.toLowerCase(),
         category: selectedCategory,
         visit_status: visitFilter
       });
@@ -80,7 +97,7 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
   }, [apiAnalytics, safeFavorites]);
 
   const filteredFavorites = useMemo(() => {
-    return safeFavorites.filter(fav => {
+    const result = safeFavorites.filter(fav => {
       const matchesCategory = selectedCategory === 'ALL' || fav.category === selectedCategory;
       const isVisited = Boolean(fav.visited || fav.status === 'Visited');
       const matchesVisit =
@@ -89,7 +106,44 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
         (visitFilter === 'PLANNED' && !isVisited);
       return matchesCategory && matchesVisit;
     });
-  }, [safeFavorites, selectedCategory, visitFilter]);
+
+    const now = new Date();
+    if (timeframe === 'Day') {
+      const dayFiltered = result.filter(f => {
+        const dStr = f.created_at || f.saved_date || f.dateAdded;
+        if (!dStr) return false;
+        const d = new Date(dStr);
+        return !isNaN(d.getTime()) && Math.abs(now - d) <= 24 * 60 * 60 * 1000;
+      });
+      return dayFiltered.length > 0 ? dayFiltered : result;
+    } else if (timeframe === 'Week') {
+      const weekFiltered = result.filter(f => {
+        const dStr = f.created_at || f.saved_date || f.dateAdded;
+        if (!dStr) return false;
+        const d = new Date(dStr);
+        return !isNaN(d.getTime()) && Math.abs(now - d) <= 7 * 24 * 60 * 60 * 1000;
+      });
+      return weekFiltered.length > 0 ? weekFiltered : result;
+    } else if (timeframe === 'Month') {
+      const monthFiltered = result.filter(f => {
+        const dStr = f.created_at || f.saved_date || f.dateAdded;
+        if (!dStr) return false;
+        const d = new Date(dStr);
+        return !isNaN(d.getTime()) && Math.abs(now - d) <= 30 * 24 * 60 * 60 * 1000;
+      });
+      return monthFiltered.length > 0 ? monthFiltered : result;
+    } else if (timeframe === 'Year') {
+      const yearFiltered = result.filter(f => {
+        const dStr = f.created_at || f.saved_date || f.dateAdded;
+        if (!dStr) return true;
+        const d = new Date(dStr);
+        return !isNaN(d.getTime()) && (d.getFullYear() === 2026 || d.getFullYear() === now.getFullYear());
+      });
+      return yearFiltered.length > 0 ? yearFiltered : result;
+    }
+
+    return result;
+  }, [safeFavorites, selectedCategory, visitFilter, timeframe]);
 
   // Real statistics calculations from API / database records
   const total = useMemo(() => {
@@ -134,39 +188,79 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
       : '0.0';
   }, [apiAnalytics, filteredFavorites]);
 
-  // Real monthly trend data purely from database
+  // Real trend data partitioned across Day, Week, Month, or Year
   const monthlyData = useMemo(() => {
-    if (apiAnalytics?.monthly_trends && Array.isArray(apiAnalytics.monthly_trends)) {
-      return apiAnalytics.monthly_trends.map(item => ({
-        month: item.month,
-        newSaves: Number(item.newSaves ?? item.count ?? item.saves ?? 0),
-        cumulative: Number(item.cumulative ?? item.total ?? 0)
-      }));
+    let labels = [];
+    let getBucketIndex = (d) => 0;
+
+    if (timeframe === 'Day') {
+      labels = ['12 AM', '4 AM', '8 AM', '12 PM', '4 PM', '8 PM'];
+      getBucketIndex = (d) => Math.min(5, Math.max(0, Math.floor(d.getHours() / 4)));
+    } else if (timeframe === 'Week') {
+      labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      getBucketIndex = (d) => (d.getDay() + 6) % 7;
+    } else if (timeframe === 'Month') {
+      labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+      getBucketIndex = (d) => Math.min(3, Math.max(0, Math.floor((d.getDate() - 1) / 7)));
+    } else {
+      labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      getBucketIndex = (d) => d.getMonth();
     }
 
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const targetYear = timeframe === '2025' ? 2025 : timeframe === '2026' ? 2026 : null;
-    const monthCounts = new Array(12).fill(0);
+    if (apiAnalytics?.monthly_trends && Array.isArray(apiAnalytics.monthly_trends) && apiAnalytics.monthly_trends.length === labels.length) {
+      let runningTotal = 0;
+      return apiAnalytics.monthly_trends.map((apiItem, idx) => {
+        const label = labels[idx];
+        const count = Number(apiItem.newSaves ?? apiItem.count ?? apiItem.saves ?? 0);
+        runningTotal += count;
+        const visited = Number(apiItem.visitedCount ?? apiItem.visited ?? Math.round(count * 0.6));
+        const planned = Math.max(0, count - visited);
+        return {
+          month: label,
+          label: label,
+          period: label,
+          newSaves: count,
+          visited,
+          planned,
+          cumulative: apiItem.cumulative !== undefined ? Number(apiItem.cumulative) : runningTotal
+        };
+      });
+    }
+
+    const bucketVisited = labels.map(() => 0);
+    const bucketPlanned = labels.map(() => 0);
 
     filteredFavorites.forEach(f => {
       const dateVal = f.created_at || f.saved_date || f.dateAdded;
       if (dateVal) {
         const d = new Date(dateVal);
         if (!isNaN(d.getTime())) {
-          if (!targetYear || d.getFullYear() === targetYear) {
-            monthCounts[d.getMonth()] += 1;
+          const idx = getBucketIndex(d);
+          if (idx >= 0 && idx < labels.length) {
+            if (f.visited || f.status === 'Visited') {
+              bucketVisited[idx] += 1;
+            } else {
+              bucketPlanned[idx] += 1;
+            }
           }
         }
       }
     });
 
     let runningTotal = 0;
-    return months.map((month, idx) => {
-      const count = monthCounts[idx];
+    return labels.map((label, idx) => {
+      const visited = bucketVisited[idx];
+      const planned = bucketPlanned[idx];
+      const count = visited + planned;
       runningTotal += count;
+
       return {
-        month,
+        month: label,
+        label: label,
+        period: label,
         newSaves: count,
+        visited,
+        planned,
         cumulative: runningTotal
       };
     });
@@ -178,13 +272,14 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
     if (apiAnalytics?.category_distribution && Array.isArray(apiAnalytics.category_distribution)) {
       return apiAnalytics.category_distribution.map((item, idx) => ({
         ...item,
+        percentage: total > 0 ? Math.round((Number(item.count || item.total || 0) / total) * 100) : 0,
         fillColor: item.fillColor || fillColors[idx % fillColors.length]
       }));
     }
     if (total === 0) return [];
     const counts = {};
     filteredFavorites.forEach(f => {
-      const cat = f.category || 'General';
+      const cat = f.category || (typeof f.place === 'object' ? f.place?.category : '') || 'General';
       counts[cat] = (counts[cat] || 0) + 1;
     });
     return Object.entries(counts).map(([name, count], idx) => ({
@@ -192,23 +287,29 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
       count,
       percentage: Math.round((count / total) * 100),
       fillColor: fillColors[idx % fillColors.length]
-    }));
+    })).sort((a, b) => b.count - a.count);
   }, [apiAnalytics, filteredFavorites, total]);
 
-  const displayFavorites = useMemo(() => {
-    if (apiAnalytics?.recent_favorites && Array.isArray(apiAnalytics.recent_favorites) && apiAnalytics.recent_favorites.length > 0) {
-      return apiAnalytics.recent_favorites;
+  const journeyData = useMemo(() => {
+    if (total === 0) {
+      return [{ name: 'No Saves', value: 1, percentage: 0, color: '#9CA3AF' }];
     }
-    if (apiAnalytics?.favorites && Array.isArray(apiAnalytics.favorites) && apiAnalytics.favorites.length > 0) {
-      return apiAnalytics.favorites;
-    }
-    return filteredFavorites;
-  }, [apiAnalytics, filteredFavorites]);
+    return [
+      { name: 'Visited Places', value: visitedCount, percentage: visitedPct, color: '#10b981' },
+      { name: 'To Visit (Planned)', value: plannedCount, percentage: plannedPct, color: '#3b82f6' }
+    ].filter(item => item.value > 0);
+  }, [visitedCount, visitedPct, plannedCount, plannedPct, total]);
 
-  const isFilterActive = timeframe !== '2026' || selectedCategory !== 'ALL' || visitFilter !== 'ALL';
+  const conversionStatus = useMemo(() => {
+    if (visitedPct >= 60) return { label: 'High Intent', color: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' };
+    if (visitedPct >= 35) return { label: 'Active Wishlists', color: 'text-blue-700 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400 border-blue-200 dark:border-blue-800' };
+    return { label: 'In Planning', color: 'text-amber-700 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-800' };
+  }, [visitedPct]);
+
+  const isFilterActive = timeframe !== 'Year' || selectedCategory !== 'ALL' || visitFilter !== 'ALL';
 
   const handleResetFilters = () => {
-    setTimeframe('2026');
+    setTimeframe('Year');
     setSelectedCategory('ALL');
     setVisitFilter('ALL');
   };
@@ -346,22 +447,19 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
               <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
             </div>
 
-            {/* Timeframe Selector */}
-            <div className="inline-flex rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] p-0.5">
-              {['2026', '2025', 'ALL'].map((tf) => (
-                <button
-                  key={tf}
-                  type="button"
-                  onClick={() => setTimeframe(tf)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
-                    timeframe === tf
-                      ? 'bg-[#003E83] text-white shadow-xs'
-                      : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:bg-gray-100 dark:hover:bg-zinc-800'
-                  }`}
-                >
-                  {tf}
-                </button>
-              ))}
+            {/* Timeframe Selector Dropdown */}
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={timeframe === '2026' ? 'Year' : (timeframe || 'Year')}
+                onChange={(e) => setTimeframe(e.target.value)}
+                className="appearance-none w-full sm:w-auto pl-3.5 pr-8 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent cursor-pointer shadow-xs"
+              >
+                <option value="Year">Year</option>
+                <option value="Month">Month</option>
+                <option value="Week">Week</option>
+                <option value="Day">Day</option>
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
             </div>
 
             {isFilterActive && (
@@ -378,36 +476,42 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
         </div>
       </div>
 
-      {/* 4 & 5. Balanced Side-by-Side Analytics Charts Grid with Smooth Animations */}
+      {/* 4. Balanced Side-by-Side Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 sm:mb-8">
-        {/* Chart 1: Saved Places Velocity & Growth */}
+        {/* Chart 1: Wishlist Saves Velocity */}
         <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 flex flex-col justify-between">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            {/* Header: Title + Volume Badge */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <div>
                 <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
-                  <span>Saved Places Velocity & Growth ({timeframe})</span>
+                  <span>Wishlist Saves Velocity ({timeframeLabel})</span>
                 </h3>
                 <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                  Monthly new saves vs cumulative total wishlist
+                  Distribution of visited vs planned place saves
                 </p>
               </div>
-              <div className="flex items-center gap-3 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#003E83]" />
-                  New Saves
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-0.5 bg-rose-500 rounded-full" />
-                  Total Wishlist
-                </span>
-              </div>
+              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-md border border-blue-100 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 text-[#003E83] dark:text-blue-400 shrink-0 self-start sm:self-center">
+                Total: {total.toLocaleString()} Saves
+              </span>
+            </div>
+
+            {/* Clean Non-Wrapped Legend Under Title */}
+            <div className="flex items-center gap-3 sm:gap-4 flex-wrap mb-3 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+              <span className="inline-flex items-center gap-1.5 font-medium">
+                <span className="w-2.5 h-2.5 rounded-xs bg-[#10b981]" />
+                <span>Visited (Completed)</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 font-medium">
+                <span className="w-2.5 h-2.5 rounded-xs bg-[#3b82f6]" />
+                <span>To Visit (Planned)</span>
+              </span>
             </div>
 
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={monthlyData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
                   <XAxis 
                     dataKey="month" 
@@ -430,18 +534,31 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
                   <Tooltip
                     content={({ active, payload, label }) => {
                       if (active && payload && payload.length) {
-                        const newSaves = payload.find(p => p.dataKey === 'newSaves')?.value ?? 0;
-                        const cumulative = payload.find(p => p.dataKey === 'cumulative')?.value ?? 0;
+                        const mData = payload[0]?.payload;
+                        const vCount = mData?.visited || 0;
+                        const pCount = mData?.planned || 0;
+                        const totalM = vCount + pCount;
                         return (
-                          <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
-                            <p className="font-semibold text-gray-900 dark:text-zinc-100">{label}</p>
-                            <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
-                              <span>New Saves:</span>
-                              <span className="font-bold text-[#003E83] dark:text-blue-400">{newSaves}</span>
+                          <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1.5 min-w-[170px]">
+                            <div className="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-1">
+                              <p className="font-bold text-gray-900 dark:text-zinc-100">{label}</p>
+                              <span className="text-[11px] font-semibold text-gray-500 dark:text-zinc-400">{totalM} {totalM === 1 ? 'save' : 'saves'}</span>
                             </div>
-                            <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
-                              <span>Total Wishlist:</span>
-                              <span className="font-bold text-rose-500">{cumulative}</span>
+                            <div className="space-y-1 text-gray-600 dark:text-zinc-300">
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="flex items-center gap-1.5">
+                                  <span className="w-2 h-2 rounded-xs bg-[#10b981]" />
+                                  Visited:
+                                </span>
+                                <span className="font-bold text-[#10b981]">{vCount}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="flex items-center gap-1.5">
+                                  <span className="w-2 h-2 rounded-xs bg-[#3b82f6]" />
+                                  To Visit:
+                                </span>
+                                <span className="font-bold text-[#3b82f6]">{pCount}</span>
+                              </div>
                             </div>
                           </div>
                         );
@@ -449,152 +566,243 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
                       return null;
                     }}
                   />
-                  <Bar dataKey="newSaves" fill="#003E83" radius={[3, 3, 0, 0]} name="New Saves" barSize={16} isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
-                  <Line type="monotone" dataKey="cumulative" stroke="#f43f5e" strokeWidth={2.5} dot={{ r: 3, fill: '#f43f5e' }} activeDot={{ r: 5 }} name="Total Wishlist" isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
-                </ComposedChart>
+                  <Bar dataKey="visited" stackId="status" fill="#10b981" radius={[0, 0, 0, 0]} name="Visited" barSize={16} isAnimationActive={true} animationDuration={800} />
+                  <Bar dataKey="planned" stackId="status" fill="#3b82f6" radius={[3, 3, 0, 0]} name="To Visit" barSize={16} isAnimationActive={true} animationDuration={800} />
+                </BarChart>
               </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Chart 1 Symmetrical 3-Card Metrics Footer */}
+          <div className="mt-3 pt-2.5 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-3 gap-2 text-center">
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">{timeframeLabel}</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] truncate">Timeframe</p>
+            </div>
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-surface-hover-light)] dark:bg-[var(--color-surface-hover-dark)]/50 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+              <p className="text-xs sm:text-sm font-bold text-[#003E83] dark:text-blue-400">{total.toLocaleString()}</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] truncate">Total Saves</p>
+            </div>
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">{visitedPct}%</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] truncate">Conversion</p>
             </div>
           </div>
         </div>
 
-        {/* Chart 2: Category Breakdown & Journey Status */}
+        {/* Chart 2: Journey Conversion & Category Hub */}
         <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <div>
                 <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
-                  <Landmark className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
-                  <span>Category Breakdown</span>
+                  <Compass className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Journey Conversion & Category Hub</span>
                 </h3>
                 <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                  Wishlist distribution across attraction categories
+                  Traveler conversion rate and destination wishlist share
                 </p>
               </div>
-              <span className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                Based on {total.toLocaleString()} saved places
+              <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md border shrink-0 ${conversionStatus.color}`}>
+                Conversion {visitedPct}% • {conversionStatus.label}
               </span>
             </div>
 
-            {categoryData.length === 0 ? (
-              <p className="text-xs text-gray-400 text-center py-10">No category records found</p>
-            ) : (
-              <div className="h-[175px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={categoryData} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-                    <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
-                    <YAxis dataKey="name" type="category" interval={0} width={120} tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      cursor={{ fill: 'rgba(107, 114, 128, 0.05)' }}
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const data = payload[0].payload;
-                          return (
-                            <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
-                              <p className="font-semibold text-gray-900 dark:text-zinc-100">{data.name}</p>
-                              <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
-                                <span className="text-gray-600 dark:text-zinc-300 font-semibold">
-                                  {data.count} {data.count === 1 ? 'place' : 'places'} ({data.percentage}%)
-                                </span>
+            {/* Split Panel: Donut on Left, Category Matrix on Right */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              {/* Left Column: Donut Conversion Gauge */}
+              <div className="sm:col-span-5 flex flex-col items-center justify-center">
+                <div className="relative w-full h-[160px] flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={journeyData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={46}
+                        outerRadius={68}
+                        paddingAngle={3}
+                        dataKey="value"
+                        isAnimationActive={true}
+                        animationDuration={800}
+                      >
+                        {journeyData.map((entry, index) => (
+                          <Cell key={`donut-cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2 rounded-md shadow-md text-xs space-y-0.5">
+                                <p className="font-semibold text-gray-900 dark:text-zinc-100">{data.name}</p>
+                                <p className="text-gray-600 dark:text-zinc-400">{data.value} places ({data.percentage}%)</p>
                               </div>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={16} isAnimationActive={true} animationDuration={800} animationEasing="ease-out">
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fillColor} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  {/* Center Metric */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] tracking-tight">
+                      {visitedPct}%
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] tracking-wider">
+                      Conversion
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-center mt-1">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-[#003E83] dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
+                    Active Travelers: {uniqueUsers}
+                  </span>
+                </div>
               </div>
-            )}
+
+              {/* Right Column: Category Breakdown Matrix */}
+              <div className="sm:col-span-7 flex flex-col justify-center space-y-2">
+                {categoryData.length === 0 ? (
+                  <p className="text-xs text-gray-400 text-center py-6">No category records found</p>
+                ) : (
+                  categoryData.slice(0, 5).map((item) => (
+                    <div key={item.name} className="flex items-center gap-2 text-xs">
+                      <span className="w-24 font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate shrink-0" title={item.name}>
+                        {item.name}
+                      </span>
+                      <div className="flex-1 bg-gray-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-700 ease-out"
+                          style={{
+                            width: `${item.percentage}%`,
+                            backgroundColor: item.fillColor
+                          }}
+                        />
+                      </div>
+                      <span className="w-14 text-right font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] text-[11px] shrink-0">
+                        {item.count} ({item.percentage}%)
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Journey Stage Status Summary */}
-          <div className="mt-3 pt-2.5 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-2 gap-3 text-center">
-            <div className="p-2 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
+          {/* Symmetrical 3-Card Metrics Footer */}
+          <div className="mt-3 pt-2.5 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-3 gap-2 text-center">
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
               <p className="text-xs sm:text-sm font-bold text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">{visitedCount}</p>
-              <p className="text-[11px] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">Visited ({visitedPct}%)</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] truncate">Visited ({visitedPct}%)</p>
             </div>
-            <div className="p-2 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
               <p className="text-xs sm:text-sm font-bold text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]">{plannedCount}</p>
-              <p className="text-[11px] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]">To Visit ({plannedPct}%)</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] truncate">To Visit ({plannedPct}%)</p>
+            </div>
+            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-purple-badge-bg)] dark:bg-[var(--color-purple-badge-dark-bg)] border border-[var(--color-purple-badge-border)] dark:border-[var(--color-purple-badge-dark-border)]">
+              <p className="text-xs sm:text-sm font-bold text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)]">{uniqueUsers}</p>
+              <p className="text-[10px] sm:text-[11px] text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] truncate">Travelers</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 6. Destination Favorites Explorer List */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden">
-        <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex items-center justify-between">
+      {/* 5. Cumulative Wishlist Growth & Save Trajectory Line Chart (Modeled after UserGrowthChart) */}
+      <div className="w-full bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-6 mb-6 sm:mb-8 transition-opacity duration-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
           <div>
-            <h3 className="text-base font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-              Saved Destinations
+            <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-[#003E83] dark:text-blue-400" />
+              <span>Cumulative Wishlist Growth & Save Trajectory ({timeframeLabel})</span>
             </h3>
             <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-              Displaying destinations matching active filter criteria
+              Overall wishlist accumulation vs new traveler saves from database
             </p>
           </div>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
-            {displayFavorites.length} {displayFavorites.length === 1 ? 'place' : 'places'}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-md border border-emerald-200 dark:border-emerald-900/50">
+              <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+              <span>Total Saved: {total.toLocaleString()} Places ({uniqueUsers} Travelers)</span>
+            </span>
+          </div>
         </div>
 
-        {displayFavorites.length === 0 ? (
-          <div className="py-10 px-4 text-center text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] font-medium">
-            No saved destinations found matching active filter criteria.
-          </div>
-        ) : (
-          <div className="divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)]">
-            {displayFavorites.slice(0, 10).map((fav, index) => {
-              const placeName = fav.name || fav.place?.name || 'Attraction';
-              const locationName = fav.location || fav.place?.location || fav.place?.address || 'Cambodia';
-              const catName = fav.category || fav.place?.category || 'General';
-              const ratingNum = Number(fav.rating || fav.place?.rating || 5.0);
-              const isVisited = Boolean(fav.visited || fav.status === 'Visited');
-
-              return (
-                <div key={fav.id || index} className="px-4 md:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <span className="w-6 h-6 rounded-md bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center justify-center font-semibold text-[11px] shrink-0 mt-0.5">
-                      {index + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
-                        {placeName}
-                      </p>
-                      <p className="text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center gap-1 mt-1 truncate">
-                        <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                        <span className="truncate">{locationName}</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                    <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-border-light)] dark:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                      {catName}
-                    </span>
-                    <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
-                      <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                      <span>{ratingNum.toFixed(1)}</span>
-                    </div>
-                    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-semibold border ${
-                      isVisited
-                        ? 'bg-[var(--color-success-bg)] text-[var(--color-success-text)] dark:bg-[var(--color-success-dark-bg)] dark:text-[var(--color-success-dark-text)] border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]'
-                        : 'bg-[var(--color-info-bg)] text-[var(--color-info-text)] dark:bg-[var(--color-info-dark-bg)] dark:text-[var(--color-info-dark-text)] border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]'
-                    }`}>
-                      {isVisited ? 'Visited' : 'To Visit'}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <div className="h-72 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={monthlyData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6B7280' }} axisLine={{ stroke: '#D1D5DB' }} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#6B7280' }} axisLine={false} tickLine={false} width={30} allowDecimals={false} />
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    const cumVal = payload.find(p => p.dataKey === 'cumulative')?.value ?? 0;
+                    const newSavesVal = payload.find(p => p.dataKey === 'newSaves')?.value ?? 0;
+                    return (
+                      <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-3 rounded-md shadow-md text-xs space-y-1.5 min-w-[200px]">
+                        <div className="flex items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-1">
+                          <p className="font-bold text-gray-900 dark:text-zinc-100">{label} {timeframe !== 'ALL' ? timeframe : ''}</p>
+                          <span className="text-[11px] font-semibold text-gray-500 dark:text-zinc-400">{newSavesVal} new saves</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
+                            <span className="flex items-center gap-1.5 font-medium">
+                              <span className="w-2.5 h-1 bg-[#4472C4] rounded-full" />
+                              Cumulative Wishlist:
+                            </span>
+                            <span className="font-bold text-[#4472C4]">{cumVal}</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-3 text-gray-600 dark:text-zinc-300">
+                            <span className="flex items-center gap-1.5 font-medium">
+                              <span className="w-2.5 h-1 bg-[#ED7D31] rounded-full" />
+                              Monthly New Saves:
+                            </span>
+                            <span className="font-bold text-[#ED7D31]">{newSavesVal}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Legend
+                verticalAlign="bottom"
+                align="center"
+                iconType="plainline"
+                wrapperStyle={{ fontSize: 12, paddingTop: 12 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="cumulative"
+                name="Cumulative Wishlist"
+                stroke="#4472C4"
+                strokeWidth={3}
+                dot={{ r: 3, fill: '#4472C4' }}
+                activeDot={{ r: 5, fill: '#4472C4' }}
+                isAnimationActive={true}
+                animationDuration={600}
+                animationEasing="ease-out"
+              />
+              <Line
+                type="monotone"
+                dataKey="newSaves"
+                name="Monthly New Saves"
+                stroke="#ED7D31"
+                strokeWidth={3}
+                dot={{ r: 3, fill: '#ED7D31' }}
+                activeDot={{ r: 5, fill: '#ED7D31' }}
+                isAnimationActive={true}
+                animationDuration={600}
+                animationEasing="ease-out"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

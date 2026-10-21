@@ -16,7 +16,7 @@ import RecentActivity from './RecentActivity';
 import dashboardService from '../../services/dashboardService';
 
 export default function Dashboard() {
-  const [timeRange, setTimeRange] = useState('weekly');
+  const [timeRange, setTimeRange] = useState('yearly');
   const [isLoading, setIsLoading] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [cache, setCache] = useState({});

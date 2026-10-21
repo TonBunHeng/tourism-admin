@@ -181,15 +181,8 @@ export default function Ratings() {
       {/* Top 4 Stat Summary Cards */}
       <RatingsStats reviews={reviews} stats={analyticsData?.overview} />
 
-      {/* Sentiment & Star Distribution Cards */}
-      <RatingsSentiment
-        reviews={reviews}
-        ratingDistribution={analyticsData?.rating_distribution}
-        stats={analyticsData?.overview}
-      />
-
       {/* Main Reviews Container */}
-      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1 mb-6 sm:mb-8">
         <RatingsToolbar
           selectedStatus={selectedStatus}
           onStatusChange={(val) => { setSelectedStatus(val); setCurrentPage(1); }}
@@ -221,6 +214,13 @@ export default function Ratings() {
           label="reviews"
         />
       </div>
+
+      {/* Sentiment & Star Distribution Cards */}
+      <RatingsSentiment
+        reviews={reviews}
+        ratingDistribution={analyticsData?.rating_distribution}
+        stats={analyticsData?.overview}
+      />
 
       {/* Review Details Modal */}
       <ReviewDetailsModal
