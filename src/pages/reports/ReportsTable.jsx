@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Star, ChevronDown, MapPin, Calendar, Users, FolderTree, Eye, Landmark, User, X } from 'lucide-react';
+import {
+  Star, ChevronDown, MapPin, Calendar, Users, FolderTree, Eye,
+  Landmark, User, X, Database, Compass, CalendarCheck, DollarSign
+} from 'lucide-react';
 import SimplePagination from '../../components/common/SimplePagination';
 
 export default function ReportsTable({
@@ -10,8 +13,8 @@ export default function ReportsTable({
   setSearchTerm,
   statusFilter,
   setStatusFilter,
-  data,
-  isLoading
+  data = [],
+  isLoading = false
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -34,8 +37,11 @@ export default function ReportsTable({
   }, [selectedItem]);
 
   const tabs = [
+    { id: 'all', label: 'All Records', icon: Database },
     { id: 'places', label: 'Places Report', icon: MapPin },
     { id: 'events', label: 'Events Report', icon: Calendar },
+    { id: 'tours', label: 'Tours Report', icon: Compass },
+    { id: 'bookings', label: 'Bookings Report', icon: CalendarCheck },
     { id: 'users', label: 'Users Report', icon: Users },
     { id: 'reviews', label: 'Reviews Report', icon: Star },
     { id: 'categories', label: 'Categories Report', icon: FolderTree }
@@ -52,6 +58,8 @@ export default function ReportsTable({
       case 'active':
       case 'approved':
       case 'completed':
+      case 'confirmed':
+      case 'published':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
             {status || 'Active'}
@@ -60,6 +68,8 @@ export default function ReportsTable({
       case 'pending':
       case 'upcoming':
       case 'scheduled':
+      case 'draft':
+      case 'under_review':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)] border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)]">
             {status || 'Pending'}
@@ -78,7 +88,67 @@ export default function ReportsTable({
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-md bg-[var(--color-neutral-badge-bg)] dark:bg-[var(--color-neutral-badge-dark-bg)] text-[var(--color-neutral-badge-text)] dark:text-[var(--color-neutral-badge-dark-text)] border border-[var(--color-neutral-badge-border)] dark:border-[var(--color-neutral-badge-dark-border)]">
-            {status}
+            {status || 'Standard'}
+          </span>
+        );
+    }
+  };
+
+  const getEntityBadge = (type) => {
+    switch (type) {
+      case 'Place':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/40">
+            <Landmark className="w-3 h-3 shrink-0" />
+            Place
+          </span>
+        );
+      case 'Event':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/40">
+            <Calendar className="w-3 h-3 shrink-0" />
+            Event
+          </span>
+        );
+      case 'Tour':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-900/40">
+            <Compass className="w-3 h-3 shrink-0" />
+            Tour
+          </span>
+        );
+      case 'Booking':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/40">
+            <CalendarCheck className="w-3 h-3 shrink-0" />
+            Booking
+          </span>
+        );
+      case 'User':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-900/40">
+            <Users className="w-3 h-3 shrink-0" />
+            User
+          </span>
+        );
+      case 'Review':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40">
+            <Star className="w-3 h-3 shrink-0" />
+            Review
+          </span>
+        );
+      case 'Category':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-900/40">
+            <FolderTree className="w-3 h-3 shrink-0" />
+            Category
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 border border-gray-200 dark:border-zinc-700">
+            {type || 'Record'}
           </span>
         );
     }
@@ -86,14 +156,15 @@ export default function ReportsTable({
 
   return (
     <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] shadow-sm overflow-hidden transition-colors duration-200">
-      {/* Table Toolbar Filter */}
+      
+      {/* Table Toolbar Header */}
       <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
           <h2 className="text-lg md:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
-            All Reports
+            {activeTab === 'all' ? 'All Platform Records' : tabs.find(t => t.id === activeTab)?.label || 'All Reports'}
           </h2>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
-            {totalRecords} {totalRecords === 1 ? 'record' : 'records'}
+          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+            {totalRecords.toLocaleString()} {totalRecords === 1 ? 'record' : 'records'}
           </span>
         </div>
 
@@ -131,6 +202,7 @@ export default function ReportsTable({
         </div>
       </div>
 
+
       {/* Mobile Card List View (Visible on Mobile Screens < sm) */}
       <div key={`mobile-${activeTab}-${currentPage}`} className="block sm:hidden divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)] animate-page-enter">
         {isLoading ? (
@@ -152,11 +224,27 @@ export default function ReportsTable({
           paginatedData.map((row, i) => (
             <div key={i} className="p-4 space-y-2 hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/40 transition-colors">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] font-bold">
-                  #{row.id}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] font-bold">
+                    #{row.id}
+                  </span>
+                  {row.entityType && getEntityBadge(row.entityType)}
+                </div>
                 <div>{getStatusBadge(row.status)}</div>
               </div>
+
+              {/* Master All Data View Mobile */}
+              {activeTab === 'all' && (
+                <>
+                  <h4 className="font-bold text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                    {row.primaryName || row.name || row.title || row.booking_code || row.userName || 'Unnamed Record'}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                    <div><span className="font-semibold text-[var(--color-text-muted-light)]">Detail:</span> {row.secondaryDetail || row.category || row.destination || row.province || row.role || 'N/A'}</div>
+                    <div><span className="font-semibold text-[var(--color-text-muted-light)]">Date:</span> {row.date || row.createdAt || row.startDate || 'N/A'}</div>
+                  </div>
+                </>
+              )}
 
               {activeTab === 'places' && (
                 <>
@@ -188,6 +276,36 @@ export default function ReportsTable({
                 </>
               )}
 
+              {activeTab === 'tours' && (
+                <>
+                  <h4 className="font-bold text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                    {row.title}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                    <div><span className="font-semibold text-[var(--color-text-muted-light)]">Dest:</span> {row.destination}</div>
+                    <div><span className="font-semibold text-[var(--color-text-muted-light)]">Duration:</span> {row.duration}</div>
+                    <div className="font-semibold text-emerald-600 dark:text-emerald-400">${row.price_per_person} / person</div>
+                    <div className="inline-flex items-center gap-1 font-semibold text-amber-500">
+                      <Star className="w-3 h-3 fill-amber-400" /> {row.rating}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'bookings' && (
+                <>
+                  <h4 className="font-bold text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                    Booking #{row.booking_code}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                    <div><span className="font-semibold text-[var(--color-text-muted-light)]">Guest:</span> {row.user?.name || row.customer_name || 'Traveler'}</div>
+                    <div><span className="font-semibold text-[var(--color-text-muted-light)]">Service:</span> {row.service_name}</div>
+                    <div><span className="font-semibold text-[var(--color-text-muted-light)]">Amount:</span> ${row.total_price}</div>
+                    <div><span className="font-semibold text-[var(--color-text-muted-light)]">Date:</span> {row.booking_date || row.date}</div>
+                  </div>
+                </>
+              )}
+
               {activeTab === 'users' && (
                 <>
                   <h4 className="font-bold text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
@@ -207,7 +325,7 @@ export default function ReportsTable({
               {activeTab === 'reviews' && (
                 <>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-slate-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-slate-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center shrink-0">
                       {row.avatar ? (
                         <img src={row.avatar} alt={row.userName} className="w-full h-full object-cover" />
                       ) : (
@@ -223,22 +341,11 @@ export default function ReportsTable({
                           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {Number(row.rating || 0).toFixed(1)}
                         </span>
                       </div>
-                      <p className="text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center gap-1 truncate mt-0.5" title={row.placeName}>
+                      <p className="text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center gap-1 truncate mt-0.5">
                         <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
                         <span className="truncate">{row.placeName}</span>
                       </p>
                     </div>
-                  </div>
-                  {row.comment && (
-                    <div className="p-2.5 rounded-md bg-[var(--color-surface-hover-light)]/60 dark:bg-zinc-800/50 border border-[var(--color-border-subtle-light)] dark:border-zinc-800 mt-1">
-                      <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-zinc-300 italic line-clamp-2">
-                        "{row.comment}"
-                      </p>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-muted-dark)] pt-1">
-                    <span>Submitted date:</span>
-                    <span className="font-mono">{row.date}</span>
                   </div>
                 </>
               )}
@@ -252,7 +359,7 @@ export default function ReportsTable({
                     {row.description}
                   </p>
                   <div className="text-xs font-semibold text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] pt-1">
-                    Total Places: <span className="text-[var(--color-primary)] dark:text-[var(--color-brand-teal)]">{row.totalPlaces}</span>
+                    Total Places: <span className="text-[#003E83] dark:text-blue-400">{row.totalPlaces}</span>
                   </div>
                 </>
               )}
@@ -272,77 +379,112 @@ export default function ReportsTable({
         )}
       </div>
 
+      {/* Desktop Table View (Visible on sm: and up) */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left text-xs md:text-sm text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
           <thead className="bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/50 text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider text-xs font-medium">
+            {activeTab === 'all' && (
+              <tr>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium uppercase tracking-wider w-12 text-center">#</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-32">Type</th>
+                <th className="px-4 py-3.5">Title / Subject</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-48">Detail / Scope</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-28">Status</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-32">Date</th>
+                <th className="pl-3 pr-4 py-3.5 text-right w-20 whitespace-nowrap">Actions</th>
+              </tr>
+            )}
             {activeTab === 'places' && (
               <tr>
-                <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">#</th>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium uppercase tracking-wider w-12 text-center">#</th>
                 <th className="px-4 py-3.5">Place & Category</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-44">Province</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-28">Rating</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-24">Reviews</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-28">Status</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-32">Created Date</th>
-                <th className="pl-3 pr-4 py-3.5 text-right w-24 whitespace-nowrap">Actions</th>
+                <th className="pl-3 pr-4 py-3.5 text-right w-20 whitespace-nowrap">Actions</th>
               </tr>
             )}
             {activeTab === 'events' && (
               <tr>
-                <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">#</th>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium uppercase tracking-wider w-12 text-center">#</th>
                 <th className="px-4 py-3.5">Event & Location</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-32">Start Date</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-32">End Date</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-28">Attendees</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-28">Status</th>
-                <th className="pl-3 pr-4 py-3.5 text-right w-24 whitespace-nowrap">Actions</th>
+                <th className="pl-3 pr-4 py-3.5 text-right w-20 whitespace-nowrap">Actions</th>
+              </tr>
+            )}
+            {activeTab === 'tours' && (
+              <tr>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium uppercase tracking-wider w-12 text-center">#</th>
+                <th className="px-4 py-3.5">Tour Package & Category</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-40">Destination</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-28">Duration</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-32">Price / Person</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-28">Rating</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-28">Status</th>
+                <th className="pl-3 pr-4 py-3.5 text-right w-20 whitespace-nowrap">Actions</th>
+              </tr>
+            )}
+            {activeTab === 'bookings' && (
+              <tr>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium uppercase tracking-wider w-12 text-center">#</th>
+                <th className="px-4 py-3.5">Booking Code & Guest</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-48">Service & Business</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-32">Booking Date</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-28">Amount</th>
+                <th className="px-3 py-3.5 whitespace-nowrap w-28">Status</th>
+                <th className="pl-3 pr-4 py-3.5 text-right w-20 whitespace-nowrap">Actions</th>
               </tr>
             )}
             {activeTab === 'users' && (
               <tr>
-                <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">#</th>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium uppercase tracking-wider w-12 text-center">#</th>
                 <th className="px-4 py-3.5">User & Email</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-32">Role</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-32">Joined Date</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-28">Reviews</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-28">Status</th>
-                <th className="pl-3 pr-4 py-3.5 text-right w-24 whitespace-nowrap">Actions</th>
+                <th className="pl-3 pr-4 py-3.5 text-right w-20 whitespace-nowrap">Actions</th>
               </tr>
             )}
             {activeTab === 'reviews' && (
               <tr>
-                <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">#</th>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium uppercase tracking-wider w-12 text-center">#</th>
                 <th className="px-4 py-3.5">User & Review</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-44">Target Place</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-28">Rating</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-32">Date</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-28">Status</th>
-                <th className="pl-3 pr-4 py-3.5 text-right w-24 whitespace-nowrap">Actions</th>
+                <th className="pl-3 pr-4 py-3.5 text-right w-20 whitespace-nowrap">Actions</th>
               </tr>
             )}
             {activeTab === 'categories' && (
               <tr>
-                <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">#</th>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium uppercase tracking-wider w-12 text-center">#</th>
                 <th className="px-4 py-3.5">Category Name</th>
                 <th className="px-3 py-3.5">Description</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-32">Total Places</th>
                 <th className="px-3 py-3.5 whitespace-nowrap w-28">Status</th>
-                <th className="pl-3 pr-4 py-3.5 text-right w-24 whitespace-nowrap">Actions</th>
+                <th className="pl-3 pr-4 py-3.5 text-right w-20 whitespace-nowrap">Actions</th>
               </tr>
             )}
           </thead>
+
           <tbody key={`${activeTab}-${currentPage}`} className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] divide-y divide-[var(--color-border-light)] dark:divide-[var(--color-border-dark)] animate-page-enter">
             {isLoading ? (
               [...Array(5)].map((_, i) => (
                 <tr key={i} className="animate-pulse">
-                  <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-16" /></td>
-                  <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-32" /></td>
+                  <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-8" /></td>
                   <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-24" /></td>
+                  <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-36" /></td>
+                  <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-24" /></td>
+                  <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-16" /></td>
                   <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-20" /></td>
-                  <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-12" /></td>
-                  <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-14" /></td>
-                  <td className="py-3.5 px-4"><div className="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-24" /></td>
-                  <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-20" /></td>
+                  <td className="py-3.5 px-4"><div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded-md w-10 ml-auto" /></td>
                 </tr>
               ))
             ) : paginatedData.length === 0 ? (
@@ -354,6 +496,49 @@ export default function ReportsTable({
             ) : (
               paginatedData.map((row, i) => (
                 <tr key={i} className="hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/40 transition-colors">
+                  
+                  {/* Master All Data View */}
+                  {activeTab === 'all' && (
+                    <>
+                      <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
+                        {startIndex + i + 1}
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap">
+                        {getEntityBadge(row.entityType || 'Record')}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="min-w-0">
+                          <p className="text-xs md:text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
+                            {row.primaryName || row.name || row.title || row.booking_code || row.userName || 'Unnamed Item'}
+                          </p>
+                          <span className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] truncate block font-mono">
+                            ID #{row.id}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                        {row.secondaryDetail || row.category || row.destination || row.province || row.role || row.placeName || row.description || 'General'}
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap">
+                        {getStatusBadge(row.status)}
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono">
+                        {row.date || row.createdAt || row.startDate || row.joinedDate || row.booking_date || 'N/A'}
+                      </td>
+                      <td className="pl-3 pr-4 py-3.5 whitespace-nowrap text-right text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedItem(row)}
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </>
+                  )}
+
+                  {/* Places Tab */}
                   {activeTab === 'places' && (
                     <>
                       <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
@@ -398,19 +583,19 @@ export default function ReportsTable({
                         {row.createdAt}
                       </td>
                       <td className="pl-3 pr-4 py-3.5 whitespace-nowrap text-right text-xs">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedItem(row)}
-                            className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedItem(row)}
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                       </td>
                     </>
                   )}
+
+                  {/* Events Tab */}
                   {activeTab === 'events' && (
                     <>
                       <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
@@ -445,19 +630,123 @@ export default function ReportsTable({
                         {getStatusBadge(row.status)}
                       </td>
                       <td className="pl-3 pr-4 py-3.5 whitespace-nowrap text-right text-xs">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedItem(row)}
-                            className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedItem(row)}
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                       </td>
                     </>
                   )}
+
+                  {/* Tours Tab */}
+                  {activeTab === 'tours' && (
+                    <>
+                      <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
+                        {startIndex + i + 1}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-md bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/40 flex items-center justify-center shrink-0">
+                            <Compass className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs md:text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
+                              {row.title}
+                            </p>
+                            <span className="text-[10px] font-semibold px-2 py-0.2 rounded-md bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200 dark:border-purple-900/40">
+                              {row.category || 'Tour Package'}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{row.destination}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono">
+                        {row.duration}
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                        ${row.price_per_person}
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500 shrink-0" />
+                          <span className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                            {Number(row.rating || 5.0).toFixed(1)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap">
+                        {getStatusBadge(row.status)}
+                      </td>
+                      <td className="pl-3 pr-4 py-3.5 whitespace-nowrap text-right text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedItem(row)}
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </>
+                  )}
+
+                  {/* Bookings Tab */}
+                  {activeTab === 'bookings' && (
+                    <>
+                      <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
+                        {startIndex + i + 1}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40 flex items-center justify-center shrink-0">
+                            <CalendarCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs md:text-sm font-semibold font-mono text-[#003E83] dark:text-blue-400 truncate">
+                              #{row.booking_code}
+                            </p>
+                            <p className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] truncate">
+                              {row.user?.name || row.customer_name || 'Traveler'}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3.5 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                        <p className="font-medium text-[var(--color-text-primary-light)] dark:text-white truncate">{row.service_name}</p>
+                        <p className="text-[11px] text-[var(--color-text-muted-light)] dark:text-zinc-400 truncate">{row.business_name}</p>
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono">
+                        {row.booking_date || row.date}
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                        ${row.total_price}
+                      </td>
+                      <td className="px-3 py-3.5 whitespace-nowrap">
+                        {getStatusBadge(row.status)}
+                      </td>
+                      <td className="pl-3 pr-4 py-3.5 whitespace-nowrap text-right text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedItem(row)}
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </>
+                  )}
+
+                  {/* Users Tab */}
                   {activeTab === 'users' && (
                     <>
                       <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
@@ -493,19 +782,19 @@ export default function ReportsTable({
                         {getStatusBadge(row.status)}
                       </td>
                       <td className="pl-3 pr-4 py-3.5 whitespace-nowrap text-right text-xs">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedItem(row)}
-                            className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedItem(row)}
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                       </td>
                     </>
                   )}
+
+                  {/* Reviews Tab */}
                   {activeTab === 'reviews' && (
                     <>
                       <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
@@ -551,19 +840,19 @@ export default function ReportsTable({
                         {getStatusBadge(row.status)}
                       </td>
                       <td className="pl-3 pr-4 py-3.5 whitespace-nowrap text-right text-xs">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedItem(row)}
-                            className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedItem(row)}
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                       </td>
                     </>
                   )}
+
+                  {/* Categories Tab */}
                   {activeTab === 'categories' && (
                     <>
                       <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
@@ -589,16 +878,14 @@ export default function ReportsTable({
                         {getStatusBadge(row.status)}
                       </td>
                       <td className="pl-3 pr-4 py-3.5 whitespace-nowrap text-right text-xs">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedItem(row)}
-                            className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
-                            title="View Details"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedItem(row)}
+                          className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                       </td>
                     </>
                   )}
@@ -636,22 +923,28 @@ export default function ReportsTable({
             <div className="flex items-center justify-between border-b border-[var(--color-border-subtle-light)] dark:border-zinc-800 pb-4 mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-md bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center shrink-0">
-                  {activeTab === 'places' && <Landmark className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
-                  {activeTab === 'events' && <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
-                  {activeTab === 'users' && <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
-                  {activeTab === 'reviews' && <Star className="w-5 h-5 text-amber-600 dark:text-amber-400" />}
-                  {activeTab === 'categories' && <FolderTree className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+                  {selectedItem.entityType === 'Tour' || activeTab === 'tours' ? (
+                    <Compass className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  ) : selectedItem.entityType === 'Booking' || activeTab === 'bookings' ? (
+                    <CalendarCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  ) : selectedItem.entityType === 'Event' || activeTab === 'events' ? (
+                    <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  ) : selectedItem.entityType === 'User' || activeTab === 'users' ? (
+                    <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  ) : selectedItem.entityType === 'Review' || activeTab === 'reviews' ? (
+                    <Star className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  ) : selectedItem.entityType === 'Category' || activeTab === 'categories' ? (
+                    <FolderTree className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  ) : (
+                    <Landmark className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  )}
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[var(--color-text-primary-light)] dark:text-white">
-                    {activeTab === 'places' && selectedItem.name}
-                    {activeTab === 'events' && selectedItem.title}
-                    {activeTab === 'users' && selectedItem.name}
-                    {activeTab === 'reviews' && `Review by ${selectedItem.userName}`}
-                    {activeTab === 'categories' && selectedItem.name}
+                  <h3 className="text-base font-bold text-[var(--color-text-primary-light)] dark:text-white truncate max-w-[280px]">
+                    {selectedItem.primaryName || selectedItem.name || selectedItem.title || selectedItem.booking_code || selectedItem.userName}
                   </h3>
                   <p className="text-xs text-[var(--color-text-muted-light)] dark:text-zinc-400 font-mono">
-                    ID #{selectedItem.id} • {activeTab.toUpperCase()} REPORT
+                    ID #{selectedItem.id} • {(selectedItem.entityType || activeTab).toUpperCase()} REPORT
                   </p>
                 </div>
               </div>
@@ -664,9 +957,10 @@ export default function ReportsTable({
               </button>
             </div>
 
-            {/* Modal Body with Specific Tab Details */}
-            <div className="space-y-4 text-xs sm:text-sm">
-              {activeTab === 'places' && (
+            {/* Modal Body with Specific Tab/Entity Details */}
+            <div className="space-y-4 text-xs sm:text-sm max-h-[60vh] overflow-y-auto pr-1">
+              {/* Place Entity */}
+              {(selectedItem.entityType === 'Place' || activeTab === 'places') && (
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3 p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
                     <div>
@@ -692,12 +986,13 @@ export default function ReportsTable({
                   <div className="p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800 space-y-1">
                     <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Location Address</span>
                     <p className="font-medium text-[var(--color-text-primary-light)] dark:text-white">{selectedItem.location || 'Cambodia'}</p>
-                    <span className="text-[11px] text-[var(--color-text-muted-light)] dark:text-zinc-400 block pt-1 font-mono">Created Date: {selectedItem.createdAt}</span>
+                    <span className="text-[11px] text-[var(--color-text-muted-light)] dark:text-zinc-400 block pt-1 font-mono">Created Date: {selectedItem.createdAt || selectedItem.date}</span>
                   </div>
                 </div>
               )}
 
-              {activeTab === 'events' && (
+              {/* Event Entity */}
+              {(selectedItem.entityType === 'Event' || activeTab === 'events') && (
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3 p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
                     <div>
@@ -724,7 +1019,70 @@ export default function ReportsTable({
                 </div>
               )}
 
-              {activeTab === 'users' && (
+              {/* Tour Entity */}
+              {(selectedItem.entityType === 'Tour' || activeTab === 'tours') && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3 p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
+                    <div>
+                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Destination</span>
+                      <span className="font-semibold text-[var(--color-text-primary-light)] dark:text-white">{selectedItem.destination}</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Duration</span>
+                      <span className="font-semibold text-[var(--color-text-primary-light)] dark:text-white">{selectedItem.duration}</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Price / Person</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">${selectedItem.price_per_person}</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Rating</span>
+                      <span className="font-bold text-amber-500 inline-flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        {Number(selectedItem.rating || 5.0).toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
+                    <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block mb-1">Package Summary</span>
+                    <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-zinc-300 leading-relaxed">
+                      {selectedItem.description || 'Curated high-standard tour experience in Cambodia.'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Booking Entity */}
+              {(selectedItem.entityType === 'Booking' || activeTab === 'bookings') && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3 p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
+                    <div>
+                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Booking Reference</span>
+                      <span className="font-bold font-mono text-[#003E83] dark:text-blue-400">#{selectedItem.booking_code}</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Status</span>
+                      <div className="mt-0.5">{getStatusBadge(selectedItem.status)}</div>
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Total Amount</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">${selectedItem.total_price}</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Booking Date</span>
+                      <span className="font-semibold font-mono text-[var(--color-text-primary-light)] dark:text-white">{selectedItem.booking_date || selectedItem.date}</span>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800 space-y-1">
+                    <span className="text-[11px] font-medium text-[var(--color-text-muted-light)] dark:text-zinc-400 block">Service & Experience</span>
+                    <p className="font-semibold text-[var(--color-text-primary-light)] dark:text-white">{selectedItem.service_name}</p>
+                    <p className="text-xs text-[var(--color-text-muted-light)] dark:text-zinc-400">Provided by {selectedItem.business_name}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* User Entity */}
+              {(selectedItem.entityType === 'User' || activeTab === 'users') && (
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3 p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
                     <div>
@@ -753,7 +1111,8 @@ export default function ReportsTable({
                 </div>
               )}
 
-              {activeTab === 'reviews' && (
+              {/* Review Entity */}
+              {(selectedItem.entityType === 'Review' || activeTab === 'reviews') && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
                     <div className="w-10 h-10 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] overflow-hidden flex items-center justify-center shrink-0 border border-slate-200 dark:border-zinc-700">
@@ -800,7 +1159,8 @@ export default function ReportsTable({
                 </div>
               )}
 
-              {activeTab === 'categories' && (
+              {/* Category Entity */}
+              {(selectedItem.entityType === 'Category' || activeTab === 'categories') && (
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3 p-3 rounded-md bg-[var(--color-surface-hover-light)]/40 dark:bg-zinc-900/40 border border-[var(--color-border-subtle-light)] dark:border-zinc-800">
                     <div>

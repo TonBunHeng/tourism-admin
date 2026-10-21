@@ -11,9 +11,10 @@ import * as XLSX from 'xlsx';
  * @param {Array<string>} options.headers - Column titles for PDF table
  * @param {Array<Array<any>>} options.rows - Row data matching headers
  * @param {string} options.filename - File name for PDF download
+ * @param {Array<Object>} [options.columnStyles] - Optional column-specific styles
  * @returns {{ success: boolean, filename: string, error?: any }}
  */
-export const exportToPDF = ({ title, subtitle, headers, rows, filename }) => {
+export const exportToPDF = ({ title, subtitle, headers, rows, filename, columnStyles }) => {
   try {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -29,11 +30,11 @@ export const exportToPDF = ({ title, subtitle, headers, rows, filename }) => {
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
-    doc.text('SMART TOURISM ADMIN - REPORT', 14, 12);
+    doc.text('SMART TOURISM ADMIN - REPORT SYSTEM', 14, 13);
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 200, 12);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 205, 13);
 
     // Section Subtitle / Metadata
     doc.setTextColor(30, 41, 59); // Dark slate
@@ -56,16 +57,21 @@ export const exportToPDF = ({ title, subtitle, headers, rows, filename }) => {
         fillColor: [0, 62, 131],
         textColor: [255, 255, 255],
         fontStyle: 'bold',
-        fontSize: 10,
-        halign: 'left'
+        fontSize: 9.5,
+        halign: 'left',
+        valign: 'middle',
+        cellPadding: 3
       },
       bodyStyles: {
-        fontSize: 9,
-        textColor: [51, 65, 85]
+        fontSize: 8.5,
+        textColor: [51, 65, 85],
+        cellPadding: 2.8,
+        valign: 'middle'
       },
       alternateRowStyles: {
         fillColor: [248, 250, 252]
       },
+      columnStyles: columnStyles || {},
       margin: { top: 46, left: 14, right: 14, bottom: 20 },
       didDrawPage: (data) => {
         // Footer Page Numbering
@@ -79,7 +85,7 @@ export const exportToPDF = ({ title, subtitle, headers, rows, filename }) => {
           { align: 'right' }
         );
         doc.text(
-          'AngkorVerses Management System - Confidential Report',
+          'AngkorVerses Management System - Confidential Comprehensive Report',
           14,
           200
         );
@@ -99,30 +105,57 @@ export const exportToPDF = ({ title, subtitle, headers, rows, filename }) => {
 };
 
 /**
- * Export dataset to Excel file (.xlsx)
+ * Export dataset to Excel file (.xlsx) with multi-sheet support
  * @param {Object} options
- * @param {Array<Object>} options.data - Flat JSON object array for spreadsheet
- * @param {string} options.sheetName - Sheet tab name
+ * @param {Array<Object>} [options.data] - Flat JSON object array for single-sheet export
+ * @param {Array<{ name: string, data: Array<Object> }>} [options.sheets] - Multiple sheets for master export
+ * @param {string} [options.sheetName] - Sheet tab name for single-sheet
  * @param {string} options.filename - File name for Excel download
  * @returns {{ success: boolean, filename: string, error?: any }}
  */
-export const exportToExcel = ({ data, sheetName = 'Report Data', filename }) => {
+export const exportToExcel = ({ data, sheets, sheetName = 'Report Data', filename }) => {
   try {
-    const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
-    // Auto-fit column widths
-    if (data.length > 0) {
-      const keys = Object.keys(data[0]);
-      const colWidths = keys.map(key => {
-        const maxLen = Math.max(
-          key.length,
-          ...data.map(row => (row[key] ? String(row[key]).length : 0))
-        );
-        return { wch: Math.min(Math.max(maxLen + 3, 10), 40) };
+    if (Array.isArray(sheets) && sheets.length > 0) {
+      sheets.forEach(({ name, data: sheetData }) => {
+        const cleanData = sheetData || [];
+        const worksheet = XLSX.utils.json_to_sheet(cleanData);
+
+        // Auto-fit column widths
+        if (cleanData.length > 0) {
+          const keys = Object.keys(cleanData[0]);
+          const colWidths = keys.map(key => {
+            const maxLen = Math.max(
+              key.length,
+              ...cleanData.map(row => (row[key] !== null && row[key] !== undefined ? String(row[key]).length : 0))
+            );
+            return { wch: Math.min(Math.max(maxLen + 3, 10), 45) };
+          });
+          worksheet['!cols'] = colWidths;
+        }
+
+        const validName = (name || 'Sheet').replace(/[:\\/?*[\]]/g, '').slice(0, 31);
+        XLSX.utils.book_append_sheet(workbook, worksheet, validName);
       });
-      worksheet['!cols'] = colWidths;
+    } else {
+      const cleanData = data || [];
+      const worksheet = XLSX.utils.json_to_sheet(cleanData);
+
+      if (cleanData.length > 0) {
+        const keys = Object.keys(cleanData[0]);
+        const colWidths = keys.map(key => {
+          const maxLen = Math.max(
+            key.length,
+            ...cleanData.map(row => (row[key] !== null && row[key] !== undefined ? String(row[key]).length : 0))
+          );
+          return { wch: Math.min(Math.max(maxLen + 3, 10), 45) };
+        });
+        worksheet['!cols'] = colWidths;
+      }
+
+      const validName = (sheetName || 'Report Data').replace(/[:\\/?*[\]]/g, '').slice(0, 31);
+      XLSX.utils.book_append_sheet(workbook, worksheet, validName);
     }
 
     const safeFilename = filename

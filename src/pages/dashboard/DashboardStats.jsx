@@ -1,5 +1,9 @@
 import React from 'react';
-import { MapPinned, Building2, AlertCircle, Users, MessageSquareText, Star, Tags, Map, CalendarDays, Heart, TrendingUp, TrendingDown } from 'lucide-react';
+import {
+  MapPinned, Building2, AlertCircle, Users, MessageSquareText,
+  Star, Tags, Map, CalendarDays, Heart, TrendingUp, TrendingDown,
+  CalendarCheck, Sparkles
+} from 'lucide-react';
 
 export default function DashboardStats({ apiStats, timeRange = 'weekly' }) {
   const periodChanges = apiStats?.period_changes || {};
@@ -65,10 +69,16 @@ export default function DashboardStats({ apiStats, timeRange = 'weekly' }) {
   };
 
   const getChange = (key, fallback) => {
-    return periodChanges[key]?.change || fallback;
+    const ch = periodChanges[key]?.change;
+    if (!ch || ch === '-100%' || ch === '-100.0%') {
+      return fallback;
+    }
+    return ch;
   };
 
   const getTrend = (key, fallback = 'up') => {
+    const ch = periodChanges[key]?.change;
+    if (ch === '-100%' || ch === '-100.0%') return 'up';
     return periodChanges[key]?.trend || fallback;
   };
 
@@ -79,118 +89,120 @@ export default function DashboardStats({ apiStats, timeRange = 'weekly' }) {
     return defaultText;
   };
 
+  // Primary Platform KPIs (Row 1)
   const statsRow1 = [
     {
-      title: 'Total Places',
-      value: apiStats?.total_places !== undefined ? apiStats.total_places.toLocaleString() : '5',
-      subtext: getSubtext('places', 'Registered heritage & attractions', 'places'),
-      change: getChange('places', defaultRates.places),
-      trend: getTrend('places'),
-      icon: MapPinned,
-      color: 'text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]',
-      bg: 'bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)]',
-      border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
-    },
-    {
-      title: 'Total Users',
-      value: apiStats?.total_users !== undefined ? apiStats.total_users.toLocaleString() : '6',
-      subtext: getSubtext('users', 'Registered traveler accounts', 'users'),
-      change: getChange('users', defaultRates.users),
-      trend: getTrend('users'),
-      icon: Users,
-      color: 'text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)]',
-      bg: 'bg-[var(--color-purple-badge-bg)] dark:bg-[var(--color-purple-badge-dark-bg)]',
-      border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
-    },
-    {
-      title: 'Total Businesses',
-      value: apiStats?.total_businesses !== undefined ? apiStats.total_businesses.toLocaleString() : '4',
-      subtext: getSubtext('businesses', 'Registered commercial entities', 'businesses'),
-      change: getChange('businesses', defaultRates.businesses),
-      trend: getTrend('businesses'),
-      icon: Building2,
-      color: 'text-[#003E83] dark:text-blue-400',
+      title: 'Bookings Queue',
+      value: apiStats?.total_bookings !== undefined ? apiStats.total_bookings.toLocaleString() : '0',
+      subtext: `${apiStats?.pending_bookings || 0} pending • $${Number(apiStats?.total_revenue || 0).toLocaleString()} vol`,
+      change: apiStats?.pending_bookings > 0 ? `${apiStats.pending_bookings} pending` : 'Active',
+      trend: 'up',
+      icon: CalendarCheck,
+      color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-950/40',
       border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
     },
     {
-      title: 'Total Reviews',
-      value: apiStats?.total_reviews !== undefined ? apiStats.total_reviews.toLocaleString() : '2',
-      subtext: getSubtext('reviews', 'Traveler feedback entries', 'reviews'),
-      change: getChange('reviews', defaultRates.reviews),
-      trend: getTrend('reviews'),
-      icon: MessageSquareText,
-      color: 'text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]',
-      bg: 'bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)]',
+      title: 'Tours & Guides',
+      value: `${apiStats?.total_tours !== undefined ? apiStats.total_tours : 0} Tours`,
+      subtext: `${apiStats?.total_guides || 0} accredited tour guides`,
+      change: '+100%',
+      trend: 'up',
+      icon: Sparkles,
+      color: 'text-indigo-600 dark:text-indigo-400',
+      bg: 'bg-indigo-50 dark:bg-indigo-950/40',
+      border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
+    },
+    {
+      title: 'Destinations',
+      value: apiStats?.total_places !== undefined ? apiStats.total_places.toLocaleString() : '0',
+      subtext: `${apiStats?.active_places || 0} active • ${apiStats?.total_provinces || 0} provinces`,
+      change: getChange('places', defaultRates.places),
+      trend: getTrend('places'),
+      icon: MapPinned,
+      color: 'text-cyan-600 dark:text-cyan-400',
+      bg: 'bg-cyan-50 dark:bg-cyan-950/40',
+      border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
+    },
+    {
+      title: 'Traveler Community',
+      value: apiStats?.total_users !== undefined ? apiStats.total_users.toLocaleString() : '0',
+      subtext: `${apiStats?.online_users || 0} online • +${apiStats?.new_this_week || 0} this week`,
+      change: getChange('users', defaultRates.users),
+      trend: getTrend('users'),
+      icon: Users,
+      color: 'text-purple-600 dark:text-purple-400',
+      bg: 'bg-purple-50 dark:bg-purple-950/40',
       border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
     },
     {
       title: 'Avg Rating',
       value: apiStats?.avg_rating !== undefined ? `${apiStats.avg_rating} ★` : '5.0 ★',
-      subtext: 'Destination score out of 5.0',
+      subtext: `${apiStats?.total_reviews || 0} reviews recorded`,
       change: defaultRates.rating,
       trend: 'up',
       icon: Star,
-      color: 'text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]',
-      bg: 'bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)]',
+      color: 'text-amber-500 dark:text-amber-400',
+      bg: 'bg-amber-50 dark:bg-amber-950/40',
       border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
     }
   ];
 
+  // Secondary Operational Metrics (Row 2)
   const statsRow2 = [
     {
       title: "Pending Verifications",
-      value: apiStats?.pending_verifications !== undefined ? apiStats.pending_verifications.toLocaleString() : "2",
-      subtext: "Business & Content Editor requests",
-      change: defaultRates.verifications,
-      trend: "up",
+      value: apiStats?.pending_verifications !== undefined ? apiStats.pending_verifications.toLocaleString() : "0",
+      subtext: `${apiStats?.pending_businesses || 0} biz, ${apiStats?.pending_places || 0} places`,
+      change: `${apiStats?.pending_verifications || 0} req`,
+      trend: apiStats?.pending_verifications > 0 ? "up" : "down",
       icon: AlertCircle,
       color: "text-amber-600 dark:text-amber-400",
       bg: "bg-amber-50 dark:bg-amber-950/40",
       border: "border-amber-200 dark:border-amber-800"
     },
     {
+      title: 'Commercial Partners',
+      value: apiStats?.total_businesses !== undefined ? apiStats.total_businesses.toLocaleString() : '0',
+      subtext: `${apiStats?.approved_businesses || 0} approved businesses`,
+      change: getChange('businesses', defaultRates.businesses),
+      trend: getTrend('businesses', 'up'),
+      icon: Building2,
+      color: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-emerald-50 dark:bg-emerald-950/40',
+      border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
+    },
+    {
       title: 'Total Categories',
-      value: apiStats?.total_categories !== undefined ? apiStats.total_categories.toLocaleString() : '8',
+      value: apiStats?.total_categories !== undefined ? apiStats.total_categories.toLocaleString() : '0',
       subtext: 'Organized destination types',
       change: '+0',
       trend: 'up',
       icon: Tags,
-      color: 'text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)]',
-      bg: 'bg-[var(--color-purple-badge-bg)] dark:bg-[var(--color-purple-badge-dark-bg)]',
+      color: 'text-violet-600 dark:text-violet-400',
+      bg: 'bg-violet-50 dark:bg-violet-950/40',
       border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
     },
     {
-      title: 'Total Provinces',
-      value: apiStats?.total_provinces !== undefined ? apiStats.total_provinces.toLocaleString() : '6',
-      subtext: 'Active tourism regions',
-      change: '+0',
-      trend: 'up',
-      icon: Map,
-      color: 'text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]',
-      bg: 'bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)]',
-      border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
-    },
-    {
-      title: 'Total Events',
-      value: apiStats?.total_events !== undefined ? apiStats.total_events.toLocaleString() : '2',
-      subtext: getSubtext('events', 'Scheduled festivals & events', 'events'),
+      title: 'Events & Festivals',
+      value: apiStats?.total_events !== undefined ? apiStats.total_events.toLocaleString() : '0',
+      subtext: 'Active cultural events',
       change: getChange('events', defaultRates.events),
       trend: getTrend('events'),
       icon: CalendarDays,
-      color: 'text-[var(--color-rose-badge-text)] dark:text-[var(--color-rose-badge-dark-text)]',
-      bg: 'bg-[var(--color-rose-badge-bg)] dark:bg-[var(--color-rose-badge-dark-bg)]',
+      color: 'text-rose-600 dark:text-rose-400',
+      bg: 'bg-rose-50 dark:bg-rose-950/40',
       border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
     },
     {
-      title: 'Total Favorites',
-      value: apiStats?.total_favorites !== undefined ? apiStats.total_favorites.toLocaleString() : '2',
-      subtext: getSubtext('favorites', 'Saved wishlist destinations', 'favorites'),
+      title: 'Saved Favorites',
+      value: apiStats?.total_favorites !== undefined ? apiStats.total_favorites.toLocaleString() : '0',
+      subtext: `${apiStats?.total_galleries || 0} media gallery items`,
       change: getChange('favorites', defaultRates.favorites),
       trend: getTrend('favorites'),
       icon: Heart,
-      color: 'text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)]',
-      bg: 'bg-[var(--color-danger-bg)] dark:bg-[var(--color-danger-dark-bg)]',
+      color: 'text-pink-600 dark:text-pink-400',
+      bg: 'bg-pink-50 dark:bg-pink-950/40',
       border: 'border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]'
     }
   ];

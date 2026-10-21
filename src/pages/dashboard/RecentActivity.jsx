@@ -1,5 +1,5 @@
 import React from 'react';
-import { Landmark, MessageSquare, Image, User, Calendar, Bell, Clock, ArrowRight } from 'lucide-react';
+import { Landmark, MessageSquare, Image, User, Calendar, Bell, Clock, ArrowRight, CalendarCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function RecentActivity({ activities, recentPlaces }) {
@@ -9,6 +9,8 @@ export default function RecentActivity({ activities, recentPlaces }) {
     switch (type) {
       case 'place':
         return Landmark;
+      case 'booking':
+        return CalendarCheck;
       case 'review':
         return MessageSquare;
       case 'gallery':
@@ -24,6 +26,8 @@ export default function RecentActivity({ activities, recentPlaces }) {
 
   const getBadgeStyle = (type) => {
     switch (type) {
+      case 'booking':
+        return 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/40';
       case 'place':
         return 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/40';
       case 'review':
