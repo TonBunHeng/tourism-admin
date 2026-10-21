@@ -12,14 +12,17 @@ import reviewService from "../../services/reviewService";
 import placeService from "../../services/placeService";
 import { useAlert } from "../../context/AlertContext";
 import { useSearch } from "../../context/SearchContext";
+import { getPageCache, setPageCache } from "../../utils/pageCache";
 
 export default function Ratings() {
   const { showConfirm, showSuccess, showError } = useAlert();
   const { searchTerm, setSearchTerm } = useSearch();
-  const [reviews, setReviews] = useState([]);
-  const [places, setPlaces] = useState(["All"]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [analyticsData, setAnalyticsData] = useState(null);
+
+  const cachedRatings = getPageCache('ratings_data');
+  const [reviews, setReviews] = useState(() => cachedRatings?.reviews || []);
+  const [places, setPlaces] = useState(() => cachedRatings?.places || ["All"]);
+  const [isLoading, setIsLoading] = useState(() => !cachedRatings);
+  const [analyticsData, setAnalyticsData] = useState(() => cachedRatings?.analyticsData || null);
 
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedRating, setSelectedRating] = useState("All");
@@ -32,8 +35,8 @@ export default function Ratings() {
   const [sortBy, setSortBy] = useState("newest");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(() => cachedRatings?.totalRecords || 0);
+  const [totalPages, setTotalPages] = useState(() => cachedRatings?.totalPages || 1);
   const itemsPerPage = 10;
 
   const statuses = ["All", "Approved", "Pending", "Rejected"];
@@ -59,7 +62,10 @@ export default function Ratings() {
       try {
         const res = await reviewService.getAnalytics();
         if (res && (res.success || res.data)) {
-          setAnalyticsData(res.data || res);
+          const data = res.data || res;
+          setAnalyticsData(data);
+          const current = getPageCache('ratings_data') || {};
+          setPageCache('ratings_data', { ...current, analyticsData: data });
         }
       } catch (e) {
         console.warn("Failed to load analytics overview for ratings", e);
@@ -69,7 +75,9 @@ export default function Ratings() {
   }, []);
 
   const loadReviews = async () => {
-    setIsLoading(true);
+    if (!cachedRatings && reviews.length === 0) {
+      setIsLoading(true);
+    }
     try {
       const params = {
         page: currentPage,
@@ -91,12 +99,14 @@ export default function Ratings() {
           replies: r.replies || [],
         }));
         setReviews(formatted);
-        if (res.meta) {
-          setTotalRecords(res.meta.total || formatted.length);
-          setTotalPages(res.meta.last_page || 1);
-        } else {
-          setTotalRecords(formatted.length);
-          setTotalPages(Math.ceil(formatted.length / itemsPerPage) || 1);
+        const total = res.meta?.total || formatted.length;
+        const pages = res.meta?.last_page || Math.ceil(total / itemsPerPage) || 1;
+        setTotalRecords(total);
+        setTotalPages(pages);
+
+        if (currentPage === 1 && !searchTerm && selectedStatus === "All" && selectedRating === "All") {
+          const current = getPageCache('ratings_data') || {};
+          setPageCache('ratings_data', { ...current, reviews: formatted, totalRecords: total, totalPages: pages });
         }
       }
     } catch (e) {

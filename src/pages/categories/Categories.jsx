@@ -13,6 +13,7 @@ import deletionRequestService from "../../services/deletionRequestService";
 import authService, { isSuperAdminRole } from "../../services/authService";
 import { useAlert } from "../../context/AlertContext";
 import { useSearch } from "../../context/SearchContext";
+import { getPageCache, setPageCache } from "../../utils/pageCache";
 
 export default function Categories() {
   const location = useLocation();
@@ -20,8 +21,9 @@ export default function Categories() {
   const { searchTerm } = useSearch();
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = isSuperAdminRole(currentUser?.role);
-  const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const cachedData = getPageCache('categories_data');
+  const [categories, setCategories] = useState(() => cachedData?.categories || []);
+  const [isLoading, setIsLoading] = useState(() => !cachedData);
 
   const [statusFilter, setStatusFilter] = useState("All");
 
@@ -30,8 +32,8 @@ export default function Categories() {
   const [viewingCategory, setViewingCategory] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(() => cachedData?.totalRecords || 0);
+  const [totalPages, setTotalPages] = useState(() => cachedData?.totalPages || 1);
   const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
@@ -42,7 +44,7 @@ export default function Categories() {
   });
 
   const loadCategories = async () => {
-    setIsLoading(true);
+    if (!getPageCache('categories_data')) setIsLoading(true);
     try {
       const params = {
         page: currentPage,
@@ -61,13 +63,11 @@ export default function Categories() {
           createdAt: c.created_at ? c.created_at.split('T')[0] : '2024-01-01',
         }));
         setCategories(formatted);
-        if (res.meta) {
-          setTotalRecords(res.meta.total);
-          setTotalPages(res.meta.last_page);
-        } else {
-          setTotalRecords(formatted.length);
-          setTotalPages(1);
-        }
+        const total = res.meta ? res.meta.total : formatted.length;
+        const pages = res.meta ? res.meta.last_page : 1;
+        setTotalRecords(total);
+        setTotalPages(pages);
+        setPageCache('categories_data', { categories: formatted, totalRecords: total, totalPages: pages });
       }
     } catch (e) {
       console.error("Failed to load categories from API", e);

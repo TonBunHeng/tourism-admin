@@ -11,20 +11,23 @@ import DeletionConfirmModal from "./DeletionConfirmModal";
 import deletionRequestService from "../../services/deletionRequestService";
 import { useAlert } from "../../context/AlertContext";
 import { useSearch } from "../../context/SearchContext";
+import { getPageCache, setPageCache } from "../../utils/pageCache";
 
 export default function DeleteAccount() {
   const { showSuccess, showError } = useAlert();
   const { searchTerm, setSearchTerm } = useSearch();
-  const [requests, setRequests] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const cachedDeletion = getPageCache('deletion_requests_data');
+  const [requests, setRequests] = useState(() => cachedDeletion?.requests || []);
+  const [isLoading, setIsLoading] = useState(() => !cachedDeletion);
   const [selectedType, setSelectedType] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedUrgency, setSelectedUrgency] = useState("All");
   const [sortBy, setSortBy] = useState("newest");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(() => cachedDeletion?.totalRecords || 0);
+  const [totalPages, setTotalPages] = useState(() => cachedDeletion?.totalPages || 1);
   const itemsPerPage = 10;
 
   // Modal states
@@ -40,7 +43,9 @@ export default function DeleteAccount() {
   const urgencies = ["All", "critical", "high", "medium", "low"];
 
   const loadRequests = async () => {
-    setIsLoading(true);
+    if (!cachedDeletion && requests.length === 0) {
+      setIsLoading(true);
+    }
     try {
       const params = {
         page: currentPage,
@@ -86,8 +91,14 @@ export default function DeleteAccount() {
           };
         });
         setRequests(formatted);
-        setTotalRecords(res.meta?.total || formatted.length);
-        setTotalPages(res.meta?.last_page || Math.ceil((res.meta?.total || formatted.length) / itemsPerPage) || 1);
+        const total = res.meta?.total || formatted.length;
+        const pages = res.meta?.last_page || Math.ceil(total / itemsPerPage) || 1;
+        setTotalRecords(total);
+        setTotalPages(pages);
+
+        if (currentPage === 1 && !searchTerm && selectedStatus === "All" && selectedType === "All" && selectedUrgency === "All") {
+          setPageCache('deletion_requests_data', { requests: formatted, totalRecords: total, totalPages: pages });
+        }
       }
     } catch (e) {
       console.error("Failed to load deletion requests:", e);

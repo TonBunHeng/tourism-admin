@@ -41,11 +41,14 @@ import userService from '../../services/userService';
 import reviewService from '../../services/reviewService';
 import categoryService from '../../services/categoryService';
 import reportService from '../../services/reportService';
+import { getPageCache } from '../../utils/pageCache';
 
 export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
   const [timeframe, setTimeframe] = useState('Year');
   const [selectedDataset, setSelectedDataset] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
+
+  const cachedFromReports = getPageCache('reports_datasets');
   const [isLoading, setIsLoading] = useState(false);
   const [apiAnalytics, setApiAnalytics] = useState(null);
 
@@ -60,12 +63,32 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
   }, [timeframe]);
 
   // Raw dataset holders
-  const [datasets, setDatasets] = useState({
-    places: [],
-    events: [],
-    users: [],
-    reviews: [],
-    categories: []
+  const [datasets, setDatasets] = useState(() => {
+    if (initialDatasets && typeof initialDatasets === 'object') {
+      return {
+        places: Array.isArray(initialDatasets.places) ? initialDatasets.places : [],
+        events: Array.isArray(initialDatasets.events) ? initialDatasets.events : [],
+        users: Array.isArray(initialDatasets.users) ? initialDatasets.users : [],
+        reviews: Array.isArray(initialDatasets.reviews) ? initialDatasets.reviews : [],
+        categories: Array.isArray(initialDatasets.categories) ? initialDatasets.categories : []
+      };
+    }
+    if (cachedFromReports) {
+      return {
+        places: cachedFromReports.places || [],
+        events: cachedFromReports.events || [],
+        users: cachedFromReports.users || [],
+        reviews: cachedFromReports.reviews || [],
+        categories: cachedFromReports.categories || []
+      };
+    }
+    return {
+      places: [],
+      events: [],
+      users: [],
+      reviews: [],
+      categories: []
+    };
   });
 
   // Sync prop datasets or load directly if loaded as a standalone page
@@ -78,7 +101,7 @@ export default function ReportsAnalytics({ datasets: initialDatasets = null }) {
         reviews: Array.isArray(initialDatasets.reviews) ? initialDatasets.reviews : [],
         categories: Array.isArray(initialDatasets.categories) ? initialDatasets.categories : []
       });
-    } else {
+    } else if (!cachedFromReports) {
       const loadAllData = async () => {
         setIsLoading(true);
         try {

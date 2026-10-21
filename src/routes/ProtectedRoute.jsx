@@ -1,102 +1,88 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import authService, { normalizeRole, isFullAdminRole } from '../services/authService';
+import authService, { normalizeRole } from '../services/authService';
 import Forbidden from '../pages/error/Forbidden';
+
+const DEFAULT_ALLOWED_ROLES = [
+  'super_admin', 'admin', 'guide_editor',
+  'Super Admin', 'Admin', 'Guide / Editor', 'Tourism Content Editor'
+];
+
+/**
+ * Check if the given role matches any allowed role.
+ * Super Admin always has full access to all admin routes.
+ */
+const checkRolePermission = (role, allowedRoles) => {
+  if (!role) return false;
+  const userNorm = normalizeRole(role);
+  if (userNorm === 'super_admin') return true;
+
+  const targetRoles = allowedRoles || DEFAULT_ALLOWED_ROLES;
+  const normalizedAllowed = (Array.isArray(targetRoles) ? targetRoles : [targetRoles])
+    .map(r => normalizeRole(r));
+  return normalizedAllowed.includes(userNorm);
+};
 
 /**
  * ProtectedRoute Guard
  * 
- * Enforces frontend authentication and role-based access.
- * Super Admin and Admin have full All Access to all protected routes.
+ * Synchronously checks authentication and permissions from cached credentials
+ * so navigation between routes happens instantly with ZERO artificial loading delays.
+ * Background verification syncs authoritative state without blocking the user.
  */
-export default function ProtectedRoute({ allowedRoles = ['super_admin', 'admin', 'guide_editor', 'Super Admin', 'Admin', 'Guide / Editor', 'Tourism Content Editor'] }) {
+export default function ProtectedRoute({ allowedRoles = DEFAULT_ALLOWED_ROLES }) {
   const location = useLocation();
-  const [isVerifying, setIsVerifying] = useState(true);
-  const [authStatus, setAuthStatus] = useState({
-    isAuthenticated: false,
-    isAllowedRole: false,
+
+  // Instant synchronous authentication state from localStorage
+  const token = authService.getToken();
+  const [user, setUser] = useState(() => authService.getCurrentUser());
+
+  // Only show verifying loader if a token exists but user profile has never been loaded
+  const [isVerifying, setIsVerifying] = useState(() => {
+    return Boolean(token && !user?.role);
   });
 
-  const checkRolePermission = (role) => {
-    if (!role) return false;
-    const userNorm = normalizeRole(role);
-    // Super Admin gets Full All Access across the entire administrative portal
-    if (userNorm === 'super_admin') return true;
-
-    const normalizedAllowed = (Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles])
-      .map(r => normalizeRole(r));
-    return normalizedAllowed.includes(userNorm);
-  };
+  const isAuthenticated = Boolean(token && user);
+  const isAllowedRole = useMemo(() => {
+    if (!isAuthenticated) return false;
+    return checkRolePermission(user?.role, allowedRoles);
+  }, [isAuthenticated, user?.role, allowedRoles]);
 
   useEffect(() => {
     let isMounted = true;
+    const currentToken = authService.getToken();
+    if (!currentToken) {
+      return;
+    }
 
-    const verifyAuth = async () => {
-      const token = authService.getToken();
-      if (!token) {
-        if (isMounted) {
-          setAuthStatus({ isAuthenticated: false, isAllowedRole: false });
-          setIsVerifying(false);
+    // Authoritative session verification in the background (runs once on mount, non-blocking)
+    authService.me()
+      .then((res) => {
+        if (!isMounted) return;
+        const freshUser = res?.data?.user || res?.data;
+        if (freshUser) {
+          setUser(freshUser);
         }
-        return;
-      }
-
-      // Check current cached user first for quick responsiveness
-      const currentUser = authService.getCurrentUser();
-      if (currentUser?.role) {
-        const isAllowed = checkRolePermission(currentUser.role);
-        if (isMounted) {
-          setAuthStatus({
-            isAuthenticated: true,
-            isAllowedRole: isAllowed,
-          });
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        if (err?.status === 401 || err?.response?.status === 401) {
+          authService.clearSession();
+          setUser(null);
         }
-      }
-
-      try {
-        // Authoritative server-side verification with backend
-        const res = await authService.me();
-        if (isMounted) {
-          const user = res?.data?.user || res?.data;
-          if (res?.success && user) {
-            const isAllowed = checkRolePermission(user.role);
-            setAuthStatus({
-              isAuthenticated: true,
-              isAllowedRole: isAllowed,
-            });
-          } else if (res?.status === 401) {
-            authService.clearSession();
-            setAuthStatus({ isAuthenticated: false, isAllowedRole: false });
-          }
-        }
-      } catch (err) {
-        if (isMounted) {
-          if (!authService.getToken() || err?.status === 401 || err?.response?.status === 401) {
-            setAuthStatus({ isAuthenticated: false, isAllowedRole: false });
-          }
-        }
-      } finally {
+      })
+      .finally(() => {
         if (isMounted) {
           setIsVerifying(false);
         }
-      }
-    };
-
-    verifyAuth();
+      });
 
     const handleStorageChange = () => {
+      const u = authService.getCurrentUser();
+      setUser(u);
       if (!authService.getToken()) {
-        setAuthStatus({ isAuthenticated: false, isAllowedRole: false });
         setIsVerifying(false);
-      } else {
-        const u = authService.getCurrentUser();
-        if (u) {
-          setAuthStatus({
-            isAuthenticated: true,
-            isAllowedRole: checkRolePermission(u.role),
-          });
-        }
       }
     };
 
@@ -108,13 +94,14 @@ export default function ProtectedRoute({ allowedRoles = ['super_admin', 'admin',
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('user-profile-updated', handleStorageChange);
     };
-  }, [location.pathname, allowedRoles]);
+  }, []); // Run on mount only to prevent repeated network delays on route navigation
 
-  if (!authService.getToken()) {
+  if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (isVerifying && !authStatus.isAuthenticated) {
+  // Only show full-screen loader if we have a token but NO cached user data at all
+  if (isVerifying && !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950">
         <div className="flex flex-col items-center gap-2.5">
@@ -125,11 +112,11 @@ export default function ProtectedRoute({ allowedRoles = ['super_admin', 'admin',
     );
   }
 
-  if (!authStatus.isAuthenticated) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!authStatus.isAllowedRole) {
+  if (!isAllowedRole) {
     return <Forbidden />;
   }
 

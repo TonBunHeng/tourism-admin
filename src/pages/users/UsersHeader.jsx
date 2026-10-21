@@ -1,6 +1,6 @@
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus } from "lucide-react";
 
-export default function UsersHeader({ onAddUser, onOpenAddModal, onRefresh, isRefreshing }) {
+export default function UsersHeader({ onAddUser, onOpenAddModal }) {
   const handleAdd = onAddUser || onOpenAddModal;
 
   return (
@@ -19,16 +19,6 @@ export default function UsersHeader({ onAddUser, onOpenAddModal, onRefresh, isRe
           </p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          {onRefresh && (
-            <button
-              type="button"
-              onClick={onRefresh}
-              className="p-2.5 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Refresh users list"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </button>
-          )}
           <button
             type="button"
             onClick={handleAdd}

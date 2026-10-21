@@ -12,6 +12,7 @@ import deletionRequestService from '../../services/deletionRequestService';
 import authService, { isSuperAdminRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
 import { useSearch } from '../../context/SearchContext';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 const PROVINCE_TYPES = ['All', 'Capital City', 'Province', 'Municipality'];
 
@@ -20,8 +21,9 @@ export default function Provinces() {
   const { searchTerm, setSearchTerm } = useSearch();
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = isSuperAdminRole(currentUser?.role);
-  const [provinces, setProvinces] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const cachedData = getPageCache('provinces_data');
+  const [provinces, setProvinces] = useState(() => cachedData?.provinces || []);
+  const [isLoading, setIsLoading] = useState(() => !cachedData);
 
   const [selectedType, setSelectedType] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
@@ -31,8 +33,8 @@ export default function Provinces() {
   const [viewingProvince, setViewingProvince] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(() => cachedData?.totalRecords || 0);
+  const [totalPages, setTotalPages] = useState(() => cachedData?.totalPages || 1);
   const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
@@ -47,7 +49,7 @@ export default function Provinces() {
   });
 
   const loadProvinces = async () => {
-    setIsLoading(true);
+    if (!getPageCache('provinces_data')) setIsLoading(true);
     try {
       const params = {
         page: currentPage,
@@ -73,13 +75,11 @@ export default function Provinces() {
         setProvinces(formatted);
 
         const meta = res.meta || res.data?.meta;
-        if (meta) {
-          setTotalRecords(meta.total || formatted.length);
-          setTotalPages(meta.last_page || 1);
-        } else {
-          setTotalRecords(formatted.length);
-          setTotalPages(1);
-        }
+        const total = meta ? (meta.total || formatted.length) : formatted.length;
+        const pages = meta ? (meta.last_page || 1) : 1;
+        setTotalRecords(total);
+        setTotalPages(pages);
+        setPageCache('provinces_data', { provinces: formatted, totalRecords: total, totalPages: pages });
       }
     } catch (e) {
       console.error('Failed to load provinces from API', e);

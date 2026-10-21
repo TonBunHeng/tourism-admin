@@ -12,21 +12,24 @@ import deletionRequestService from '../../services/deletionRequestService';
 import authService, { isSuperAdminRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
 import { useSearch } from '../../context/SearchContext';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 export default function Events() {
   const { showConfirm, showSuccess, showError } = useAlert();
   const { searchTerm, setSearchTerm } = useSearch();
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = isSuperAdminRole(currentUser?.role);
-  const [events, setEvents] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const cachedEvents = getPageCache('events_data');
+  const [events, setEvents] = useState(() => cachedEvents?.events || []);
+  const [isLoading, setIsLoading] = useState(() => !cachedEvents);
 
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(() => cachedEvents?.totalRecords || 0);
+  const [totalPages, setTotalPages] = useState(() => cachedEvents?.totalPages || 1);
   const itemsPerPage = 10;
 
   // Modal States
@@ -52,7 +55,9 @@ export default function Events() {
   const categoriesList = ['All', 'Cultural', 'Festival', 'Sports', 'Food', 'Music', 'Exhibition'];
 
   const loadEvents = async () => {
-    setIsLoading(true);
+    if (!cachedEvents && events.length === 0) {
+      setIsLoading(true);
+    }
     try {
       const params = {
         page: currentPage,
@@ -92,8 +97,14 @@ export default function Events() {
         });
 
         setEvents(mapped);
-        setTotalRecords(res.meta?.total || mapped.length);
-        setTotalPages(res.meta?.last_page || Math.ceil((res.meta?.total || mapped.length) / itemsPerPage) || 1);
+        const total = res.meta?.total || mapped.length;
+        const pages = res.meta?.last_page || Math.ceil(total / itemsPerPage) || 1;
+        setTotalRecords(total);
+        setTotalPages(pages);
+
+        if (currentPage === 1 && !searchTerm && selectedCategory === 'All' && selectedStatus === 'All') {
+          setPageCache('events_data', { events: mapped, totalRecords: total, totalPages: pages });
+        }
       }
     } catch (e) {
       console.error('Failed to load events from API:', e);

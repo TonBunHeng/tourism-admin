@@ -17,7 +17,6 @@ import {
   Sparkles,
   Info,
   Users,
-  RefreshCw,
   Loader2,
   Calendar,
   AlertTriangle
@@ -27,6 +26,7 @@ import { useSearch } from '../../context/SearchContext';
 import notificationService from '../../services/notificationService';
 import NotificationDetailsModal from './NotificationDetailsModal';
 import SimplePagination from '../../components/common/SimplePagination';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 export default function Notifications() {
   const { showConfirm, showSuccess, showError } = useAlert();
@@ -42,11 +42,11 @@ export default function Notifications() {
     return 'All';
   });
 
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const cachedNotifs = getPageCache('notifications_data');
+  const [notifications, setNotifications] = useState(() => cachedNotifs?.notifications || []);
+  const [unreadCount, setUnreadCount] = useState(() => cachedNotifs?.unreadCount || 0);
+  const [loading, setLoading] = useState(() => !cachedNotifs);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [unreadCount, setUnreadCount] = useState(0);
 
   // Pagination States (10 items per page standard)
   const [currentPage, setCurrentPage] = useState(1);
@@ -146,9 +146,10 @@ export default function Notifications() {
     };
   };
 
-  const fetchNotifications = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+  const fetchNotifications = useCallback(async () => {
+    if (!cachedNotifs && notifications.length === 0) {
+      setLoading(true);
+    }
 
     try {
       const params = {};
@@ -165,19 +166,25 @@ export default function Notifications() {
       setNotifications(notifs);
 
       // Meta counts
+      let unread = 0;
       if (res?.meta?.unread_count !== undefined) {
-        setUnreadCount(res.meta.unread_count);
+        unread = res.meta.unread_count;
+        setUnreadCount(unread);
       } else {
         const unreadRes = await notificationService.getUnreadCount();
-        setUnreadCount(unreadRes?.unread_count || 0);
+        unread = unreadRes?.unread_count || 0;
+        setUnreadCount(unread);
+      }
+
+      if (filterCategory === 'All' && statusFilter === 'all') {
+        setPageCache('notifications_data', { notifications: notifs, unreadCount: unread });
       }
     } catch (err) {
       console.error('Failed to load notifications:', err);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
-  }, [filterCategory, statusFilter]);
+  }, [filterCategory, statusFilter, cachedNotifs, notifications.length]);
 
   useEffect(() => {
     fetchNotifications();
@@ -370,17 +377,6 @@ export default function Notifications() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-            <button
-              type="button"
-              onClick={() => fetchNotifications(true)}
-              disabled={refreshing}
-              className="py-2 px-3.5 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] hover:bg-gray-50 dark:hover:bg-zinc-800 text-xs font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60 shadow-xs"
-              title="Refresh notifications"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </button>
-
             {unreadCount > 0 && (
               <button
                 type="button"

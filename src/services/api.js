@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { clearPageCache } from '../utils/pageCache';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -65,6 +66,7 @@ api.interceptors.response.use(
 
     // 401 Unauthorized: Session is expired or invalid
     if (status === 401) {
+      clearApiCache();
       localStorage.removeItem('auth_token');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -108,4 +110,75 @@ api.interceptors.response.use(
   }
 );
 
+// Fast in-memory cache for GET requests to make page transitions instant
+const apiGetCache = new Map();
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds
+
+export const clearApiCache = () => {
+  apiGetCache.clear();
+  clearPageCache();
+};
+
+const originalGet = api.get.bind(api);
+const originalPost = api.post.bind(api);
+const originalPut = api.put.bind(api);
+const originalPatch = api.patch.bind(api);
+const originalDelete = api.delete.bind(api);
+
+api.get = function (url, config = {}) {
+  // Option to explicitly bypass cache
+  if (config.noCache || config.headers?.['Cache-Control'] === 'no-cache') {
+    return originalGet(url, config);
+  }
+
+  const queryKey = config.params ? JSON.stringify(config.params) : '';
+  const key = `${url}?${queryKey}`;
+  const now = Date.now();
+
+  const cached = apiGetCache.get(key);
+  if (cached && now - cached.timestamp < CACHE_TTL_MS && cached.data !== undefined) {
+    return Promise.resolve(cached.data);
+  }
+
+  // Deduplicate in-flight requests to the same endpoint
+  if (cached?.inFlight) {
+    return cached.inFlight;
+  }
+
+  const inFlightPromise = originalGet(url, config)
+    .then((data) => {
+      apiGetCache.set(key, { data, timestamp: Date.now() });
+      return data;
+    })
+    .catch((err) => {
+      apiGetCache.delete(key);
+      throw err;
+    });
+
+  apiGetCache.set(key, { inFlight: inFlightPromise, timestamp: now });
+  return inFlightPromise;
+};
+
+// Any mutation invalidates cache to ensure fresh data
+api.post = function (...args) {
+  clearApiCache();
+  return originalPost(...args);
+};
+
+api.put = function (...args) {
+  clearApiCache();
+  return originalPut(...args);
+};
+
+api.patch = function (...args) {
+  clearApiCache();
+  return originalPatch(...args);
+};
+
+api.delete = function (...args) {
+  clearApiCache();
+  return originalDelete(...args);
+};
+
 export default api;
+

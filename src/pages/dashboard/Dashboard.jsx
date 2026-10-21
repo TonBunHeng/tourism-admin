@@ -14,17 +14,21 @@ import CategoryDistribution from './CategoryDistribution';
 import RecentBookings from './RecentBookings';
 import RecentActivity from './RecentActivity';
 import dashboardService from '../../services/dashboardService';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 export default function Dashboard() {
   const [timeRange, setTimeRange] = useState('yearly');
+  const cachedDash = getPageCache('dashboard_stats_yearly');
   const [isLoading, setIsLoading] = useState(false);
-  const [dashboardData, setDashboardData] = useState(null);
-  const [cache, setCache] = useState({});
+  const [dashboardData, setDashboardData] = useState(() => cachedDash || null);
+  const [cache, setCache] = useState(() => cachedDash ? { yearly: cachedDash } : {});
 
   const fetchStats = async (range = timeRange) => {
-    setIsLoading(true);
-    if (cache[range]) {
-      setDashboardData(cache[range]);
+    const existing = cache[range] || getPageCache('dashboard_stats_' + range);
+    if (!existing) {
+      setIsLoading(true);
+    } else {
+      setDashboardData(existing);
     }
     try {
       const res = await dashboardService.getStats(range);
@@ -33,6 +37,7 @@ export default function Dashboard() {
           ...prev,
           [range]: res.data,
         }));
+        setPageCache('dashboard_stats_' + range, res.data);
         setDashboardData(res.data);
       }
     } catch (e) {

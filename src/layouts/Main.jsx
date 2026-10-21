@@ -76,6 +76,15 @@ export default function Main() {
     }
   }, [location.pathname, location.search]);
 
+  // Pre-warm API cache in the background so navigating to any page renders immediately
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      import('../utils/prewarm').then(m => m.prewarmAdminCaches());
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-[#09090b] transition-colors duration-200">
       <Sidebar

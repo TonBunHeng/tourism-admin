@@ -24,6 +24,7 @@ import deletionRequestService from '../../services/deletionRequestService';
 import authService, { isSuperAdminRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
 import { useSearch } from '../../context/SearchContext';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 export default function Places() {
   const location = useLocation();
@@ -31,15 +32,16 @@ export default function Places() {
   const { searchTerm, setSearchTerm } = useSearch();
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = isSuperAdminRole(currentUser?.role);
-  const [places, setPlaces] = useState([]);
+  const cachedData = getPageCache('places_data');
+  const [places, setPlaces] = useState(() => cachedData?.places || []);
   const [categoriesList, setCategoriesList] = useState(['All', 'Temple', 'Palace', 'Beach', 'Nature', 'Market', 'Farm']);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !cachedData);
 
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(() => cachedData?.totalRecords || 0);
+  const [totalPages, setTotalPages] = useState(() => cachedData?.totalPages || 1);
   const itemsPerPage = 10;
 
   // Modal States
@@ -83,7 +85,7 @@ export default function Places() {
   };
 
   const loadPlaces = async () => {
-    setIsLoading(true);
+    if (!getPageCache('places_data')) setIsLoading(true);
     try {
       const params = {
         page: currentPage,
@@ -123,8 +125,11 @@ export default function Places() {
           updated_at: p.updated_at
         }));
         setPlaces(formatted);
-        setTotalRecords(res.meta?.total || formatted.length);
-        setTotalPages(res.meta?.last_page || Math.ceil((res.meta?.total || formatted.length) / itemsPerPage) || 1);
+        const total = res.meta?.total || formatted.length;
+        const pages = res.meta?.last_page || Math.ceil(total / itemsPerPage) || 1;
+        setTotalRecords(total);
+        setTotalPages(pages);
+        setPageCache('places_data', { places: formatted, totalRecords: total, totalPages: pages });
       }
     } catch (e) {
       console.error('Failed to load places from API:', e);

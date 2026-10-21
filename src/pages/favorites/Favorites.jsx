@@ -20,14 +20,17 @@ import placeService from "../../services/placeService";
 import categoryService from "../../services/categoryService";
 import { useAlert } from "../../context/AlertContext";
 import { useSearch } from "../../context/SearchContext";
+import { getPageCache, setPageCache } from "../../utils/pageCache";
 
 export default function Favorites() {
   const { showConfirm, showSuccess, showError } = useAlert();
   const { searchTerm, setSearchTerm } = useSearch();
-  const [favorites, setFavorites] = useState([]);
-  const [categories, setCategories] = useState(["All"]);
+
+  const cachedFavorites = getPageCache('favorites_data');
+  const [favorites, setFavorites] = useState(() => cachedFavorites?.favorites || []);
+  const [categories, setCategories] = useState(() => cachedFavorites?.categories || ["All"]);
   const [availablePlaces, setAvailablePlaces] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !cachedFavorites);
 
   // Filter & Search States
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -96,7 +99,9 @@ export default function Favorites() {
 
   // Load Favorites from API
   const loadFavorites = async () => {
-    setIsLoading(true);
+    if (!cachedFavorites && favorites.length === 0) {
+      setIsLoading(true);
+    }
     try {
       const res = await favoriteService.getFavorites();
       if (res.success && res.data) {
@@ -152,6 +157,7 @@ export default function Favorites() {
         });
 
         setFavorites(formatted);
+        setPageCache('favorites_data', { favorites: formatted, categories });
       }
     } catch (e) {
       console.error("Failed to load favorites from API", e);

@@ -1,4 +1,4 @@
-import api from './api';
+import api, { clearApiCache } from './api';
 
 export const normalizeRole = (role) => {
   if (!role) return 'user';
@@ -108,6 +108,7 @@ export const authService = {
   },
 
   clearSession() {
+    clearApiCache();
     localStorage.removeItem('auth_token');
     localStorage.removeItem('token');
     localStorage.removeItem('user');

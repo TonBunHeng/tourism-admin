@@ -12,12 +12,15 @@ import { useAlert } from '../../context/AlertContext';
 import { useSearch } from '../../context/SearchContext';
 import { getStatusColor } from '../../utils/StatusUtils';
 
+import { getPageCache, setPageCache } from '../../utils/pageCache';
+
 export default function Bookings() {
   const { showConfirm, showSuccess, showError } = useAlert();
   const { searchTerm: search } = useSearch();
 
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cachedData = getPageCache('bookings_data');
+  const [bookings, setBookings] = useState(() => cachedData || []);
+  const [loading, setLoading] = useState(() => !cachedData);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -34,7 +37,7 @@ export default function Bookings() {
 
   const fetchBookings = useCallback(async (isManualRefresh = false) => {
     if (isManualRefresh) setIsRefreshing(true);
-    else setLoading(true);
+    else if (!getPageCache('bookings_data')) setLoading(true);
 
     try {
       const res = await bookingService.getBookings();
@@ -48,6 +51,7 @@ export default function Bookings() {
           status: b.status || 'pending'
         }));
         setBookings(normalized);
+        setPageCache('bookings_data', normalized);
       } else {
         setBookings([]);
       }

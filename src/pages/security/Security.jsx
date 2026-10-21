@@ -10,14 +10,16 @@ import SecurityDetailsModal from './SecurityDetailsModal';
 import SecurityExportModal from './SecurityExportModal';
 import SecurityToolbar from './SecurityToolbar';
 import SimplePagination from '../../components/common/SimplePagination';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 export default function Security() {
   const { showConfirm, showSuccess, showError } = useAlert();
   const { searchTerm } = useSearch();
 
-  const [alerts, setAlerts] = useState([]);
-  const [meta, setMeta] = useState({});
-  const [loading, setLoading] = useState(true);
+  const cachedSecurity = getPageCache('security_data');
+  const [alerts, setAlerts] = useState(() => cachedSecurity?.alerts || []);
+  const [meta, setMeta] = useState(() => cachedSecurity?.meta || {});
+  const [loading, setLoading] = useState(() => !cachedSecurity);
 
   // Modal States
   const [selectedAlert, setSelectedAlert] = useState(null);
@@ -30,20 +32,25 @@ export default function Security() {
   const itemsPerPage = 10;
 
   const fetchSecurityAlerts = useCallback(async () => {
-    setLoading(true);
+    if (!cachedSecurity && alerts.length === 0) {
+      setLoading(true);
+    }
     try {
       const res = await securityService.getAlerts({ per_page: 100 });
       const data = res?.data || [];
-      setAlerts(Array.isArray(data) ? data : []);
+      const alertsList = Array.isArray(data) ? data : [];
+      setAlerts(alertsList);
+      const newMeta = res?.meta || {};
       if (res?.meta) {
-        setMeta(res.meta);
+        setMeta(newMeta);
       }
+      setPageCache('security_data', { alerts: alertsList, meta: newMeta });
     } catch (err) {
       console.error('Failed to load security alerts from DB:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [cachedSecurity, alerts.length]);
 
   useEffect(() => {
     fetchSecurityAlerts();

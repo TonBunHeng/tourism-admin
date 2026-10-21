@@ -10,13 +10,15 @@ import GuideDetailsModal from './GuideDetailsModal';
 import { useAlert } from '../../context/AlertContext';
 import { useSearch } from '../../context/SearchContext';
 import { getStatusColor } from '../../utils/StatusUtils';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 export default function Guides() {
   const { showConfirm, showSuccess, showError } = useAlert();
   const { searchTerm: search } = useSearch();
 
-  const [guides, setGuides] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cachedGuides = getPageCache('guides_data');
+  const [guides, setGuides] = useState(() => cachedGuides || []);
+  const [loading, setLoading] = useState(() => !cachedGuides);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [languageFilter, setLanguageFilter] = useState('All');
@@ -48,9 +50,10 @@ export default function Guides() {
         status: g.status === 'verified' || g.status === 'Active' ? 'Active' : 'Inactive'
       }));
       setGuides(mapped);
+      setPageCache('guides_data', mapped);
     } catch (err) {
       console.warn('Backend guides fetch notice:', err);
-      setGuides([]);
+      if (!cachedGuides) setGuides([]);
     } finally {
       setIsRefreshing(false);
       setLoading(false);

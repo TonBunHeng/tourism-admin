@@ -14,6 +14,7 @@ import categoryService from '../../services/categoryService';
 import bookingService from '../../services/bookingService';
 import tourService from '../../services/tourService';
 import { useSearch } from '../../context/SearchContext';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 export default function Reports() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -50,9 +51,11 @@ export default function Reports() {
   const [isResetting, setIsResetting] = useState(false);
   const { showConfirm, showSuccess, showError } = useAlert();
   const [totalExports, setTotalExports] = useState(16);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const [datasets, setDatasets] = useState({
+  const cachedDatasets = getPageCache('reports_datasets');
+  const [isLoading, setIsLoading] = useState(() => !cachedDatasets);
+
+  const [datasets, setDatasets] = useState(() => cachedDatasets || {
     all: [],
     places: [],
     events: [],
@@ -64,16 +67,18 @@ export default function Reports() {
   });
 
   const loadAllReportsData = async () => {
-    setIsLoading(true);
+    if (!cachedDatasets && datasets.all.length === 0) {
+      setIsLoading(true);
+    }
     try {
       const [placesRes, eventsRes, usersRes, reviewsRes, categoriesRes, bookingsRes, toursRes] = await Promise.allSettled([
-        placeService.getPlaces({ per_page: 1000, all: true }),
-        eventService.getEvents({ per_page: 1000, all: true }),
-        userService.getUsers({ per_page: 1000, all: true }),
-        reviewService.getReviews({ per_page: 1000, all: true }),
-        categoryService.getCategories({ per_page: 1000, all: true }),
-        bookingService.getBookings({ per_page: 1000, all: true }),
-        tourService.getTours({ per_page: 1000, all: true })
+        placeService.getPlaces({ per_page: 100, all: true }),
+        eventService.getEvents({ per_page: 100, all: true }),
+        userService.getUsers({ per_page: 100, all: true }),
+        reviewService.getReviews({ per_page: 100, all: true }),
+        categoryService.getCategories({ per_page: 100, all: true }),
+        bookingService.getBookings({ per_page: 100, all: true }),
+        tourService.getTours({ per_page: 100, all: true })
       ]);
 
       const extractArray = (resVal) => {
@@ -223,7 +228,7 @@ export default function Reports() {
         return String(dateB).localeCompare(String(dateA));
       });
 
-      setDatasets({
+      const newDatasets = {
         all: combinedAll,
         places: formattedPlaces,
         events: formattedEvents,
@@ -232,7 +237,10 @@ export default function Reports() {
         users: formattedUsers,
         reviews: formattedReviews,
         categories: formattedCategories
-      });
+      };
+
+      setDatasets(newDatasets);
+      setPageCache('reports_datasets', newDatasets);
     } catch (e) {
       console.error('Failed to load reports datasets from API:', e);
     } finally {

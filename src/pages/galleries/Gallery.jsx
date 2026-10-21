@@ -13,14 +13,17 @@ import deletionRequestService from "../../services/deletionRequestService";
 import authService, { isSuperAdminRole } from "../../services/authService";
 import { useAlert } from "../../context/AlertContext";
 import { useSearch } from "../../context/SearchContext";
+import { getPageCache, setPageCache } from "../../utils/pageCache";
 
 export default function Gallery() {
   const { showConfirm, showSuccess, showError } = useAlert();
   const { searchTerm, setSearchTerm } = useSearch();
   const currentUser = authService.getCurrentUser();
   const isSuperAdmin = isSuperAdminRole(currentUser?.role);
-  const [mediaItems, setMediaItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const cachedGallery = getPageCache('gallery_data');
+  const [mediaItems, setMediaItems] = useState(() => cachedGallery?.mediaItems || []);
+  const [isLoading, setIsLoading] = useState(() => !cachedGallery);
 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
@@ -31,8 +34,8 @@ export default function Gallery() {
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(() => cachedGallery?.totalRecords || 0);
+  const [totalPages, setTotalPages] = useState(() => cachedGallery?.totalPages || 1);
   const itemsPerPage = 10;
 
   const [categoriesList, setCategoriesList] = useState(["All", "Temple", "Nature", "Culture", "City", "Festival", "Food"]);
@@ -51,7 +54,9 @@ export default function Gallery() {
   };
 
   const loadMedia = async () => {
-    setIsLoading(true);
+    if (!cachedGallery && mediaItems.length === 0) {
+      setIsLoading(true);
+    }
     try {
       const params = {
         page: currentPage,
@@ -81,12 +86,13 @@ export default function Gallery() {
             : [item.category?.toLowerCase() || "tourism"]
         }));
         setMediaItems(formatted);
-        if (res.meta) {
-          setTotalRecords(res.meta.total || formatted.length);
-          setTotalPages(res.meta.last_page || Math.ceil((res.meta.total || formatted.length) / itemsPerPage) || 1);
-        } else {
-          setTotalRecords(formatted.length);
-          setTotalPages(1);
+        const total = res.meta?.total || formatted.length;
+        const pages = res.meta?.last_page || Math.ceil(total / itemsPerPage) || 1;
+        setTotalRecords(total);
+        setTotalPages(pages);
+
+        if (currentPage === 1 && !searchTerm && selectedCategory === "All" && selectedType === "All") {
+          setPageCache('gallery_data', { mediaItems: formatted, totalRecords: total, totalPages: pages });
         }
       }
     } catch (e) {

@@ -10,13 +10,15 @@ import TourDetailsModal from './TourDetailsModal';
 import { useAlert } from '../../context/AlertContext';
 import { useSearch } from '../../context/SearchContext';
 import { getStatusColor } from '../../utils/StatusUtils';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 export default function Tours() {
   const { showConfirm, showSuccess, showError } = useAlert();
   const { searchTerm: search } = useSearch();
 
-  const [tours, setTours] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cachedTours = getPageCache('tours_data');
+  const [tours, setTours] = useState(() => cachedTours || []);
+  const [loading, setLoading] = useState(() => !cachedTours);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [destinationFilter, setDestinationFilter] = useState('All');
@@ -53,10 +55,11 @@ export default function Tours() {
           description: t.description || 'Curated travel experience in Cambodia.'
         }));
         setTours(mapped);
+        setPageCache('tours_data', mapped);
       }
     } catch (err) {
       console.warn('Backend tours fetch notice:', err);
-      setTours([]);
+      if (!cachedTours) setTours([]);
     } finally {
       setIsRefreshing(false);
       setLoading(false);

@@ -11,12 +11,14 @@ import authService, { normalizeRole } from '../../services/authService';
 import { useAlert } from '../../context/AlertContext';
 import { useSearch } from '../../context/SearchContext';
 import SimplePagination from '../../components/common/SimplePagination';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 export default function Users() {
   const { showConfirm, showSuccess, showError } = useAlert();
   const { searchTerm, setSearchTerm } = useSearch();
-  const [users, setUsers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const cachedData = getPageCache('users_data');
+  const [users, setUsers] = useState(() => cachedData?.users || []);
+  const [isLoading, setIsLoading] = useState(() => !cachedData);
 
   const [selectedRole, setSelectedRole] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
@@ -27,8 +29,8 @@ export default function Users() {
   const [viewingUser, setViewingUser] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(() => cachedData?.totalRecords || 0);
+  const [totalPages, setTotalPages] = useState(() => cachedData?.totalPages || 1);
   const itemsPerPage = 10;
 
   const currentUser = authService.getCurrentUser();
@@ -49,11 +51,8 @@ export default function Users() {
     avatar: ""
   });
 
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
   const loadUsers = async (showLoadingState = true) => {
-    if (showLoadingState) setIsLoading(true);
-    setIsRefreshing(true);
+    if (showLoadingState && !getPageCache('users_data')) setIsLoading(true);
     try {
       const params = {
         page: currentPage,
@@ -109,19 +108,16 @@ export default function Users() {
 
         setUsers(formatted);
         const meta = res.meta || res.data?.meta;
-        if (meta) {
-          setTotalRecords(meta.total || formatted.length);
-          setTotalPages(meta.last_page || Math.ceil((meta.total || formatted.length) / itemsPerPage) || 1);
-        } else {
-          setTotalRecords(formatted.length);
-          setTotalPages(1);
-        }
+        const total = meta ? (meta.total || formatted.length) : formatted.length;
+        const pages = meta ? (meta.last_page || Math.ceil((meta.total || formatted.length) / itemsPerPage) || 1) : 1;
+        setTotalRecords(total);
+        setTotalPages(pages);
+        setPageCache('users_data', { users: formatted, totalRecords: total, totalPages: pages });
       }
     } catch (e) {
       console.error("Failed to load users from API", e);
     } finally {
-      if (showLoadingState) setIsLoading(false);
-      setIsRefreshing(false);
+      setIsLoading(false);
     }
   };
 
@@ -138,10 +134,6 @@ export default function Users() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
-
-  const handleManualRefresh = () => {
-    loadUsers(false);
-  };
 
   const handleSearchChange = (val) => { setSearchTerm(val); setCurrentPage(1); };
   const handleRoleChange = (val) => { setSelectedRole(val); setCurrentPage(1); };
@@ -275,8 +267,6 @@ export default function Users() {
       {/* Header Section */}
       <UsersHeader
         onOpenAddModal={openAddModal}
-        onRefresh={handleManualRefresh}
-        isRefreshing={isRefreshing}
       />
 
       {/* Stats Cards */}

@@ -12,12 +12,14 @@ import BusinessReasonModal from './BusinessReasonModal';
 import { useAlert } from '../../context/AlertContext';
 import { useSearch } from '../../context/SearchContext';
 import { getBusinessVerificationStatusColor } from '../../utils/StatusUtils';
+import { getPageCache, setPageCache } from '../../utils/pageCache';
 
 export default function Businesses() {
   const { showConfirm, showSuccess, showError } = useAlert();
-  const [businesses, setBusinesses] = useState([]);
-  const [stats, setStats] = useState({ pending: 0, approved: 0, suspended: 0, rejected: 0, total: 0 });
-  const [loading, setLoading] = useState(true);
+  const cachedData = getPageCache('businesses_data');
+  const [businesses, setBusinesses] = useState(() => cachedData?.businesses || []);
+  const [stats, setStats] = useState(() => cachedData?.stats || { pending: 0, approved: 0, suspended: 0, rejected: 0, total: 0 });
+  const [loading, setLoading] = useState(() => !cachedData);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const { searchTerm: search, setSearchTerm: setSearch } = useSearch();
@@ -58,19 +60,22 @@ export default function Businesses() {
         longitude: item.longitude || '103.8590'
       }));
       setBusinesses(mapped);
+      let computedStats;
       if (data?.verification_stats) {
-        setStats(data.verification_stats);
+        computedStats = data.verification_stats;
       } else {
         const total = mapped.length;
         const pending = mapped.filter(b => b.verification_status === 'pending').length;
         const approved = mapped.filter(b => b.verification_status === 'approved').length;
         const rejected = mapped.filter(b => b.verification_status === 'rejected').length;
         const suspended = mapped.filter(b => b.verification_status === 'suspended').length;
-        setStats({ total, pending, approved, rejected, suspended });
+        computedStats = { total, pending, approved, rejected, suspended };
       }
+      setStats(computedStats);
+      setPageCache('businesses_data', { businesses: mapped, stats: computedStats });
     } catch (err) {
       console.warn('Backend business API fetch notice:', err);
-      setBusinesses([]);
+      if (!cachedData) setBusinesses([]);
     } finally {
       setIsRefreshing(false);
       setLoading(false);
