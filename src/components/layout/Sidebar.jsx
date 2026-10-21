@@ -138,11 +138,10 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
       <Link
         to={item.path || '#'}
         key={item.name}
-        className={`group relative flex items-center px-3 py-1.5 my-0.5 rounded-md cursor-pointer transition-colors duration-150 overflow-hidden ${
-          isActive
-            ? 'bg-blue-50 dark:bg-blue-600/15 text-[#003E83] dark:text-blue-400 font-semibold shadow-xs'
-            : 'text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800/70'
-        }`}
+        className={`group relative flex items-center px-3 py-1.5 my-0.5 rounded-md cursor-pointer transition-colors duration-150 overflow-hidden ${isActive
+          ? 'bg-blue-50 dark:bg-blue-600/15 text-[#003E83] dark:text-blue-400 font-semibold shadow-xs'
+          : 'text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800/70'
+          }`}
         aria-label={item.name}
       >
         <div className="flex items-center w-full min-w-0">
@@ -173,9 +172,8 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
 
       <aside
         ref={sidebarRef}
-        className={`fixed md:static inset-y-0 left-0 z-40 transition-all duration-200 flex flex-col bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-zinc-300 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        } ${isExpanded ? 'w-56' : 'w-56 md:w-18'}`}
+        className={`fixed md:static inset-y-0 left-0 z-40 transition-all duration-200 flex flex-col bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-zinc-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          } ${isExpanded ? 'w-56' : 'w-56 md:w-18'}`}
       >
         {/* Brand Header */}
         <div className="h-16 flex items-center justify-between px-3.5 overflow-hidden shrink-0 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-colors">
@@ -266,7 +264,7 @@ export default function Sidebar({ isOpen, setIsOpen, isExpanded }) {
       <LogoutAlert
         isOpen={showLogoutAlert}
         onClose={() => setShowLogoutAlert(false)}
-        onLogout={() => {}}
+        onLogout={() => { }}
       />
     </>
   );

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   Building2, User, Mail, Phone, MapPin, FileCheck, CheckCircle2,
   AlertCircle, XCircle, ShieldAlert, Star, Calendar, Globe, FileText,
-  Edit, RefreshCw, AlertTriangle
+  Edit, RefreshCw, AlertTriangle, ExternalLink
 } from 'lucide-react';
 
 export default function BusinessDetailsModal({
@@ -326,11 +326,24 @@ export default function BusinessDetailsModal({
             </button>
             <button
               type="button"
-              onClick={() => onEdit(business)}
+              onClick={() => onEdit?.(business)}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs sm:text-sm font-medium border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] transition-colors cursor-pointer"
             >
               <Edit size={14} /> Edit Profile
             </button>
+            <a
+              href={(() => {
+                const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+                const travelBase = isLocal ? 'http://localhost:5175' : '';
+                return `${travelBase}/businesses/${business.id || ''}`;
+              })()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs sm:text-sm font-medium border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] text-[#003E83] dark:text-blue-400 transition-colors cursor-pointer"
+            >
+              <ExternalLink size={14} />
+              <span>Visit Page</span>
+            </a>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

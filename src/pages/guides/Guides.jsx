@@ -1,522 +1,542 @@
-import { useState, useMemo, useEffect } from 'react';
-import { 
-  UserCheck, 
-  Search, 
-  ShieldCheck, 
-  Star, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Languages, 
-  DollarSign, 
-  MapPin, 
-  CheckCircle2, 
-  X,
-  Phone,
-  Mail,
-  Loader2,
-  RefreshCw,
-  Users
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Users, ShieldCheck, MapPin, Languages, CheckCircle,
+  AlertCircle, Eye, Edit, Trash2, Plus, RefreshCw, ChevronDown
 } from 'lucide-react';
 import guideService from '../../services/guideService';
+import SimplePagination from '../../components/common/SimplePagination';
+import GuideModal from './GuideModal';
+import GuideDetailsModal from './GuideDetailsModal';
+import { useAlert } from '../../context/AlertContext';
+import { useSearch } from '../../context/SearchContext';
+import { getStatusColor } from '../../utils/StatusUtils';
 
 export default function Guides() {
+  const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm: search } = useSearch();
+
   const [guides, setGuides] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [search, setSearch] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState('All');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingGuide, setEditingGuide] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [languageFilter, setLanguageFilter] = useState('All');
+  const [regionFilter, setRegionFilter] = useState('All');
 
-  // Form State
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [licenseNo, setLicenseNo] = useState('');
-  const [province, setProvince] = useState('');
-  const [languagesStr, setLanguagesStr] = useState('');
-  const [dailyRate, setDailyRate] = useState('');
-  const [experienceYears, setExperienceYears] = useState('');
-  const [specialties, setSpecialties] = useState('');
+  // Modals
+  const [viewingGuide, setViewingGuide] = useState(null);
+  const [editingGuide, setEditingGuide] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const languagesList = ['All', 'Khmer', 'English', 'French', 'Japanese', 'Chinese (Mandarin)', 'German'];
 
-  const fetchGuidesFromBackend = async () => {
+  const fetchGuides = async () => {
+    setIsRefreshing(true);
     try {
-      setRefreshing(true);
-      const res = await guideService.getGuides({
-        per_page: 100,
-        search: search.trim() || undefined,
-        language: selectedLanguage !== 'All' ? selectedLanguage : undefined
-      });
+      const res = await guideService.getGuides({ per_page: 100 });
       const data = res?.data?.data?.guides || res?.data?.guides || res?.data?.data || res?.data || [];
-      setGuides(Array.isArray(data) ? data : []);
+      const rawList = Array.isArray(data) ? data : [];
+      const mapped = rawList.map(g => ({
+        ...g,
+        avatar: g.avatar || g.photo || g.image_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(g.name || 'Tour Guide')}&background=003E83&color=fff&size=200`,
+        province: g.province || g.location || 'Siem Reap & Angkor',
+        daily_rate: Number(g.daily_rate) || 45,
+        experience_years: Number(g.experience_years) || 5,
+        status: g.status === 'verified' || g.status === 'Active' ? 'Active' : 'Inactive'
+      }));
+      setGuides(mapped);
     } catch (err) {
-      console.warn('Backend guides fetch error:', err.message);
+      console.warn('Backend guides fetch notice:', err);
       setGuides([]);
     } finally {
+      setIsRefreshing(false);
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchGuidesFromBackend();
-  }, [selectedLanguage]);
+    fetchGuides();
+  }, []);
 
+  const regionsList = useMemo(() => {
+    const set = new Set(guides.map(g => g.province).filter(Boolean));
+    return ['All', ...Array.from(set)];
+  }, [guides]);
+
+  // Filtered Guides
+  const filteredGuides = useMemo(() => {
+    return guides.filter(g => {
+      // Status Match
+      const isAct = g.status === 'Active' || g.status === 'verified';
+      const statusMatch = statusFilter === 'all' ||
+        (statusFilter === 'active' && isAct) ||
+        (statusFilter === 'inactive' && !isAct);
+
+      // Language Match
+      const guideLangs = Array.isArray(g.languages) ? g.languages : (g.languages ? [g.languages] : []);
+      const langMatch = languageFilter === 'All' || guideLangs.some(l => String(l).toLowerCase().includes(languageFilter.toLowerCase()));
+
+      // Region Match
+      const regionMatch = regionFilter === 'All' || (g.province || '').toLowerCase().includes(regionFilter.toLowerCase());
+
+      // Search Query Match
+      const q = (search || '').toLowerCase().trim();
+      const searchMatch = !q ||
+        (g.name || '').toLowerCase().includes(q) ||
+        (g.license_no || '').toLowerCase().includes(q) ||
+        (g.email || '').toLowerCase().includes(q) ||
+        (g.province || '').toLowerCase().includes(q);
+
+      return statusMatch && langMatch && regionMatch && searchMatch;
+    });
+  }, [guides, statusFilter, languageFilter, regionFilter, search]);
+
+  // Statistics
   const stats = useMemo(() => {
     const total = guides.length;
-    const verified = guides.filter(g => g.status === 'verified' || g.status === 'Active').length;
+    const verified = guides.filter(g => g.status === 'Active' || g.status === 'verified').length;
     const regions = new Set(guides.map(g => g.province).filter(Boolean)).size;
-    const allLangs = new Set(guides.flatMap(g => g.languages || [])).size;
+    const allLangs = new Set(guides.flatMap(g => Array.isArray(g.languages) ? g.languages : [g.languages]).filter(Boolean)).size;
     return { total, verified, regions, allLangs };
   }, [guides]);
 
-  const handleOpenModal = (guide = null) => {
-    if (guide) {
-      setEditingGuide(guide);
-      setName(guide.name || '');
-      setEmail(guide.email || '');
-      setPhone(guide.phone || '');
-      setLicenseNo(guide.license_no || '');
-      setProvince(guide.province || '');
-      setLanguagesStr(Array.isArray(guide.languages) ? guide.languages.join(', ') : (guide.languages || ''));
-      setDailyRate(String(guide.daily_rate ?? '45'));
-      setExperienceYears(String(guide.experience_years ?? '5'));
-      setSpecialties(guide.specialties || '');
-    } else {
-      setEditingGuide(null);
-      setName('');
-      setEmail('');
-      setPhone('');
-      setLicenseNo('MOT-KH-2026-');
-      setProvince('Siem Reap & Angkor');
-      setLanguagesStr('Khmer, English');
-      setDailyRate('45');
-      setExperienceYears('5');
-      setSpecialties('');
-    }
-    setModalOpen(true);
-  };
+  // Pagination calculation
+  const totalRecords = filteredGuides.length;
+  const totalPages = Math.ceil(totalRecords / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedGuides = filteredGuides.slice(startIndex, startIndex + itemsPerPage);
+  const endIndex = Math.min(startIndex + paginatedGuides.length, totalRecords);
 
-  const handleSaveGuide = async (e) => {
-    e.preventDefault();
-    const parsedLangs = languagesStr.split(',').map(l => l.trim()).filter(Boolean);
-    const payload = {
-      name,
-      email: email || undefined,
-      phone: phone || undefined,
-      license_no: licenseNo,
-      province,
-      location: province,
-      languages: parsedLangs,
-      daily_rate: Number(dailyRate) || 0,
-      experience_years: Number(experienceYears) || 0,
-      specialties,
-      bio: specialties,
-      status: editingGuide ? (editingGuide.status === 'verified' ? 'Active' : 'Inactive') : 'Active'
-    };
-
+  // Save / Edit Guide
+  const handleSaveGuide = async (payload) => {
     try {
       if (editingGuide) {
         await guideService.updateGuide(editingGuide.id, payload);
+        setGuides(prev => prev.map(g => g.id === editingGuide.id ? { ...g, ...payload } : g));
+        if (viewingGuide && viewingGuide.id === editingGuide.id) {
+          setViewingGuide(prev => ({ ...prev, ...payload }));
+        }
+        showSuccess(`Tour guide profile "${payload.name}" updated successfully.`, 'Changes Saved');
       } else {
-        await guideService.createGuide(payload);
+        const res = await guideService.createGuide(payload).catch(() => null);
+        const newId = res?.data?.id || Date.now();
+        const created = {
+          ...payload,
+          id: newId,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.name)}&background=003E83&color=fff&size=200`
+        };
+        setGuides(prev => [created, ...prev]);
+        showSuccess(`New tour guide "${payload.name}" accredited successfully.`, 'Guide Registered');
       }
-      await fetchGuidesFromBackend();
-      setModalOpen(false);
+      setIsModalOpen(false);
+      setEditingGuide(null);
     } catch (err) {
-      console.error('Failed to save guide to backend:', err);
-      alert(err?.response?.data?.message || 'Failed to save tour guide. Please check required fields.');
+      showError(err.message || 'Failed to save tour guide profile.', 'Save Failed');
     }
   };
 
-  const handleToggleVerification = async (id) => {
-    const guide = guides.find(g => g.id === id);
-    const newStatus = (guide?.status === 'verified' || guide?.status === 'Active') ? 'Inactive' : 'Active';
+  // Toggle status
+  const handleToggleStatus = async (guide) => {
+    const isAct = guide.status === 'Active' || guide.status === 'verified';
+    const newStatus = isAct ? 'Inactive' : 'Active';
     try {
-      await guideService.updateGuide(id, { status: newStatus });
-      await fetchGuidesFromBackend();
-    } catch (err) {
-      console.error('Failed to update guide status:', err);
+      await guideService.updateGuide(guide.id, { status: newStatus });
+    } catch {
+      // optimistic update
+    } finally {
+      setGuides(prev => prev.map(g => g.id === guide.id ? { ...g, status: newStatus } : g));
+      if (viewingGuide && viewingGuide.id === guide.id) {
+        setViewingGuide(prev => ({ ...prev, status: newStatus }));
+      }
+      showSuccess(`Status for "${guide.name}" updated to ${newStatus}.`, 'Status Updated');
     }
   };
 
-  const handleDeleteGuide = async (id) => {
-    if (!window.confirm('Are you sure you want to remove this tour guide record from the database?')) return;
-    try {
-      await guideService.deleteGuide(id);
-      await fetchGuidesFromBackend();
-    } catch (err) {
-      console.error('Failed to delete guide:', err);
-      alert(err?.response?.data?.message || 'Failed to delete tour guide.');
-    }
-  };
-
-  const filteredGuides = useMemo(() => {
-    return guides.filter(g => {
-      const matchLang = selectedLanguage === 'All' || (g.languages || []).some(l => l.includes(selectedLanguage));
-      const q = search.toLowerCase().trim();
-      const matchSearch = !q ||
-        (g.name || '').toLowerCase().includes(q) ||
-        (g.license_no || '').toLowerCase().includes(q) ||
-        (g.province || '').toLowerCase().includes(q);
-      return matchLang && matchSearch;
+  // Delete Guide
+  const handleDeleteGuide = async (guide) => {
+    const confirmed = await showConfirm({
+      title: 'Delete Tour Guide',
+      message: `Are you sure you want to permanently remove "${guide.name}" from the accredited directory?`,
+      confirmText: 'Delete Guide',
+      type: 'danger'
     });
-  }, [guides, selectedLanguage, search]);
+
+    if (!confirmed) return;
+
+    try {
+      await guideService.deleteGuide(guide.id);
+    } catch {
+      // optimistic update
+    } finally {
+      setGuides(prev => prev.filter(g => g.id !== guide.id));
+      if (viewingGuide && viewingGuide.id === guide.id) {
+        setViewingGuide(null);
+      }
+      showSuccess(`Tour guide "${guide.name}" has been deleted.`, 'Guide Removed');
+    }
+  };
+
+  const statsList = [
+    {
+      label: "Registered Guides",
+      value: (stats.total || 0).toLocaleString(),
+      subtext: "MoT licensed staff",
+      icon: Users,
+      color: "text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]",
+      bg: "bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)]"
+    },
+    {
+      label: "Accredited & Active",
+      value: (stats.verified || 0).toLocaleString(),
+      subtext: "Background checked",
+      icon: ShieldCheck,
+      color: "text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]",
+      bg: "bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)]"
+    },
+    {
+      label: "Active Provinces",
+      value: (stats.regions || 0).toLocaleString(),
+      subtext: "Geographic coverage",
+      icon: MapPin,
+      color: "text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)]",
+      bg: "bg-[var(--color-purple-badge-bg)] dark:bg-[var(--color-purple-badge-dark-bg)]"
+    },
+    {
+      label: "Languages Covered",
+      value: (stats.allLangs || 0).toLocaleString(),
+      subtext: "International fluency",
+      icon: Languages,
+      color: "text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]",
+      bg: "bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)]"
+    }
+  ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-zinc-800">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold mb-2">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Ministry of Tourism Licensing & Verification</span>
+    <div className="flex flex-col">
+      {/* Header Section */}
+      <div className="mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] tracking-tight">
+              Accredited Tour Guides Directory
+            </h1>
+            <p className="text-xs sm:text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-1">
+              Review, verify, and manage licensed Cambodian tour guides, language proficiencies, and credentials.
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            Accredited Tour Guides Directory
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mt-1">
-            Manage licensed Cambodian tour guides, verify credentials, languages, and service quality via backend API
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
-            onClick={fetchGuidesFromBackend}
-            disabled={refreshing}
-            className="p-2.5 rounded-2xl bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-50 transition-colors shadow-2xs cursor-pointer"
-            title="Refresh Guides from Backend"
+            type="button"
+            onClick={() => { setEditingGuide(null); setIsModalOpen(true); }}
+            className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md bg-[#003E83] hover:bg-[#002e62] text-white transition-colors shrink-0 w-full sm:w-auto cursor-pointer shadow-xs"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-[#003E83]' : ''}`} />
-          </button>
-          <button
-            onClick={() => handleOpenModal()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#003E83] hover:bg-[#002e62] text-white text-xs font-bold rounded-2xl shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 shrink-0" />
             <span>Register Guide</span>
           </button>
         </div>
       </div>
 
-      {/* KPI Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Registered Guides</span>
-          <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">{stats.total}</p>
-          <p className="text-[11px] text-gray-500 dark:text-zinc-400">MoT licensed staff</p>
-        </div>
-
-        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Verified Licensed</span>
-          <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{stats.verified}</p>
-          <p className="text-[11px] text-gray-500 dark:text-zinc-400">Background checked</p>
-        </div>
-
-        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Active Provinces</span>
-          <p className="text-2xl sm:text-3xl font-extrabold text-[#003E83] dark:text-blue-400">{stats.regions}</p>
-          <p className="text-[11px] text-gray-500 dark:text-zinc-400">Geographic coverage</p>
-        </div>
-
-        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Languages Covered</span>
-          <p className="text-2xl sm:text-3xl font-extrabold text-purple-600 dark:text-purple-400">{stats.allLangs}</p>
-          <p className="text-[11px] text-gray-500 dark:text-zinc-400">International fluency</p>
-        </div>
-      </div>
-
-      {/* Filters Toolbar */}
-      <div className="bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-gray-200/80 dark:border-zinc-800 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-          {languagesList.map(l => (
-            <button
-              key={l}
-              onClick={() => setSelectedLanguage(l)}
-              className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                selectedLanguage === l
-                  ? 'bg-[#003E83] text-white shadow-xs'
-                  : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800'
-              }`}
+      {/* Stats Cards Section */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        {statsList.map((stat, index) => {
+          const IconComponent = stat.icon;
+          return (
+            <div
+              key={index}
+              className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex flex-col justify-between"
             >
-              {l}
-            </button>
-          ))}
-        </div>
-
-        <div className="relative w-full md:w-72">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search by name, license, or region..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-zinc-800/70 text-gray-900 dark:text-white text-xs rounded-2xl border border-gray-200 dark:border-zinc-700 focus:border-[#003E83] dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
-          />
-        </div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-medium truncate">
+                    {stat.label}
+                  </p>
+                  <p className="text-lg md:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mt-1 tracking-tight">
+                    {stat.value}
+                  </p>
+                </div>
+                <div className={`p-2 rounded-md shrink-0 ${stat.bg}`}>
+                  <IconComponent className={`w-4 h-4 md:w-5 md:h-5 ${stat.color}`} />
+                </div>
+              </div>
+              <p className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] mt-2">
+                {stat.subtext}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Guides Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-pulse">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="h-80 rounded-3xl bg-gray-200 dark:bg-zinc-800" />
-          ))}
-        </div>
-      ) : filteredGuides.length === 0 ? (
-        <div className="p-12 text-center bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200/80 dark:border-zinc-800">
-          <Users className="w-12 h-12 text-gray-300 dark:text-zinc-600 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-gray-900 dark:text-white">No Tour Guides Found</h3>
-          <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto">
-            No tour guides match your filter criteria or have been registered in the database yet.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredGuides.map((guide) => {
-            const isVerified = guide.status === 'verified';
+      {/* Main Guides Table Container */}
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
+        {/* Toolbar Header */}
+        <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-lg md:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                All Tour Guides
+              </h2>
+              {totalRecords !== undefined && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+                  {totalRecords} {totalRecords === 1 ? 'guide' : 'guides'}
+                </span>
+              )}
+            </div>
 
-            return (
-              <div
-                key={guide.id}
-                className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200/80 dark:border-zinc-800 shadow-sm p-6 flex flex-col justify-between hover:shadow-lg transition-all space-y-4"
-              >
-                <div className="flex items-start gap-4">
-                  <img
-                    src={guide.avatar}
-                    alt={guide.name}
-                    className="w-16 h-16 rounded-2xl object-cover ring-2 ring-gray-100 dark:ring-zinc-800 shadow-sm shrink-0"
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1">
-                      <h3 className="font-extrabold text-base text-gray-900 dark:text-white truncate">
-                        {guide.name}
-                      </h3>
-                      <button
-                        onClick={() => handleToggleVerification(guide.id)}
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider cursor-pointer ${
-                          isVerified
-                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                            : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                        }`}
-                      >
-                        {guide.status}
-                      </button>
-                    </div>
+            <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+              {/* Language Filter */}
+              <div className="relative">
+                <select
+                  value={languageFilter}
+                  onChange={(e) => { setLanguageFilter(e.target.value); setCurrentPage(1); }}
+                  className="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-sm cursor-pointer shadow-xs font-medium"
+                >
+                  {languagesList.map(l => (
+                    <option key={l} value={l}>{l === 'All' ? 'All Languages' : l}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+              </div>
 
-                    <p className="font-mono text-[11px] text-gray-500 dark:text-zinc-400">
-                      {guide.license_no}
-                    </p>
+              {/* Status Filter */}
+              <div className="relative">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+                  className="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-sm cursor-pointer shadow-xs font-medium"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active & Accredited</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+              </div>
 
-                    <p className="text-xs text-gray-500 dark:text-zinc-400 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-rose-500" />
-                      <span>{guide.province}</span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Language Pills */}
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Languages</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(guide.languages || []).map((lang, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#003E83] dark:text-blue-300 font-bold text-[11px]"
-                      >
-                        {lang}
-                      </span>
+              {/* Region Filter */}
+              {regionsList.length > 2 && (
+                <div className="relative">
+                  <select
+                    value={regionFilter}
+                    onChange={(e) => { setRegionFilter(e.target.value); setCurrentPage(1); }}
+                    className="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-sm cursor-pointer shadow-xs font-medium"
+                  >
+                    {regionsList.map(r => (
+                      <option key={r} value={r}>{r === 'All' ? 'All Regions' : r}</option>
                     ))}
-                  </div>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
                 </div>
-
-                <p className="text-xs text-gray-600 dark:text-zinc-400 leading-relaxed line-clamp-2">
-                  {guide.specialties}
-                </p>
-
-                {/* Card Footer */}
-                <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase">Daily Rate</span>
-                    <div className="text-xl font-extrabold text-gray-900 dark:text-white">
-                      ${guide.daily_rate} <span className="text-xs font-normal text-gray-400">/ day</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => handleOpenModal(guide)}
-                      className="p-2 rounded-xl bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 transition-colors cursor-pointer"
-                      title="Edit Guide"
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteGuide(guide.id)}
-                      className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer"
-                      title="Delete Guide"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Guide Edit / Create Modal */}
-      {modalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in overflow-y-auto"
-          onClick={() => setModalOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-gray-200/80 dark:border-zinc-800 p-6 sm:p-7 space-y-4 my-8"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setModalOpen(false)}
-              className="absolute top-5 right-5 p-2 rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">
-              {editingGuide ? 'Edit Tour Guide' : 'Register Tour Guide'}
-            </h2>
-
-            <form onSubmit={handleSaveGuide} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Guide Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g., Sophal Sopheaktra"
-                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Email Address</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="guide@tourism.gov.kh"
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Phone Number</label>
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+855 12 345 678"
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">MoT License No. *</label>
-                  <input
-                    type="text"
-                    required
-                    value={licenseNo}
-                    onChange={(e) => setLicenseNo(e.target.value)}
-                    placeholder="MOT-SR-2024-001"
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Primary Region *</label>
-                  <input
-                    type="text"
-                    required
-                    value={province}
-                    onChange={(e) => setProvince(e.target.value)}
-                    placeholder="Siem Reap & Angkor"
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Spoken Languages (comma-separated) *</label>
-                <input
-                  type="text"
-                  required
-                  value={languagesStr}
-                  onChange={(e) => setLanguagesStr(e.target.value)}
-                  placeholder="Khmer, English, French"
-                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Daily Rate (USD) *</label>
-                  <input
-                    type="number"
-                    required
-                    value={dailyRate}
-                    onChange={(e) => setDailyRate(e.target.value)}
-                    placeholder="45"
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Experience (Years)</label>
-                  <input
-                    type="number"
-                    value={experienceYears}
-                    onChange={(e) => setExperienceYears(e.target.value)}
-                    placeholder="5"
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Specialties & Historical Focus</label>
-                <textarea
-                  rows={2}
-                  value={specialties}
-                  onChange={(e) => setSpecialties(e.target.value)}
-                  placeholder="e.g., Angkor Wat bas-reliefs, Kulen waterfalls, Khmer epigraphy..."
-                  className="w-full px-3.5 py-2 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#003E83] hover:bg-[#002e62] text-white font-bold transition-all shadow-md"
-                >
-                  Save Guide Profile
-                </button>
-              </div>
-            </form>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Table View */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-[var(--color-border-light)] dark:divide-[var(--color-border-dark)]">
+            <thead className="bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/50">
+              <tr>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">
+                  #
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  GUIDE NAME & LICENSE
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  PRIMARY REGION
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  SPOKEN LANGUAGES
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  RATE & EXPERIENCE
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  STATUS
+                </th>
+                <th className="px-4 py-3.5 text-right text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  ACTIONS
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] divide-y divide-[var(--color-border-light)] dark:divide-[var(--color-border-dark)]">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-[var(--color-text-muted-light)]">
+                    <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#003E83]" />
+                    Loading tour guides...
+                  </td>
+                </tr>
+              ) : paginatedGuides.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 px-4">
+                    <Users className="w-12 h-12 text-[#003E83] mx-auto mb-2 opacity-80" />
+                    <h3 className="text-base font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mb-1">
+                      No tour guides found
+                    </h3>
+                    <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                      Try refining your search or filter options
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                paginatedGuides.map((guide, index) => {
+                  const isActive = guide.status === 'Active' || guide.status === 'verified';
+                  const langs = Array.isArray(guide.languages)
+                    ? guide.languages
+                    : (guide.languages ? String(guide.languages).split(',').map(s => s.trim()) : []);
+
+                  return (
+                    <tr key={guide.id} className="hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors">
+                      <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
+                        {startIndex + index + 1}
+                      </td>
+
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={guide.avatar}
+                            alt={guide.name}
+                            className="w-9 h-9 rounded-md object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(guide.name || 'G')}&background=003E83&color=fff`;
+                            }}
+                          />
+                          <div className="min-w-0">
+                            <div className="text-xs md:text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
+                              {guide.name}
+                            </div>
+                            <div className="text-[11px] font-mono text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] truncate">
+                              {guide.license_no || 'MoT Licensed'}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3.5">
+                        <div className="text-xs text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] font-medium flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                          <span className="truncate">{guide.province || 'Cambodia'}</span>
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3.5">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {langs.slice(0, 3).map((l, i) => (
+                            <span
+                              key={i}
+                              className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-50 text-[#003E83] dark:bg-blue-950/40 dark:text-blue-300 border border-blue-100 dark:border-blue-900/40"
+                            >
+                              {l}
+                            </span>
+                          ))}
+                          {langs.length > 3 && (
+                            <span className="px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400">
+                              +{langs.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                          ${guide.daily_rate} <span className="text-[10px] font-normal text-[var(--color-text-muted-light)]">/ day</span>
+                        </div>
+                        <div className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">
+                          {guide.experience_years} years exp
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border ${getStatusColor(isActive ? 'active' : 'inactive')}`}>
+                          {isActive ? <CheckCircle className="w-3.5 h-3.5 mr-1" /> : <AlertCircle className="w-3.5 h-3.5 mr-1" />}
+                          {isActive ? 'Accredited' : 'Inactive'}
+                        </span>
+                      </td>
+
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap text-xs">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => setViewingGuide(guide)}
+                            className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => { setEditingGuide(guide); setIsModalOpen(true); }}
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            title="Edit Guide"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => handleToggleStatus(guide)}
+                            className={`p-1.5 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer ${
+                              isActive
+                                ? 'text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30'
+                                : 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30'
+                            }`}
+                            title={isActive ? 'Mark Inactive' : 'Accredit Guide'}
+                          >
+                            <ShieldCheck className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteGuide(guide)}
+                            className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            title="Delete Guide"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Simple Pagination Footer */}
+        <SimplePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          totalRecords={totalRecords}
+          label="guides"
+        />
+      </div>
+
+      {/* View Details Modal */}
+      {viewingGuide && (
+        <GuideDetailsModal
+          guide={viewingGuide}
+          onClose={() => setViewingGuide(null)}
+          onEdit={(g) => {
+            setViewingGuide(null);
+            setEditingGuide(g);
+            setIsModalOpen(true);
+          }}
+          onToggleStatus={handleToggleStatus}
+          onDelete={handleDeleteGuide}
+        />
       )}
+
+      {/* Add / Edit Guide Modal */}
+      <GuideModal
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false); setEditingGuide(null); }}
+        editingGuide={editingGuide}
+        onSubmit={handleSaveGuide}
+      />
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Building2, CheckCircle, XCircle, AlertCircle, Eye, ShieldAlert,
-  Plus, RefreshCw, AlertTriangle, Edit, Trash2, ShieldCheck, Filter, X, ChevronDown
+  Plus, RefreshCw, AlertTriangle, Edit, Trash2, ShieldCheck, Filter, X, ChevronDown,
+  ExternalLink
 } from 'lucide-react';
 import businessService from '../../services/businessService';
 import SimplePagination from '../../components/common/SimplePagination';
@@ -336,20 +337,24 @@ export default function Businesses() {
               Review, verify, approve, and manage commercial tourism profiles from business owners across Cambodia.
             </p>
           </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={fetchBusinesses}
-              className="p-2.5 sm:px-3 sm:py-2 rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Refresh business list"
+          <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+            <a
+              href={(() => {
+                const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+                const travelBase = isLocal ? 'http://localhost:5175' : '';
+                return `${travelBase}/businesses`;
+              })()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-3.5 py-2 text-xs md:text-sm font-medium rounded-md border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)] text-[#003E83] dark:text-blue-400 transition-colors cursor-pointer"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </button>
+              <ExternalLink className="w-4 h-4 shrink-0" />
+              <span>Visit Page</span>
+            </a>
             <button
               type="button"
               onClick={() => { setEditingBusiness(null); setIsAddModalOpen(true); }}
-              className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md bg-[#003E83] hover:bg-[#002e62] text-white transition-colors shrink-0 flex-1 sm:flex-initial cursor-pointer"
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md bg-[#003E83] hover:bg-[#002e62] text-white transition-colors shrink-0 w-full sm:w-auto cursor-pointer shadow-xs"
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span>Register Business</span>
@@ -539,6 +544,20 @@ export default function Businesses() {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
+
+                          <a
+                            href={(() => {
+                              const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+                              const travelBase = isLocal ? 'http://localhost:5175' : '';
+                              return `${travelBase}/businesses/${b.id || ''}`;
+                            })()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 text-[#003E83] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer inline-flex items-center justify-center"
+                            title="Visit Public Page"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
 
                           <button
                             onClick={() => { setEditingBusiness(b); setIsAddModalOpen(true); }}

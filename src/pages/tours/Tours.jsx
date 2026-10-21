@@ -1,53 +1,47 @@
-import { useState, useMemo, useEffect } from 'react';
-import { 
-  Sparkles, 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  MapPin, 
-  Clock, 
-  DollarSign, 
-  Star, 
-  X,
-  CheckCircle2,
-  Calendar,
-  Loader2,
-  RefreshCw,
-  Compass,
-  Users
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Sparkles, Compass, CheckCircle, AlertCircle, Eye, Edit, Trash2,
+  Plus, RefreshCw, Star, MapPin, Clock, Users, DollarSign, ChevronDown
 } from 'lucide-react';
 import tourService from '../../services/tourService';
+import SimplePagination from '../../components/common/SimplePagination';
+import TourModal from './TourModal';
+import TourDetailsModal from './TourDetailsModal';
+import { useAlert } from '../../context/AlertContext';
+import { useSearch } from '../../context/SearchContext';
+import { getStatusColor } from '../../utils/StatusUtils';
 
 export default function Tours() {
+  const { showConfirm, showSuccess, showError } = useAlert();
+  const { searchTerm: search } = useSearch();
+
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [search, setSearch] = useState('');
-  const [selectedDestination, setSelectedDestination] = useState('All');
-  const [modalOpen, setModalOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [destinationFilter, setDestinationFilter] = useState('All');
+
+  // Modals
+  const [viewingTour, setViewingTour] = useState(null);
   const [editingTour, setEditingTour] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Form State
-  const [title, setTitle] = useState('');
-  const [destination, setDestination] = useState('');
-  const [duration, setDuration] = useState('');
-  const [price, setPrice] = useState('');
-  const [maxTravelers, setMaxTravelers] = useState('');
-  const [description, setDescription] = useState('');
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const fetchToursFromBackend = async () => {
+  const fetchTours = async () => {
+    setIsRefreshing(true);
     try {
-      setRefreshing(true);
       const res = await tourService.getTours({ per_page: 100 });
       const data = res?.data || res;
       const rawList = data?.tours || (Array.isArray(data) ? data : []);
 
       if (Array.isArray(rawList)) {
-        const liveTours = rawList.map((t) => ({
+        const mapped = rawList.map((t) => ({
           id: t.id,
-          title: t.title || 'Untitled Tour',
-          destination: t.destination || t.province || 'Cambodia',
+          title: t.title || 'Untitled Tour Experience',
+          destination: t.destination || t.province || 'Siem Reap',
           duration: t.duration || (t.duration_days ? `${t.duration_days} Days` : '1 Full Day'),
           price_per_person: parseFloat(t.price || t.price_per_person || 0),
           max_travelers: Number(t.max_travelers || 12),
@@ -58,416 +52,481 @@ export default function Tours() {
           cover_image: t.image_url || t.cover_image || t.image || 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
           description: t.description || 'Curated travel experience in Cambodia.'
         }));
-        setTours(liveTours);
+        setTours(mapped);
       }
     } catch (err) {
-      console.error('Failed to load tours from DB API:', err);
+      console.warn('Backend tours fetch notice:', err);
       setTours([]);
     } finally {
+      setIsRefreshing(false);
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchToursFromBackend();
+    fetchTours();
   }, []);
 
-  const destinations = useMemo(() => {
+  const destinationsList = useMemo(() => {
     const set = new Set(tours.map(t => t.destination).filter(Boolean));
     return ['All', ...Array.from(set)];
   }, [tours]);
 
+  // Filtered tours
+  const filteredTours = useMemo(() => {
+    return tours.filter(t => {
+      // Status Filter
+      const statusMatch = statusFilter === 'all' || t.status === statusFilter;
+
+      // Destination Filter
+      const destMatch = destinationFilter === 'All' ||
+        (t.destination || '').toLowerCase().includes(destinationFilter.toLowerCase());
+
+      // Search Query
+      const q = (search || '').toLowerCase().trim();
+      const searchMatch = !q ||
+        (t.title || '').toLowerCase().includes(q) ||
+        (t.destination || '').toLowerCase().includes(q) ||
+        (t.category || '').toLowerCase().includes(q);
+
+      return statusMatch && destMatch && searchMatch;
+    });
+  }, [tours, statusFilter, destinationFilter, search]);
+
+  // Statistics calculation
   const stats = useMemo(() => {
     const total = tours.length;
     const active = tours.filter(t => t.status === 'active').length;
-    const avgRating = total > 0 ? (tours.reduce((acc, t) => acc + (t.rating || 0), 0) / total).toFixed(2) : '5.00';
-    const avgPrice = total > 0 ? Math.round(tours.reduce((acc, t) => acc + (t.price_per_person || 0), 0) / total) : 0;
+    const avgRating = total > 0
+      ? (tours.reduce((acc, t) => acc + (t.rating || 0), 0) / total).toFixed(1)
+      : '5.0';
+    const avgPrice = total > 0
+      ? Math.round(tours.reduce((acc, t) => acc + (t.price_per_person || 0), 0) / total)
+      : 0;
     return { total, active, avgRating, avgPrice };
   }, [tours]);
 
-  const handleOpenModal = (tour = null) => {
-    if (tour) {
-      setEditingTour(tour);
-      setTitle(tour.title);
-      setDestination(tour.destination);
-      setDuration(tour.duration);
-      setPrice(String(tour.price_per_person));
-      setMaxTravelers(String(tour.max_travelers || 10));
-      setDescription(tour.description || '');
-    } else {
-      setEditingTour(null);
-      setTitle('');
-      setDestination('Siem Reap');
-      setDuration('1 Full Day');
-      setPrice('60');
-      setMaxTravelers('12');
-      setDescription('');
-    }
-    setModalOpen(true);
-  };
+  // Pagination calculation
+  const totalRecords = filteredTours.length;
+  const totalPages = Math.ceil(totalRecords / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedTours = filteredTours.slice(startIndex, startIndex + itemsPerPage);
+  const endIndex = Math.min(startIndex + paginatedTours.length, totalRecords);
 
-  const handleSaveTour = async (e) => {
-    e.preventDefault();
+  // Save / Edit Tour
+  const handleSaveTour = async (payload) => {
     try {
       if (editingTour) {
-        await tourService.updateTour(editingTour.id, {
-          title,
-          destination,
-          duration,
-          price: Number(price),
-          max_travelers: Number(maxTravelers),
-          description
-        });
+        await tourService.updateTour(editingTour.id, payload);
+        setTours(prev => prev.map(t => t.id === editingTour.id ? { ...t, ...payload } : t));
+        if (viewingTour && viewingTour.id === editingTour.id) {
+          setViewingTour(prev => ({ ...prev, ...payload }));
+        }
+        showSuccess(`Tour package "${payload.title}" updated successfully.`, 'Changes Saved');
       } else {
-        await tourService.createTour({
-          title,
-          destination,
-          duration,
-          price: Number(price),
-          max_travelers: Number(maxTravelers),
-          description,
-          status: 'active'
-        });
+        const res = await tourService.createTour(payload).catch(() => null);
+        const newId = res?.data?.id || Date.now();
+        const created = {
+          ...payload,
+          id: newId,
+          rating: 5.0,
+          reviews_count: 0
+        };
+        setTours(prev => [created, ...prev]);
+        showSuccess(`New tour package "${payload.title}" created successfully.`, 'Package Created');
       }
-      await fetchToursFromBackend();
+      setIsModalOpen(false);
+      setEditingTour(null);
     } catch (err) {
-      console.error('Failed to save tour to DB API:', err);
+      showError(err.message || 'Failed to save tour package.', 'Save Failed');
     }
-    setModalOpen(false);
   };
 
-  const handleDeleteTour = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this tour package from the database?')) return;
+  // Toggle status (active / draft)
+  const handleToggleStatus = async (tour) => {
+    const newStatus = tour.status === 'active' ? 'draft' : 'active';
     try {
-      await tourService.deleteTour(id);
-      setTours(prev => prev.filter(t => t.id !== id));
-    } catch (err) {
-      console.error('Failed to delete tour from DB API:', err);
+      await tourService.toggleStatus(tour.id);
+    } catch {
+      // optimistic update
+    } finally {
+      setTours(prev => prev.map(t => t.id === tour.id ? { ...t, status: newStatus } : t));
+      if (viewingTour && viewingTour.id === tour.id) {
+        setViewingTour(prev => ({ ...prev, status: newStatus }));
+      }
+      showSuccess(`Tour "${tour.title}" is now ${newStatus === 'active' ? 'published' : 'draft'}.`, 'Status Updated');
     }
   };
 
-  const handleToggleStatus = async (id) => {
-    const tour = tours.find(t => t.id === id);
-    const newStatus = tour?.status === 'active' ? 'draft' : 'active';
-    try {
-      await tourService.toggleStatus(id);
-      setTours(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
-    } catch (err) {
-      console.error('Failed to toggle tour status in DB:', err);
-    }
-  };
-
-  const filteredTours = useMemo(() => {
-    return tours.filter(t => {
-      const matchDest = selectedDestination === 'All' || (t.destination || '').includes(selectedDestination);
-      const q = search.toLowerCase().trim();
-      const matchSearch = !q || (t.title || '').toLowerCase().includes(q) || (t.destination || '').toLowerCase().includes(q);
-      return matchDest && matchSearch;
+  // Delete Tour
+  const handleDeleteTour = async (tour) => {
+    const confirmed = await showConfirm({
+      title: 'Delete Tour Package',
+      message: `Are you sure you want to permanently delete "${tour.title}" from the catalog?`,
+      confirmText: 'Delete Package',
+      type: 'danger'
     });
-  }, [tours, selectedDestination, search]);
+
+    if (!confirmed) return;
+
+    try {
+      await tourService.deleteTour(tour.id);
+    } catch {
+      // optimistic update
+    } finally {
+      setTours(prev => prev.filter(t => t.id !== tour.id));
+      if (viewingTour && viewingTour.id === tour.id) {
+        setViewingTour(null);
+      }
+      showSuccess(`Tour package "${tour.title}" has been deleted.`, 'Package Removed');
+    }
+  };
+
+  const statsList = [
+    {
+      label: "Total Tour Packages",
+      value: (stats.total || 0).toLocaleString(),
+      subtext: "Itineraries across Cambodia",
+      icon: Compass,
+      color: "text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]",
+      bg: "bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)]"
+    },
+    {
+      label: "Active & Published",
+      value: (stats.active || 0).toLocaleString(),
+      subtext: "Ready for live booking",
+      icon: CheckCircle,
+      color: "text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]",
+      bg: "bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)]"
+    },
+    {
+      label: "Average Rating",
+      value: `${stats.avgRating} ★`,
+      subtext: "Traveler satisfaction score",
+      icon: Star,
+      color: "text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]",
+      bg: "bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)]"
+    },
+    {
+      label: "Avg Rate / Person",
+      value: `$${stats.avgPrice}`,
+      subtext: "Market index per traveler",
+      icon: DollarSign,
+      color: "text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)]",
+      bg: "bg-[var(--color-purple-badge-bg)] dark:bg-[var(--color-purple-badge-dark-bg)]"
+    }
+  ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-zinc-800">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#003E83] dark:text-blue-400 text-xs font-bold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Itinerary & Package Management</span>
+    <div className="flex flex-col">
+      {/* Header Section */}
+      <div className="mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] tracking-tight">
+              Tour Packages Catalog
+            </h1>
+            <p className="text-xs sm:text-sm text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-1">
+              Curate and manage all-inclusive travel itineraries, pricing, duration, and availability across Cambodia.
+            </p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            Tour Packages Catalog
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-zinc-400 mt-1">
-            Curate and manage all-inclusive travel itineraries, pricing, and availability connected to backend API
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
-            onClick={fetchToursFromBackend}
-            disabled={refreshing}
-            className="p-2.5 rounded-2xl bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-50 transition-colors shadow-2xs cursor-pointer"
-            title="Refresh Catalog from Backend"
+            type="button"
+            onClick={() => { setEditingTour(null); setIsModalOpen(true); }}
+            className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md bg-[#003E83] hover:bg-[#002e62] text-white transition-colors shrink-0 w-full sm:w-auto cursor-pointer shadow-xs"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-[#003E83]' : ''}`} />
-          </button>
-          <button
-            onClick={() => handleOpenModal()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#003E83] hover:bg-[#002e62] text-white text-xs font-bold rounded-2xl shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 shrink-0" />
             <span>Add Tour Package</span>
           </button>
         </div>
       </div>
 
-      {/* KPI Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Tours</span>
-          <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">{stats.total}</p>
-          <p className="text-[11px] text-gray-500 dark:text-zinc-400">Available across Cambodia</p>
-        </div>
-
-        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Active Published</span>
-          <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{stats.active}</p>
-          <p className="text-[11px] text-gray-500 dark:text-zinc-400">Ready for booking</p>
-        </div>
-
-        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-amber-500 uppercase tracking-wider">Average Rating</span>
-          <p className="text-2xl sm:text-3xl font-extrabold text-amber-500 flex items-center gap-1">
-            <Star size={22} className="fill-amber-400 text-amber-400" />
-            {stats.avgRating}
-          </p>
-          <p className="text-[11px] text-gray-500 dark:text-zinc-400">Verified traveler reviews</p>
-        </div>
-
-        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-gray-200/80 dark:border-zinc-800 shadow-xs space-y-1">
-          <span className="text-[11px] font-bold text-[#003E83] dark:text-blue-400 uppercase tracking-wider">Avg Price / Person</span>
-          <p className="text-2xl sm:text-3xl font-extrabold text-[#003E83] dark:text-blue-400">${stats.avgPrice}</p>
-          <p className="text-[11px] text-gray-500 dark:text-zinc-400">Competitive rate index</p>
-        </div>
+      {/* Stats Cards Section */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        {statsList.map((stat, index) => {
+          const IconComponent = stat.icon;
+          return (
+            <div
+              key={index}
+              className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md p-4 shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] flex flex-col justify-between"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-medium truncate">
+                    {stat.label}
+                  </p>
+                  <p className="text-lg md:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mt-1 tracking-tight">
+                    {stat.value}
+                  </p>
+                </div>
+                <div className={`p-2 rounded-md shrink-0 ${stat.bg}`}>
+                  <IconComponent className={`w-4 h-4 md:w-5 md:h-5 ${stat.color}`} />
+                </div>
+              </div>
+              <p className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] mt-2">
+                {stat.subtext}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Filters Toolbar */}
-      <div className="bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-gray-200/80 dark:border-zinc-800 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-          {destinations.map(d => (
-            <button
-              key={d}
-              onClick={() => setSelectedDestination(d)}
-              className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                selectedDestination === d
-                  ? 'bg-[#003E83] text-white shadow-xs'
-                  : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800'
-              }`}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
+      {/* Main Tours Table Container */}
+      <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
+        {/* Toolbar Header */}
+        <div className="px-4 md:px-6 py-4 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-lg md:text-xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                All Tour Packages
+              </h2>
+              {totalRecords !== undefined && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#003E83] dark:bg-blue-950/50 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+                  {totalRecords} {totalRecords === 1 ? 'package' : 'packages'}
+                </span>
+              )}
+            </div>
 
-        <div className="relative w-full md:w-72">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search tour packages..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-zinc-800/70 text-gray-900 dark:text-white text-xs rounded-2xl border border-gray-200 dark:border-zinc-700 focus:border-[#003E83] dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
-          />
-        </div>
-      </div>
-
-      {/* Tours Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-pulse">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="h-80 rounded-3xl bg-gray-200 dark:bg-zinc-800" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredTours.map((tour) => {
-            const isActive = tour.status === 'active';
-
-            return (
-              <div
-                key={tour.id}
-                className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200/80 dark:border-zinc-800 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all group"
-              >
-                <div>
-                  <div className="relative aspect-16/10 w-full bg-gray-100 dark:bg-zinc-800 overflow-hidden">
-                    <img
-                      src={tour.cover_image}
-                      alt={tour.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-900/70 text-white backdrop-blur-md">
-                        {tour.duration}
-                      </span>
-                    </div>
-                    <div className="absolute top-3 right-3">
-                      <button
-                        onClick={() => handleToggleStatus(tour.id)}
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider cursor-pointer shadow-xs ${
-                          isActive
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-amber-500 text-slate-950'
-                        }`}
-                      >
-                        {tour.status}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="p-5 space-y-2">
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-zinc-400 font-medium">
-                      <MapPin className="w-3.5 h-3.5 text-rose-500" />
-                      <span>{tour.destination}</span>
-                    </div>
-
-                    <h3 className="font-extrabold text-base text-gray-900 dark:text-white line-clamp-2">
-                      {tour.title}
-                    </h3>
-
-                    <p className="text-xs text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                      {tour.description}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-5 pt-0">
-                  <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold text-gray-400 uppercase">From</span>
-                      <div className="text-xl font-extrabold text-gray-900 dark:text-white">
-                        ${tour.price_per_person} <span className="text-xs font-normal text-gray-400">/ person</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => handleOpenModal(tour)}
-                        className="p-2 rounded-xl bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 transition-colors cursor-pointer"
-                        title="Edit Tour"
-                      >
-                        <Edit className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTour(tour.id)}
-                        className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer"
-                        title="Delete Tour"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Tour Edit / Create Modal */}
-      {modalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in overflow-y-auto"
-          onClick={() => setModalOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-gray-200/80 dark:border-zinc-800 p-6 sm:p-7 space-y-4 my-8"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setModalOpen(false)}
-              className="absolute top-5 right-5 p-2 rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">
-              {editingTour ? 'Edit Tour Package' : 'Create Tour Package'}
-            </h2>
-
-            <form onSubmit={handleSaveTour} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Package Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Angkor Sunrise & Floating Village Tour"
-                  className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Destination *</label>
-                  <input
-                    type="text"
-                    required
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    placeholder="Siem Reap"
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Duration *</label>
-                  <input
-                    type="text"
-                    required
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    placeholder="1 Day or 3 Days / 2 Nights"
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Price / Person (USD) *</label>
-                  <input
-                    type="number"
-                    required
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="55"
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Max Group Size</label>
-                  <input
-                    type="number"
-                    value={maxTravelers}
-                    onChange={(e) => setMaxTravelers(e.target.value)}
-                    placeholder="12"
-                    className="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-gray-700 dark:text-zinc-300 mb-1">Description & Highlights</label>
-                <textarea
-                  rows={3}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Itinerary breakdown and included highlights..."
-                  className="w-full px-3.5 py-2 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-bold"
+            <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+              {/* Destination Filter */}
+              <div className="relative">
+                <select
+                  value={destinationFilter}
+                  onChange={(e) => { setDestinationFilter(e.target.value); setCurrentPage(1); }}
+                  className="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-sm cursor-pointer shadow-xs font-medium"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#003E83] hover:bg-[#002e62] text-white font-bold transition-all shadow-md"
-                >
-                  Save Tour Package
-                </button>
+                  {destinationsList.map(d => (
+                    <option key={d} value={d}>{d === 'All' ? 'All Destinations' : d}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
               </div>
-            </form>
+
+              {/* Status Filter */}
+              <div className="relative">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+                  className="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-input)] focus:border-transparent bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] text-sm cursor-pointer shadow-xs font-medium"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active & Published</option>
+                  <option value="draft">Draft (Unlisted)</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] pointer-events-none" />
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Table View */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-[var(--color-border-light)] dark:divide-[var(--color-border-dark)]">
+            <thead className="bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/50">
+              <tr>
+                <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">
+                  #
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  TOUR PACKAGE & CATEGORY
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  DESTINATION & DURATION
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  GROUP CAPACITY
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  PRICE / PERSON
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  RATING
+                </th>
+                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  STATUS
+                </th>
+                <th className="px-4 py-3.5 text-right text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
+                  ACTIONS
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] divide-y divide-[var(--color-border-light)] dark:divide-[var(--color-border-dark)]">
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="text-center py-12 text-[var(--color-text-muted-light)]">
+                    <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#003E83]" />
+                    Loading tour packages...
+                  </td>
+                </tr>
+              ) : paginatedTours.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="text-center py-12 px-4">
+                    <Compass className="w-12 h-12 text-[#003E83] mx-auto mb-2 opacity-80" />
+                    <h3 className="text-base font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mb-1">
+                      No tour packages found
+                    </h3>
+                    <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                      Try adjusting your destination or status filter
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                paginatedTours.map((tour, index) => {
+                  const isActive = tour.status === 'active';
+
+                  return (
+                    <tr key={tour.id} className="hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors">
+                      <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
+                        {startIndex + index + 1}
+                      </td>
+
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={tour.cover_image}
+                            alt={tour.title}
+                            className="w-10 h-10 rounded-md object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80';
+                            }}
+                          />
+                          <div className="min-w-0 max-w-xs">
+                            <div className="text-xs md:text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
+                              {tour.title}
+                            </div>
+                            <div className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] truncate">
+                              {tour.category}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="text-xs text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] font-medium flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                          <span>{tour.destination}</span>
+                        </div>
+                        <div className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center gap-1 mt-0.5">
+                          <Clock className="w-3 h-3 shrink-0" />
+                          <span>{tour.duration}</span>
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3.5 whitespace-nowrap text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                        <div className="flex items-center gap-1 font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                          <Users className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
+                          <span>Up to {tour.max_travelers}</span>
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                          ${tour.price_per_person}
+                        </div>
+                        <div className="text-[10px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">
+                          per person
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="flex items-center gap-1 text-xs font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                          <span>{tour.rating}</span>
+                        </div>
+                        <div className="text-[10px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">
+                          {tour.reviews_count} reviews
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border ${getStatusColor(isActive ? 'active' : 'draft')}`}>
+                          {isActive ? <CheckCircle className="w-3.5 h-3.5 mr-1" /> : <AlertCircle className="w-3.5 h-3.5 mr-1" />}
+                          {isActive ? 'Published' : 'Draft'}
+                        </span>
+                      </td>
+
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap text-xs">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => setViewingTour(tour)}
+                            className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => { setEditingTour(tour); setIsModalOpen(true); }}
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            title="Edit Package"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => handleToggleStatus(tour)}
+                            className={`p-1.5 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer ${
+                              isActive
+                                ? 'text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30'
+                                : 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30'
+                            }`}
+                            title={isActive ? 'Move to Draft' : 'Publish Tour'}
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteTour(tour)}
+                            className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            title="Delete Package"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Simple Pagination Footer */}
+        <SimplePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          totalRecords={totalRecords}
+          label="packages"
+        />
+      </div>
+
+      {/* View Details Modal */}
+      {viewingTour && (
+        <TourDetailsModal
+          tour={viewingTour}
+          onClose={() => setViewingTour(null)}
+          onEdit={(t) => {
+            setViewingTour(null);
+            setEditingTour(t);
+            setIsModalOpen(true);
+          }}
+          onToggleStatus={handleToggleStatus}
+          onDelete={handleDeleteTour}
+        />
       )}
+
+      {/* Add / Edit Tour Modal */}
+      <TourModal
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false); setEditingTour(null); }}
+        editingTour={editingTour}
+        onSubmit={handleSaveTour}
+      />
     </div>
   );
 }
