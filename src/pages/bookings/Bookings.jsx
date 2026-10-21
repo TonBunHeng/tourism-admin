@@ -22,104 +22,6 @@ import {
 } from 'lucide-react';
 import bookingService from '../../services/bookingService';
 
-const SAMPLE_FALLBACK_BOOKINGS = [
-  {
-    id: 1,
-    booking_reference: 'BK-ANGKOR-8821',
-    customer_name: 'David Miller',
-    customer_email: 'david.miller@gmail.com',
-    customer_phone: '+1 415 890 2311',
-    business_name: 'Angkor Heritage Boutique Hotel',
-    service_name: 'Deluxe Heritage Suite & Temple Tour',
-    service_type: 'Hotel & Tour',
-    booking_date: '2026-11-15',
-    booking_time: '14:00',
-    number_of_guests: 2,
-    total_price: 180,
-    status: 'pending',
-    payment_method: 'ABA Pay',
-    payment_status: 'paid',
-    special_requests: 'Airport pickup requested from Siem Reap International Airport.',
-    created_at: '2026-10-18T10:30:00Z'
-  },
-  {
-    id: 2,
-    booking_reference: 'BK-KULEN-9942',
-    customer_name: 'Elena Rostova',
-    customer_email: 'elena.rostova@traveler.ru',
-    customer_phone: '+7 903 124 5566',
-    business_name: 'Siem Reap Eco-Adventures',
-    service_name: 'Phnom Kulen Waterfall & River of Thousand Lingas',
-    service_type: 'Tour Package',
-    booking_date: '2026-11-18',
-    booking_time: '08:00',
-    number_of_guests: 4,
-    total_price: 260,
-    status: 'confirmed',
-    payment_method: 'Visa / Mastercard',
-    payment_status: 'paid',
-    special_requests: 'Vegetarian lunch preferred for 2 guests.',
-    created_at: '2026-10-17T15:20:00Z'
-  },
-  {
-    id: 3,
-    booking_reference: 'BK-KOHRONG-7714',
-    customer_name: 'Jean-Luc Moreau',
-    customer_email: 'jeanluc.moreau@orange.fr',
-    customer_phone: '+33 6 12 34 56 78',
-    business_name: 'Koh Rong Sanloem Coral Dive',
-    service_name: 'Full Day Coral Reef Snorkeling & Island Hop',
-    service_type: 'Activities',
-    booking_date: '2026-11-20',
-    booking_time: '09:30',
-    number_of_guests: 2,
-    total_price: 110,
-    status: 'completed',
-    payment_method: 'ABA Pay',
-    payment_status: 'paid',
-    special_requests: 'Life jackets required for both guests.',
-    created_at: '2026-10-14T09:00:00Z'
-  },
-  {
-    id: 4,
-    booking_reference: 'BK-KAMPOT-6630',
-    customer_name: 'Sokha Ly',
-    customer_email: 'sokha.ly@khmertech.com',
-    customer_phone: '+855 12 889 900',
-    business_name: 'Kampot River View Retreat',
-    service_name: 'Sunset Firefly River Cruise & Local Dinner',
-    service_type: 'Dining & Cruise',
-    booking_date: '2026-11-22',
-    booking_time: '17:00',
-    number_of_guests: 5,
-    total_price: 125,
-    status: 'pending',
-    payment_method: 'Cash on Arrival',
-    payment_status: 'pending',
-    special_requests: 'Family with 1 child aged 6.',
-    created_at: '2026-10-19T08:15:00Z'
-  },
-  {
-    id: 5,
-    booking_reference: 'BK-PHNOM-5519',
-    customer_name: 'Markus Weber',
-    customer_email: 'markus.weber@berlin-travel.de',
-    customer_phone: '+49 171 223 9988',
-    business_name: 'Phnom Penh Heritage Tours',
-    service_name: 'Royal Palace, National Museum & Silk Island',
-    service_type: 'Cultural Guide',
-    booking_date: '2026-11-10',
-    booking_time: '08:30',
-    number_of_guests: 1,
-    total_price: 65,
-    status: 'cancelled',
-    payment_method: 'Credit Card',
-    payment_status: 'refunded',
-    special_requests: 'Cancelled due to flight itinerary reschedule.',
-    created_at: '2026-10-12T14:45:00Z'
-  }
-];
-
 export default function Bookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -147,10 +49,12 @@ export default function Bookings() {
           service_name: b.service?.name || b.service_name || 'Travel Experience',
         }));
         setBookings(normalized);
+      } else {
+        setBookings([]);
       }
     } catch (err) {
-      console.warn('Backend bookings endpoint fallback:', err);
-      setBookings(SAMPLE_FALLBACK_BOOKINGS);
+      console.warn('Backend bookings endpoint fetch notice:', err.message);
+      setBookings([]);
     } finally {
       setLoading(false);
       setRefreshing(false);

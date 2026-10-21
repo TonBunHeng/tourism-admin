@@ -18,83 +18,10 @@ import {
   RefreshCw,
   Users
 } from 'lucide-react';
-import userService from '../../services/userService';
-
-const INITIAL_GUIDES = [
-  {
-    id: 1,
-    name: 'Sophal Sopheaktra',
-    license_no: 'MOT-SR-2018-042',
-    province: 'Siem Reap & Angkor',
-    languages: ['Khmer', 'English', 'French'],
-    experience_years: 14,
-    daily_rate: 45,
-    rating: 4.98,
-    reviews_count: 215,
-    status: 'verified',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-    specialties: 'Senior Khmer Culture & UNESCO World Heritage Certified Tour Guide with 14 years experience at Angkor Archaeological Park.'
-  },
-  {
-    id: 2,
-    name: 'Meng Dara',
-    license_no: 'MOT-PP-2019-115',
-    province: 'Phnom Penh & Kandal',
-    languages: ['Khmer', 'English', 'Chinese (Mandarin)'],
-    experience_years: 9,
-    daily_rate: 40,
-    rating: 4.92,
-    reviews_count: 168,
-    status: 'verified',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-    specialties: 'Phnom Penh Royal Palace historian, architectural docent, and Mekong river culture researcher.'
-  },
-  {
-    id: 3,
-    name: 'Srey Mom Khem',
-    license_no: 'MOT-BB-2021-089',
-    province: 'Battambang',
-    languages: ['Khmer', 'English', 'French'],
-    experience_years: 7,
-    daily_rate: 38,
-    rating: 4.89,
-    reviews_count: 94,
-    status: 'verified',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80',
-    specialties: 'Battambang provincial arts curator, colonial heritage walk leader, and Phare circus ambassador.'
-  },
-  {
-    id: 4,
-    name: 'Heng Rathana',
-    license_no: 'MOT-MK-2020-031',
-    province: 'Mondulkiri & Ratanakiri',
-    languages: ['Khmer', 'English'],
-    experience_years: 8,
-    daily_rate: 50,
-    rating: 4.96,
-    reviews_count: 112,
-    status: 'verified',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
-    specialties: 'Indigenous Bunong eco-trail master and wildlife protection advocate in Mondulkiri and Cardamom highlands.'
-  },
-  {
-    id: 5,
-    name: 'Kolap Samnang',
-    license_no: 'MOT-SH-2022-102',
-    province: 'Preah Sihanouk & Koh Rong',
-    languages: ['Khmer', 'English', 'German'],
-    experience_years: 6,
-    daily_rate: 45,
-    rating: 4.94,
-    reviews_count: 86,
-    status: 'verified',
-    avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80',
-    specialties: 'PADI certified divemaster and marine ecology guide for Koh Rong Archipelago and Kep coastal reserves.'
-  }
-];
+import guideService from '../../services/guideService';
 
 export default function Guides() {
-  const [guides, setGuides] = useState(INITIAL_GUIDES);
+  const [guides, setGuides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
@@ -113,40 +40,21 @@ export default function Guides() {
   const [experienceYears, setExperienceYears] = useState('');
   const [specialties, setSpecialties] = useState('');
 
-  const languagesList = ['All', 'English', 'French', 'Japanese', 'Chinese (Mandarin)', 'German'];
+  const languagesList = ['All', 'Khmer', 'English', 'French', 'Japanese', 'Chinese (Mandarin)', 'German'];
 
   const fetchGuidesFromBackend = async () => {
     try {
       setRefreshing(true);
-      const res = await userService.getUsers();
-      const rawUsers = res?.data?.users || res?.data?.data || res?.data || res || [];
-
-      if (Array.isArray(rawUsers) && rawUsers.length > 0) {
-        // Find users with guide_editor role or content editors
-        const guideUsers = rawUsers.filter(u => u.role === 'guide_editor' || u.role === 'editor' || u.role === 'tour_guide');
-        const listToMap = guideUsers.length > 0 ? guideUsers : rawUsers.slice(0, 10);
-
-        const mappedGuides = listToMap.map((u, index) => ({
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          phone: u.phone || '+855 12 345 678',
-          license_no: `MOT-KH-20${18 + (u.id % 7)}-${100 + u.id}`,
-          province: u.location || (index % 2 === 0 ? 'Siem Reap & Angkor' : 'Phnom Penh'),
-          languages: ['Khmer', 'English', index % 3 === 0 ? 'French' : 'Chinese (Mandarin)'],
-          experience_years: 5 + (u.id % 10),
-          daily_rate: 40 + (u.id % 4) * 5,
-          rating: 4.90 + ((u.id % 10) * 0.01),
-          reviews_count: 50 + u.id * 12,
-          status: u.status === 'Active' || u.status === 'verified' ? 'verified' : 'pending',
-          avatar: u.avatar || INITIAL_GUIDES[index % INITIAL_GUIDES.length]?.avatar,
-          specialties: u.bio || 'Ministry of Tourism Certified Tour Guide & Cultural Docent.'
-        }));
-
-        setGuides(mappedGuides);
-      }
+      const res = await guideService.getGuides({
+        per_page: 100,
+        search: search.trim() || undefined,
+        language: selectedLanguage !== 'All' ? selectedLanguage : undefined
+      });
+      const data = res?.data?.data?.guides || res?.data?.guides || res?.data?.data || res?.data || [];
+      setGuides(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.warn('Backend users endpoint fallback in place:', err.message);
+      console.warn('Backend guides fetch error:', err.message);
+      setGuides([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -155,11 +63,11 @@ export default function Guides() {
 
   useEffect(() => {
     fetchGuidesFromBackend();
-  }, []);
+  }, [selectedLanguage]);
 
   const stats = useMemo(() => {
     const total = guides.length;
-    const verified = guides.filter(g => g.status === 'verified').length;
+    const verified = guides.filter(g => g.status === 'verified' || g.status === 'Active').length;
     const regions = new Set(guides.map(g => g.province).filter(Boolean)).size;
     const allLangs = new Set(guides.flatMap(g => g.languages || [])).size;
     return { total, verified, regions, allLangs };
@@ -168,14 +76,14 @@ export default function Guides() {
   const handleOpenModal = (guide = null) => {
     if (guide) {
       setEditingGuide(guide);
-      setName(guide.name);
+      setName(guide.name || '');
       setEmail(guide.email || '');
       setPhone(guide.phone || '');
-      setLicenseNo(guide.license_no);
-      setProvince(guide.province);
-      setLanguagesStr((guide.languages || []).join(', '));
-      setDailyRate(String(guide.daily_rate));
-      setExperienceYears(String(guide.experience_years));
+      setLicenseNo(guide.license_no || '');
+      setProvince(guide.province || '');
+      setLanguagesStr(Array.isArray(guide.languages) ? guide.languages.join(', ') : (guide.languages || ''));
+      setDailyRate(String(guide.daily_rate ?? '45'));
+      setExperienceYears(String(guide.experience_years ?? '5'));
       setSpecialties(guide.specialties || '');
     } else {
       setEditingGuide(null);
@@ -195,95 +103,55 @@ export default function Guides() {
   const handleSaveGuide = async (e) => {
     e.preventDefault();
     const parsedLangs = languagesStr.split(',').map(l => l.trim()).filter(Boolean);
+    const payload = {
+      name,
+      email: email || undefined,
+      phone: phone || undefined,
+      license_no: licenseNo,
+      province,
+      location: province,
+      languages: parsedLangs,
+      daily_rate: Number(dailyRate) || 0,
+      experience_years: Number(experienceYears) || 0,
+      specialties,
+      bio: specialties,
+      status: editingGuide ? (editingGuide.status === 'verified' ? 'Active' : 'Inactive') : 'Active'
+    };
 
-    if (editingGuide) {
-      try {
-        await userService.updateUser(editingGuide.id, {
-          name,
-          email,
-          phone,
-          location: province,
-          bio: specialties
-        });
-      } catch (err) {
-        console.warn('Backend guide update notice:', err.message);
+    try {
+      if (editingGuide) {
+        await guideService.updateGuide(editingGuide.id, payload);
+      } else {
+        await guideService.createGuide(payload);
       }
-
-      setGuides(prev => prev.map(g => g.id === editingGuide.id ? {
-        ...g,
-        name,
-        email,
-        phone,
-        license_no: licenseNo,
-        province,
-        languages: parsedLangs,
-        daily_rate: Number(dailyRate),
-        experience_years: Number(experienceYears),
-        specialties
-      } : g));
-    } else {
-      let createdId = Date.now();
-      try {
-        const res = await userService.createUser({
-          name,
-          email: email || `guide.${Date.now()}@tourism.gov.kh`,
-          password: 'password123',
-          role: 'guide_editor',
-          location: province,
-          bio: specialties,
-          status: 'Active'
-        });
-        if (res?.data?.id) createdId = res.data.id;
-      } catch (err) {
-        console.warn('Backend guide create notice:', err.message);
-      }
-
-      const newGuide = {
-        id: createdId,
-        name,
-        email,
-        phone,
-        license_no: licenseNo,
-        province,
-        languages: parsedLangs,
-        daily_rate: Number(dailyRate),
-        experience_years: Number(experienceYears),
-        rating: 5.0,
-        reviews_count: 0,
-        status: 'verified',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-        specialties
-      };
-      setGuides(prev => [newGuide, ...prev]);
+      await fetchGuidesFromBackend();
+      setModalOpen(false);
+    } catch (err) {
+      console.error('Failed to save guide to backend:', err);
+      alert(err?.response?.data?.message || 'Failed to save tour guide. Please check required fields.');
     }
-    setModalOpen(false);
   };
 
   const handleToggleVerification = async (id) => {
     const guide = guides.find(g => g.id === id);
-    const newStatus = guide?.status === 'verified' ? 'pending' : 'verified';
+    const newStatus = (guide?.status === 'verified' || guide?.status === 'Active') ? 'Inactive' : 'Active';
     try {
-      await userService.updateUserStatus(id, newStatus === 'verified' ? 'Active' : 'Inactive');
+      await guideService.updateGuide(id, { status: newStatus });
+      await fetchGuidesFromBackend();
     } catch (err) {
-      console.warn('Backend user status toggle notice:', err.message);
+      console.error('Failed to update guide status:', err);
     }
-
-    setGuides(prev => prev.map(g => {
-      if (g.id === id) {
-        return { ...g, status: newStatus };
-      }
-      return g;
-    }));
   };
 
   const handleDeleteGuide = async (id) => {
-    if (!window.confirm('Are you sure you want to remove this tour guide record?')) return;
+    if (!window.confirm('Are you sure you want to remove this tour guide record from the database?')) return;
     try {
-      await userService.deleteUser(id);
+      await guideService.deleteGuide(id);
+      await fetchGuidesFromBackend();
     } catch (err) {
-      console.warn('Backend guide delete notice:', err.message);
+      console.error('Failed to delete guide:', err);
+      alert(err?.response?.data?.message || 'Failed to delete tour guide.');
     }
-    setGuides(prev => prev.filter(g => g.id !== id));
   };
 
   const filteredGuides = useMemo(() => {
@@ -397,6 +265,14 @@ export default function Guides() {
           {[1, 2, 3].map((n) => (
             <div key={n} className="h-80 rounded-3xl bg-gray-200 dark:bg-zinc-800" />
           ))}
+        </div>
+      ) : filteredGuides.length === 0 ? (
+        <div className="p-12 text-center bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200/80 dark:border-zinc-800">
+          <Users className="w-12 h-12 text-gray-300 dark:text-zinc-600 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-gray-900 dark:text-white">No Tour Guides Found</h3>
+          <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto">
+            No tour guides match your filter criteria or have been registered in the database yet.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

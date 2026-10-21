@@ -17,69 +17,10 @@ import {
   Compass,
   Users
 } from 'lucide-react';
-import businessService from '../../services/businessService';
-
-const INITIAL_TOURS = [
-  {
-    id: 1,
-    title: 'Angkor Wat Sunrise & Sacred Grand Circuit',
-    destination: 'Siem Reap',
-    duration: '1 Full Day',
-    price_per_person: 55,
-    max_travelers: 12,
-    rating: 4.95,
-    reviews_count: 328,
-    status: 'active',
-    category: 'Cultural & Heritage',
-    cover_image: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
-    description: 'Experience Angkor Wat illuminated by the first golden morning rays, followed by the mystical stone faces of the Bayon and jungle-strangled Ta Prohm.'
-  },
-  {
-    id: 2,
-    title: 'Phnom Penh Heritage, Silk Island & Mekong Sunset',
-    destination: 'Phnom Penh',
-    duration: '2 Days / 1 Night',
-    price_per_person: 120,
-    max_travelers: 10,
-    rating: 4.88,
-    reviews_count: 142,
-    status: 'active',
-    category: 'City & Culture',
-    cover_image: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&w=800&q=80',
-    description: 'Explore the Royal Palace, Silver Pagoda, and traditional silk-weaving villages along the banks of the Mekong and Tonle Sap rivers.'
-  },
-  {
-    id: 3,
-    title: 'Koh Rong Sanloem Island Reef & Bioluminescence',
-    destination: 'Koh Rong / Sihanoukville',
-    duration: '3 Days / 2 Nights',
-    price_per_person: 210,
-    max_travelers: 8,
-    rating: 4.92,
-    reviews_count: 196,
-    status: 'active',
-    category: 'Beach & Island',
-    cover_image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-    description: 'Escape to powdery white sands of Saracen Bay. Enjoy snorkeling crystal coral gardens and nighttime swimming with glowing bioluminescent plankton.'
-  },
-  {
-    id: 4,
-    title: 'Kampot Pepper Plantations & Bokor Mist Peak',
-    destination: 'Kampot & Kep',
-    duration: '2 Days / 1 Night',
-    price_per_person: 95,
-    max_travelers: 14,
-    rating: 4.85,
-    reviews_count: 110,
-    status: 'active',
-    category: 'Eco & Nature',
-    cover_image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80',
-    description: 'Visit organic Kampot pepper farms, kayak the green river loop, and ascend Bokor Mountain to witness panoramic views over the Gulf of Thailand.'
-  }
-];
+import tourService from '../../services/tourService';
 
 export default function Tours() {
-  const [tours, setTours] = useState(INITIAL_TOURS);
+  const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
@@ -98,32 +39,30 @@ export default function Tours() {
   const fetchToursFromBackend = async () => {
     try {
       setRefreshing(true);
-      const res = await businessService.getAll();
-      const rawList = res?.data?.businesses || res?.data?.data || res?.data || res || [];
+      const res = await tourService.getTours({ per_page: 100 });
+      const data = res?.data || res;
+      const rawList = data?.tours || (Array.isArray(data) ? data : []);
 
-      if (Array.isArray(rawList) && rawList.length > 0) {
-        const liveTours = rawList.map((b) => ({
-          id: b.id,
-          title: b.services?.[0]?.name || b.name,
-          destination: b.province?.name || b.address || 'Cambodia',
-          duration: b.services?.[0]?.duration_minutes
-            ? (b.services[0].duration_minutes >= 1440
-                ? `${Math.round(b.services[0].duration_minutes / 1440)} Days`
-                : `${b.services[0].duration_minutes} Mins`)
-            : '1 Full Day',
-          price_per_person: parseFloat(b.services?.[0]?.price || (b.price_range === '$$$$' ? 120 : b.price_range === '$$$' ? 85 : 45)),
-          max_travelers: 12,
-          rating: parseFloat(b.rating || 4.9),
-          reviews_count: b.review_count || 12,
-          status: b.status === 'active' ? 'active' : 'draft',
-          category: b.category?.name || 'Guided Tour',
-          cover_image: b.cover_image_url || 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
-          description: b.description || 'Verified tour operator & hospitality package in Cambodia.'
+      if (Array.isArray(rawList)) {
+        const liveTours = rawList.map((t) => ({
+          id: t.id,
+          title: t.title || 'Untitled Tour',
+          destination: t.destination || t.province || 'Cambodia',
+          duration: t.duration || (t.duration_days ? `${t.duration_days} Days` : '1 Full Day'),
+          price_per_person: parseFloat(t.price || t.price_per_person || 0),
+          max_travelers: Number(t.max_travelers || 12),
+          rating: parseFloat(t.rating || 5.0),
+          reviews_count: Number(t.reviews_count || 0),
+          status: t.status === 'active' ? 'active' : 'draft',
+          category: t.category || 'Cultural & Heritage',
+          cover_image: t.image_url || t.cover_image || t.image || 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+          description: t.description || 'Curated travel experience in Cambodia.'
         }));
         setTours(liveTours);
       }
     } catch (err) {
-      console.warn('Backend tours endpoint fallback in place:', err.message);
+      console.error('Failed to load tours from DB API:', err);
+      setTours([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -170,87 +109,53 @@ export default function Tours() {
 
   const handleSaveTour = async (e) => {
     e.preventDefault();
-    if (editingTour) {
-      try {
-        await businessService.update(editingTour.id, {
-          name: title,
-          address: destination,
+    try {
+      if (editingTour) {
+        await tourService.updateTour(editingTour.id, {
+          title,
+          destination,
+          duration,
+          price: Number(price),
+          max_travelers: Number(maxTravelers),
           description
         });
-      } catch (err) {
-        console.warn('Backend update notice:', err.message);
-      }
-      setTours(prev => prev.map(t => t.id === editingTour.id ? {
-        ...t,
-        title,
-        destination,
-        duration,
-        price_per_person: Number(price),
-        max_travelers: Number(maxTravelers),
-        description
-      } : t));
-    } else {
-      let createdId = Date.now();
-      try {
-        const res = await businessService.create({
-          name: title,
-          address: destination,
+      } else {
+        await tourService.createTour({
+          title,
+          destination,
+          duration,
+          price: Number(price),
+          max_travelers: Number(maxTravelers),
           description,
           status: 'active'
         });
-        if (res?.data?.id) createdId = res.data.id;
-      } catch (err) {
-        console.warn('Backend create notice:', err.message);
       }
-
-      const newTour = {
-        id: createdId,
-        title,
-        destination,
-        duration,
-        price_per_person: Number(price),
-        max_travelers: Number(maxTravelers),
-        rating: 5.0,
-        reviews_count: 0,
-        status: 'active',
-        category: 'Guided Tour',
-        cover_image: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
-        description
-      };
-      setTours(prev => [newTour, ...prev]);
+      await fetchToursFromBackend();
+    } catch (err) {
+      console.error('Failed to save tour to DB API:', err);
     }
     setModalOpen(false);
   };
 
   const handleDeleteTour = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this tour package?')) return;
+    if (!window.confirm('Are you sure you want to delete this tour package from the database?')) return;
     try {
-      await businessService.delete(id);
+      await tourService.deleteTour(id);
+      setTours(prev => prev.filter(t => t.id !== id));
     } catch (err) {
-      console.warn('Backend delete notice:', err.message);
+      console.error('Failed to delete tour from DB API:', err);
     }
-    setTours(prev => prev.filter(t => t.id !== id));
   };
 
   const handleToggleStatus = async (id) => {
     const tour = tours.find(t => t.id === id);
     const newStatus = tour?.status === 'active' ? 'draft' : 'active';
     try {
-      if (newStatus === 'active') {
-        await businessService.activate(id);
-      } else {
-        await businessService.suspend(id, { reason: 'Set to draft by administrator.' });
-      }
+      await tourService.toggleStatus(id);
+      setTours(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
     } catch (err) {
-      console.warn('Backend status toggle notice:', err.message);
+      console.error('Failed to toggle tour status in DB:', err);
     }
-
-    setTours(prev => prev.map(t => {
-      if (t.id === id) {
-        return { ...t, status: newStatus };
-      }
-      return t;
-    }));
   };
 
   const filteredTours = useMemo(() => {

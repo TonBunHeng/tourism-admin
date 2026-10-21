@@ -12,102 +12,11 @@ import { useAlert } from '../../context/AlertContext';
 import { useSearch } from '../../context/SearchContext';
 import { getBusinessVerificationStatusColor } from '../../utils/StatusUtils';
 
-const INITIAL_MOCK_BUSINESSES = [
-  {
-    id: 1,
-    name: 'Angkor Heritage Restaurant & Lounge',
-    category: { id: 3, name: 'Dining' },
-    category_name: 'Dining',
-    owner: { name: 'Sokha Chan', email: 'info@angkor-restaurant.com', phone: '+855 12 884 920' },
-    province: { name: 'Siem Reap' },
-    address: 'National Road 6, Siem Reap',
-    phone: '+855 12 884 920',
-    email: 'info@angkor-restaurant.com',
-    price_tier: '$$$',
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
-    latitude: '13.3610',
-    longitude: '103.8590',
-    verification_status: 'approved',
-    license_number: 'MOT-2024-REG',
-    rating: 4.8,
-    operating_hours: '24/7 Operations',
-    website: 'https://angkor-restaurant.com',
-    created_at: '2024-03-10T08:30:00Z',
-    description: 'Premier luxury retreat near Angkor Wat with 120 suites, traditional Khmer spa, and organic fine dining restaurants.'
-  },
-  {
-    id: 2,
-    name: 'Buger',
-    category: { id: 3, name: 'Dining' },
-    category_name: 'Dining',
-    owner: { name: 'Ton Bunheng', email: 'tonbunheng1122@gmail.com', phone: '+855 92 110 445' },
-    province: { name: 'Siem Reap' },
-    address: 'Street 08, Pub Street District, Siem Reap',
-    phone: '+855 92 110 445',
-    email: 'tonbunheng1122@gmail.com',
-    price_tier: '$$',
-    image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=80&w=800',
-    latitude: '13.3540',
-    longitude: '103.8540',
-    verification_status: 'pending',
-    license_number: 'MOT-2024-REG',
-    rating: 4.9,
-    operating_hours: '8:00 AM - 9:00 PM',
-    website: 'https://siemreapfoodtours.kh',
-    created_at: '2023-11-15T10:15:00Z',
-    description: 'Guided street food and high-end culinary walking tours exploring authentic Cambodian flavours.'
-  },
-  {
-    id: 3,
-    name: 'Mekong River Sunset Cruise & Kayaking',
-    category: { id: 2, name: 'Adventure & Tour' },
-    category_name: 'Adventure & Tour',
-    owner: { name: 'Vannak Kem', email: 'booking@mekong-cruise.com', phone: '+855 16 339 012' },
-    province: { name: 'Phnom Penh' },
-    address: 'Monivong Blvd, Boeung Keng Kang, Phnom Penh',
-    phone: '+855 16 339 012',
-    email: 'booking@mekong-cruise.com',
-    price_tier: '$$',
-    image: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&q=80&w=800',
-    latitude: '11.5564',
-    longitude: '104.9282',
-    verification_status: 'pending',
-    license_number: 'MOT-2024-REG',
-    rating: 4.6,
-    operating_hours: '6:00 AM - 11:00 PM',
-    website: 'https://bayonexpress.com',
-    created_at: '2024-01-20T14:00:00Z',
-    description: 'Inter-city VIP minibus, private chauffeur transfers, and tourist coach transport services across Cambodia.'
-  },
-  {
-    id: 4,
-    name: 'Kampot Pepper Plantation & Eco Lodge',
-    category: { id: 1, name: 'Resort & Hotel' },
-    category_name: 'Resort & Hotel',
-    owner: { name: 'Dara Pich', email: 'contact@kampot-pepperlodge.com', phone: '+855 77 400 918' },
-    province: { name: 'Kampot' },
-    address: 'Street 11, Kampot Area, Kampot',
-    phone: '+855 77 400 918',
-    email: 'contact@kampot-pepperlodge.com',
-    price_tier: '$$$',
-    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
-    latitude: '10.6104',
-    longitude: '104.1815',
-    verification_status: 'approved',
-    license_number: 'MOT-2024-REG',
-    rating: 4.7,
-    operating_hours: '24/7 Operations',
-    website: 'https://kampot-pepperlodge.com',
-    created_at: '2022-08-05T09:00:00Z',
-    description: 'Eco lodge surrounded by organic Kampot pepper plantation.'
-  }
-];
-
 export default function Businesses() {
   const { showConfirm, showSuccess, showError } = useAlert();
-  const [businesses, setBusinesses] = useState(INITIAL_MOCK_BUSINESSES);
-  const [stats, setStats] = useState({ pending: 2, approved: 2, suspended: 0, rejected: 0, total: 4 });
-  const [loading, setLoading] = useState(false);
+  const [businesses, setBusinesses] = useState([]);
+  const [stats, setStats] = useState({ pending: 0, approved: 0, suspended: 0, rejected: 0, total: 0 });
+  const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const { searchTerm: search, setSearchTerm: setSearch } = useSearch();
@@ -139,27 +48,28 @@ export default function Businesses() {
       const res = await businessService.getAdminAll(params);
       const data = res?.data?.data || res?.data || res;
 
-      if (data && (Array.isArray(data.businesses) || Array.isArray(data))) {
-        const rawList = Array.isArray(data.businesses) ? data.businesses : (Array.isArray(data) ? data : []);
-        if (rawList.length > 0) {
-          const mapped = rawList.map(item => {
-            const fallback = INITIAL_MOCK_BUSINESSES.find(m => m.id === item.id || m.name?.toLowerCase() === item.name?.toLowerCase());
-            return {
-              ...item,
-              image: item.image || item.image_url || item.cover_image || item.photo || fallback?.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
-              price_tier: item.price_tier || fallback?.price_tier || '$$',
-              latitude: item.latitude || fallback?.latitude || '13.3610',
-              longitude: item.longitude || fallback?.longitude || '103.8590'
-            };
-          });
-          setBusinesses(mapped);
-          if (data.verification_stats) {
-            setStats(data.verification_stats);
-          }
-        }
+      const rawList = Array.isArray(data?.businesses) ? data.businesses : (Array.isArray(data) ? data : []);
+      const mapped = rawList.map(item => ({
+        ...item,
+        image: item.image || item.image_url || item.cover_image || item.photo || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
+        price_tier: item.price_tier || '$$',
+        latitude: item.latitude || '13.3610',
+        longitude: item.longitude || '103.8590'
+      }));
+      setBusinesses(mapped);
+      if (data?.verification_stats) {
+        setStats(data.verification_stats);
+      } else {
+        const total = mapped.length;
+        const pending = mapped.filter(b => b.verification_status === 'pending').length;
+        const approved = mapped.filter(b => b.verification_status === 'approved').length;
+        const rejected = mapped.filter(b => b.verification_status === 'rejected').length;
+        const suspended = mapped.filter(b => b.verification_status === 'suspended').length;
+        setStats({ total, pending, approved, rejected, suspended });
       }
     } catch (err) {
-      console.warn('Backend business API offline or empty, displaying client business state:', err);
+      console.warn('Backend business API fetch notice:', err);
+      setBusinesses([]);
     } finally {
       setIsRefreshing(false);
       setLoading(false);
