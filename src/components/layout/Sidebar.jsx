@@ -6,7 +6,7 @@ import {
   LayoutGrid, MapPinned, Tags, Images, CalendarDays,
   Star, Heart, Trash2, Settings, LogOut,
   Users, User, X, FileText, ShieldCheck, Bell, Globe, Building2,
-  CalendarCheck, Sparkles, UserCheck, ChevronDown, Compass, BarChart2
+  CalendarCheck, Sparkles, UserCheck, ChevronDown, Compass, BarChart2, Activity
 } from "lucide-react";
 import LogoutAlert from './LogoutAlert';
 import { isFullAdminRole, normalizeRole } from '../../services/authService';
@@ -68,6 +68,7 @@ const NAV_SECTIONS = [
         icon: ShieldCheck,
         children: [
           { name: 'Users', icon: Users, path: '/users', match: ['/users', '/user'], requires: 'privileged' },
+          { name: 'Users Tracking', icon: Activity, path: '/tracking-users', requires: 'privileged' },
           { name: 'Security Alerts', icon: ShieldCheck, path: '/security', requires: 'privileged' },
           { name: 'Deletion Requests', icon: Trash2, path: '/deletion-requests', requires: 'super_admin' },
 

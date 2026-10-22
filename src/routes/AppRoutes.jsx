@@ -34,6 +34,7 @@ import Businesses from '../pages/businesses/Businesses';
 import Bookings from '../pages/bookings/Bookings';
 import Tours from '../pages/tours/Tours';
 import Guides from '../pages/guides/Guides';
+import UsersTracking from '../pages/tracking/UsersTracking';
 
 import { SearchProvider } from '../context/SearchContext';
 
@@ -90,6 +91,7 @@ const AppRoutes = () => {
               <Route path="/reports/analytics" element={<ReportsAnalytics />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/security" element={<Security />} />
+              <Route path="/tracking-users" element={<UsersTracking />} />
             </Route>
 
             {/* Restricted Pages: Super Admin Only */}

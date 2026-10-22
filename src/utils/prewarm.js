@@ -8,6 +8,7 @@ import businessService from '../services/businessService';
 import userService from '../services/userService';
 import notificationService from '../services/notificationService';
 import securityService from '../services/securityService';
+import userTrackingService from '../services/userTrackingService';
 
 let prewarmed = false;
 
@@ -26,6 +27,7 @@ export function prewarmAdminCaches() {
     () => userService.getUsers({ page: 1, per_page: 10 }),
     () => notificationService.getNotifications({}),
     () => securityService.getAlerts({ per_page: 100 }),
+    () => userTrackingService.getLogs({ page: 1, per_page: 10 }),
   ];
 
   tasks.forEach((task, index) => {

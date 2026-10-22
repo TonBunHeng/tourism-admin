@@ -59,6 +59,7 @@ export default function Main() {
       "/favorites/analytics": "Favorites Analytics",
       "/deletion-requests": "Deletion Requests",
       "/security": "Security & Audit Center",
+      "/tracking-users": "Users Tracking",
       "/settings": "Settings",
       "/profile": "Profile",
       "/notifications": "Notifications Center",

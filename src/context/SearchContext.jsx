@@ -33,6 +33,7 @@ export const SearchProvider = ({ children }) => {
     if (path.includes('/businesses') || path.includes('/business')) return 'Search businesses...';
     if (path.includes('/reports')) return 'Search reports...';
     if (path.includes('/security')) return 'Search security incidents...';
+    if (path.includes('/tracking')) return 'Search user activities...';
     if (path.includes('/notifications')) return 'Search notifications...';
     if (path.includes('/deletion-requests')) return 'Search requests...';
     return 'Search in pages...';
