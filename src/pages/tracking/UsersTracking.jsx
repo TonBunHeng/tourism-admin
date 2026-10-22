@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText, FileSpreadsheet } from 'lucide-react';
 import { useAlert } from '../../context/AlertContext';
 import { useSearch } from '../../context/SearchContext';
 import authService, { isSuperAdminRole } from '../../services/authService';
@@ -32,9 +32,9 @@ export default function UsersTracking() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [actionFilter, setActionFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
-  const [totalRecords, setTotalRecords] = useState(() => cachedData?.meta?.total_logs || 0);
-  const [totalPages, setTotalPages] = useState(() => cachedData?.meta?.last_page || 1);
-  const perPage = 10;
+  const [totalRecords, setTotalRecords] = useState(() => cachedData?.totalRecords || 0);
+  const [totalPages, setTotalPages] = useState(() => cachedData?.totalPages || 1);
+  const itemsPerPage = 10;
 
   // Modals
   const [selectedLog, setSelectedLog] = useState(null);
@@ -46,7 +46,7 @@ export default function UsersTracking() {
     try {
       const params = {
         page: currentPage,
-        per_page: perPage,
+        per_page: itemsPerPage,
         role: roleFilter !== 'all' ? roleFilter : undefined,
         action: actionFilter !== 'all' ? actionFilter : undefined,
         period: periodFilter !== 'all' ? periodFilter : undefined,
@@ -60,8 +60,8 @@ export default function UsersTracking() {
         setLogs(list);
         setMeta(resMeta);
 
-        const total = resMeta.total_logs ?? list.length;
-        const pages = resMeta.last_page ?? Math.ceil(total / perPage) ?? 1;
+        const total = res.pagination?.total ?? resMeta.total ?? resMeta.total_logs ?? list.length;
+        const pages = res.pagination?.last_page ?? resMeta.last_page ?? Math.ceil(total / itemsPerPage) ?? 1;
         setTotalRecords(total);
         setTotalPages(pages);
 
@@ -79,7 +79,7 @@ export default function UsersTracking() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, roleFilter, actionFilter, periodFilter, searchTerm, showError, stats]);
+  }, [currentPage, roleFilter, actionFilter, periodFilter, searchTerm, showError, stats, itemsPerPage]);
 
   // Fetch stats for cards
   const fetchStats = useCallback(async () => {
@@ -101,10 +101,25 @@ export default function UsersTracking() {
     fetchStats();
   }, [fetchStats]);
 
-  // Reset to page 1 on search or filter changes
+  // Reset to page 1 on search
   useEffect(() => {
     setCurrentPage(1);
-  }, [roleFilter, actionFilter, periodFilter, searchTerm]);
+  }, [searchTerm]);
+
+  const handleRoleFilterChange = (val) => {
+    setRoleFilter(val);
+    setCurrentPage(1);
+  };
+
+  const handleActionFilterChange = (val) => {
+    setActionFilter(val);
+    setCurrentPage(1);
+  };
+
+  const handlePeriodFilterChange = (val) => {
+    setPeriodFilter(val);
+    setCurrentPage(1);
+  };
 
   // Handle View Details Modal
   const handleViewDetails = (log) => {
@@ -135,17 +150,39 @@ export default function UsersTracking() {
 
   // Export to PDF
   const handleExportPDF = async () => {
+    const recordCount = totalRecords || logs.length;
+    if (recordCount === 0) {
+      showError('No records found to export.', 'Export Failed');
+      return;
+    }
+
+    const confirmed = await showConfirm({
+      title: 'Export PDF Report Confirmation',
+      message: `Are you sure you want to export the "Users Tracking" dataset (${recordCount} items) as a styled PDF document?`,
+      confirmText: 'Export PDF',
+      cancelText: 'Cancel',
+      type: 'danger',
+      customIcon: (
+        <div className="w-16 h-16 rounded-md bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 ring-8 ring-red-50/70 dark:ring-red-950/30 flex items-center justify-center shadow-xs">
+          <FileText size={30} />
+        </div>
+      )
+    });
+
+    if (!confirmed) return;
+
     try {
       const params = {
         role: roleFilter !== 'all' ? roleFilter : undefined,
         action: actionFilter !== 'all' ? actionFilter : undefined,
+        period: periodFilter !== 'all' ? periodFilter : undefined,
         search: searchTerm ? searchTerm.trim() : undefined,
       };
       const res = await userTrackingService.getExportData(params);
       const items = res?.data || [];
 
       if (items.length === 0) {
-        showError('No records found to export.', 'Export');
+        showError('No records found to export.', 'Export Failed');
         return;
       }
 
@@ -181,29 +218,51 @@ export default function UsersTracking() {
       });
 
       if (result.success) {
-        showSuccess(`Exported ${items.length} records to PDF successfully.`, 'PDF Export Complete');
+        showSuccess(`The "Users Tracking" dataset (${items.length} items) has been exported to PDF successfully.`, 'PDF Exported Successfully');
       } else {
-        showError(result.error || 'Failed to generate PDF document.', 'Export Error');
+        showError(result.error || 'Failed to generate PDF report document.', 'Export Failed');
       }
     } catch (err) {
       console.error('PDF Export Error:', err);
-      showError(err.message || 'Failed to export PDF.', 'Export Error');
+      showError(err.message || 'An unexpected error occurred during PDF export.', 'Export Failed');
     }
   };
 
   // Export to Excel
   const handleExportExcel = async () => {
+    const recordCount = totalRecords || logs.length;
+    if (recordCount === 0) {
+      showError('No records found to export.', 'Export Failed');
+      return;
+    }
+
+    const confirmed = await showConfirm({
+      title: 'Export Excel Spreadsheet Confirmation',
+      message: `Are you sure you want to export the "Users Tracking" dataset (${recordCount} items) as an Excel spreadsheet?`,
+      confirmText: 'Export Excel',
+      cancelText: 'Cancel',
+      type: 'success',
+      customIcon: (
+        <div className="w-16 h-16 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 ring-8 ring-emerald-50/70 dark:ring-emerald-950/30 flex items-center justify-center shadow-xs">
+          <FileSpreadsheet size={30} />
+        </div>
+      )
+    });
+
+    if (!confirmed) return;
+
     try {
       const params = {
         role: roleFilter !== 'all' ? roleFilter : undefined,
         action: actionFilter !== 'all' ? actionFilter : undefined,
+        period: periodFilter !== 'all' ? periodFilter : undefined,
         search: searchTerm ? searchTerm.trim() : undefined,
       };
       const res = await userTrackingService.getExportData(params);
       const items = res?.data || [];
 
       if (items.length === 0) {
-        showError('No records found to export.', 'Export');
+        showError('No records found to export.', 'Export Failed');
         return;
       }
 
@@ -215,17 +274,17 @@ export default function UsersTracking() {
       });
 
       if (result.success) {
-        showSuccess(`Exported ${items.length} records to Excel spreadsheet.`, 'Excel Export Complete');
+        showSuccess(`The "Users Tracking" dataset (${items.length} items) has been exported to Excel successfully.`, 'Excel Exported Successfully');
       } else {
-        showError(result.error || 'Failed to generate Excel file.', 'Export Error');
+        showError(result.error || 'Failed to generate Excel spreadsheet.', 'Export Failed');
       }
     } catch (err) {
       console.error('Excel Export Error:', err);
-      showError(err.message || 'Failed to export Excel.', 'Export Error');
+      showError(err.message || 'An unexpected error occurred during Excel export.', 'Export Failed');
     }
   };
 
-  const startIndex = (currentPage - 1) * perPage;
+  const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + logs.length, totalRecords);
 
   return (
@@ -245,11 +304,11 @@ export default function UsersTracking() {
         <TrackingToolbar
           totalCount={totalRecords}
           roleFilter={roleFilter}
-          onRoleFilterChange={setRoleFilter}
+          onRoleFilterChange={handleRoleFilterChange}
           actionFilter={actionFilter}
-          onActionFilterChange={setActionFilter}
+          onActionFilterChange={handleActionFilterChange}
           periodFilter={periodFilter}
-          onPeriodFilterChange={setPeriodFilter}
+          onPeriodFilterChange={handlePeriodFilterChange}
         />
 
         {/* Content Table or Spinner */}

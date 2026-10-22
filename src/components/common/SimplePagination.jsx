@@ -18,8 +18,8 @@ export default function SimplePagination({
   if (!totalRecords || totalRecords <= 0) return null;
 
   // Safe range calculation
-  const from = Math.min(startIndex + 1, totalRecords);
-  const to = Math.min(endIndex, totalRecords);
+  const from = totalRecords > 0 ? Math.min(startIndex + 1, totalRecords) : 0;
+  const to = Math.max(from, Math.min(endIndex, totalRecords));
 
   // Generate 10-page window (1-10, 11-20, 21-30, etc.)
   const startBlock = Math.floor((currentPage - 1) / 10) * 10 + 1;
@@ -61,8 +61,8 @@ export default function SimplePagination({
         items-center justify-between
         gap-3
         px-4 py-3
-        border-t border-gray-200 dark:border-zinc-800
-        bg-white dark:bg-zinc-900
+        border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]
+        bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)]
         ${className}
       `}
     >
