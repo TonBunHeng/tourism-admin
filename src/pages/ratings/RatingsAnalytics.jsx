@@ -38,6 +38,7 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
   const [ratingFilter, setRatingFilter] = useState('ALL');
   const [apiAnalytics, setApiAnalytics] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [ratingChartTab, setRatingChartTab] = useState('stars');
 
   const timeframeLabel = useMemo(() => {
     switch (timeframe) {
@@ -692,117 +693,192 @@ export default function RatingsAnalytics({ reviews: initialReviews = [] }) {
         </div>
 
         {/* Chart 2: Net Sentiment & Star Distribution Hub */}
-        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 flex flex-col justify-between">
+        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 flex flex-col justify-between h-full">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <div>
                 <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
                   <Award className="w-4 h-4 text-amber-500" />
                   <span>Net Sentiment & Star Distribution</span>
                 </h3>
-                <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
+                <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
                   Satisfaction index (CSAT) & 5-tier star breakdown
                 </p>
               </div>
-              <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md border shrink-0 ${csatStatus.color}`}>
-                CSAT {positivePct}% • {csatStatus.label}
-              </span>
+              <div className="flex items-center gap-1 bg-gray-100 dark:bg-zinc-800/80 p-0.5 rounded-md border border-gray-200/50 dark:border-zinc-700/50 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setRatingChartTab('stars')}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-sm transition-all cursor-pointer ${
+                    ratingChartTab === 'stars'
+                      ? 'bg-[var(--color-white)] dark:bg-zinc-900 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-xs'
+                      : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  By Stars
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRatingChartTab('sentiment')}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-sm transition-all cursor-pointer ${
+                    ratingChartTab === 'sentiment'
+                      ? 'bg-[var(--color-white)] dark:bg-zinc-900 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-xs'
+                      : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  Sentiment
+                </button>
+              </div>
             </div>
 
-            {/* Split Panel: Donut on Left, 5-Star Progress Matrix on Right */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              {/* Left Column: Donut CSAT Gauge */}
-              <div className="sm:col-span-5 flex flex-col items-center justify-center">
-                <div className="relative w-full h-[160px] flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={sentimentData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={46}
-                        outerRadius={68}
-                        paddingAngle={3}
-                        dataKey="value"
-                        isAnimationActive={true}
-                        animationDuration={800}
-                      >
-                        {sentimentData.map((entry, index) => (
-                          <Cell key={`donut-cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2 rounded-md shadow-md text-xs space-y-0.5">
-                                <p className="font-semibold text-gray-900 dark:text-zinc-100">{data.name}</p>
-                                <p className="text-gray-600 dark:text-zinc-400">{data.value} reviews ({data.percentage}%)</p>
-                              </div>
-                            );
+            {/* Donut Chart Container (Modeled identically to CategoryDistribution) */}
+            <div className="relative h-[250px] w-full flex items-center justify-center my-1">
+              {total === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-gray-400 text-xs">
+                  <Award className="w-8 h-8 mb-2 stroke-1 text-gray-300 dark:text-zinc-600" />
+                  <p>No ratings recorded yet</p>
+                </div>
+              ) : (
+                <>
+                  {/* Center Donut Label */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                    <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100">
+                      {ratingChartTab === 'stars' ? `${avgRating} ★` : `${positivePct}%`}
+                    </span>
+                    <span className="text-[11px] text-gray-500 dark:text-zinc-400 font-medium">
+                      {ratingChartTab === 'stars' ? `Avg (${total.toLocaleString()} Reviews)` : 'CSAT Score'}
+                    </span>
+                  </div>
+
+                  <div className="w-full h-full relative z-10">
+                    <ResponsiveContainer width="100%" height="100%" key={`ratings-dist-${ratingChartTab}`}>
+                      <PieChart>
+                        <Pie
+                          data={
+                            ratingChartTab === 'stars'
+                              ? ratingDistribution.map(item => ({
+                                  name: `${item.stars} Stars`,
+                                  fullName: `${item.stars} Stars Rating`,
+                                  count: item.count,
+                                  percentage: item.percentage,
+                                  fill: item.fillColor
+                                }))
+                              : sentimentData.map(item => ({
+                                  name: item.name,
+                                  fullName: item.name,
+                                  count: item.value,
+                                  percentage: item.percentage,
+                                  fill: item.color
+                                }))
                           }
-                          return null;
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  {/* Center Metric */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] tracking-tight">
-                      {positivePct}%
-                    </span>
-                    <span className="text-[10px] font-semibold uppercase text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] tracking-wider">
-                      CSAT
-                    </span>
+                          dataKey="count"
+                          nameKey="fullName"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={65}
+                          outerRadius={100}
+                          paddingAngle={3}
+                          stroke="none"
+                          isAnimationActive={true}
+                          animationDuration={600}
+                          animationEasing="ease-out"
+                        >
+                          {(ratingChartTab === 'stars'
+                            ? ratingDistribution.map(item => item.fillColor)
+                            : sentimentData.map(item => item.color)
+                          ).map((color, index) => (
+                            <Cell key={`cell-${index}`} fill={color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          wrapperStyle={{ zIndex: 50, pointerEvents: 'none' }}
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
+                                  <p className="font-semibold text-gray-900 dark:text-zinc-100 flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: data.fill }} />
+                                    {data.fullName || data.name}
+                                  </p>
+                                  <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
+                                    <span className="text-gray-900 dark:text-zinc-100 font-bold">
+                                      {data.count.toLocaleString()} {data.count === 1 ? 'review' : 'reviews'}
+                                    </span>
+                                    <span className="text-amber-600 dark:text-amber-400 font-semibold">
+                                      ({data.percentage}%)
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
-                </div>
+                </>
+              )}
+            </div>
 
-                <div className="text-center mt-1">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-[#003E83] dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
-                    Net Sentiment: {netSentimentScore >= 0 ? `+${netSentimentScore}` : netSentimentScore}
-                  </span>
-                </div>
-              </div>
-
-              {/* Right Column: 5-Star Breakdown Matrix */}
-              <div className="sm:col-span-7 flex flex-col justify-center space-y-2">
-                {ratingDistribution.map((item) => (
-                  <div key={item.stars} className="flex items-center gap-2 text-xs">
-                    <span className="w-10 font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-1 shrink-0">
-                      {item.stars} <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                    </span>
-                    <div className="flex-1 bg-gray-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-700 ease-out"
-                        style={{
-                          width: `${item.percentage}%`,
-                          backgroundColor: item.fillColor
-                        }}
-                      />
+            {/* Legend / Breakdown Grid (CategoryDistribution design) */}
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2 pt-2 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+              {ratingChartTab === 'stars' ? (
+                <>
+                  {ratingDistribution.map((item) => (
+                    <div key={item.stars} className="flex items-center justify-between text-xs min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.fillColor }} />
+                        <span className="text-gray-700 dark:text-zinc-300 font-medium truncate text-[11px]">
+                          {item.stars} Stars
+                        </span>
+                      </div>
+                      <span className="text-gray-500 dark:text-zinc-400 text-[10px] font-semibold shrink-0">
+                        {item.percentage}% <span className="font-normal text-gray-400">({item.count})</span>
+                      </span>
                     </div>
-                    <span className="w-16 text-right font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] text-[11px] shrink-0">
-                      {item.count} ({item.percentage}%)
+                  ))}
+                  <div className="flex items-center justify-between text-xs min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-blue-600" />
+                      <span className="text-gray-700 dark:text-zinc-300 font-medium truncate text-[11px]">
+                        Net Sentiment
+                      </span>
+                    </div>
+                    <span className="text-blue-600 dark:text-blue-400 text-[10px] font-semibold shrink-0">
+                      {netSentimentScore >= 0 ? `+${netSentimentScore}` : netSentimentScore} <span className="font-normal text-gray-400">({positivePct}% pos)</span>
                     </span>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 3-Tier Sentiment Summary Badges */}
-          <div className="mt-3 pt-2.5 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-3 gap-2 text-center">
-            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
-              <p className="text-xs sm:text-sm font-bold text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">{positiveCount}</p>
-              <p className="text-[10px] sm:text-[11px] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] truncate">Positive ({positivePct}%)</p>
-            </div>
-            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-warning-bg)] dark:bg-[var(--color-warning-dark-bg)] border border-[var(--color-warning-border)] dark:border-[var(--color-warning-dark-border)]">
-              <p className="text-xs sm:text-sm font-bold text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)]">{neutralCount}</p>
-              <p className="text-[10px] sm:text-[11px] text-[var(--color-warning-text)] dark:text-[var(--color-warning-dark-text)] truncate">Neutral ({neutralPct}%)</p>
-            </div>
-            <div className="p-1.5 sm:p-2 rounded-md bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40">
-              <p className="text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400">{criticalCount}</p>
-              <p className="text-[10px] sm:text-[11px] text-rose-600 dark:text-rose-400 truncate">Critical ({criticalPct}%)</p>
+                </>
+              ) : (
+                <>
+                  {sentimentData.map((item) => (
+                    <div key={item.name} className="flex items-center justify-between text-xs min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="text-gray-700 dark:text-zinc-300 font-medium truncate text-[11px]">
+                          {item.name}
+                        </span>
+                      </div>
+                      <span className="text-gray-500 dark:text-zinc-400 text-[10px] font-semibold shrink-0">
+                        {item.percentage}% <span className="font-normal text-gray-400">({item.value})</span>
+                      </span>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between text-xs min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-blue-600" />
+                      <span className="text-gray-700 dark:text-zinc-300 font-medium truncate text-[11px]">
+                        Net Sentiment
+                      </span>
+                    </div>
+                    <span className="text-blue-600 dark:text-blue-400 text-[10px] font-semibold shrink-0">
+                      {netSentimentScore >= 0 ? `+${netSentimentScore}` : netSentimentScore} <span className="font-normal text-gray-400">(Score)</span>
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

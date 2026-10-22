@@ -13,7 +13,6 @@ import {
 import SimplePagination from '../../components/common/SimplePagination';
 import PlacesHeader from './PlacesHeader';
 import PlacesStats from './PlacesStats';
-import FeaturedPlaces from './FeaturedPlaces';
 import PlacesToolbar from './PlacesToolbar';
 import PlacesList from './PlacesList';
 import PlaceModal from './PlaceModal';
@@ -332,14 +331,7 @@ export default function Places() {
       {/* 2. Key Metrics & Analytics Row */}
       <PlacesStats places={places} />
 
-      {/* 3. Featured / Top-Rated Attractions Showcase */}
-      <FeaturedPlaces
-        places={places}
-        onViewPlace={handleView}
-        onEditPlace={openEditModal}
-      />
-
-      {/* 4. Main Places Explorer Container */}
+      {/* 3. Main Places Explorer Container */}
       <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] overflow-hidden flex-1">
         {/* Search & Filter Toolbar */}
         <PlacesToolbar

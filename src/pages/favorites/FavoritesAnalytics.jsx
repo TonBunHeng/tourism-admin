@@ -40,6 +40,7 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
   const [visitFilter, setVisitFilter] = useState('ALL');
   const [apiAnalytics, setApiAnalytics] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [favoritesChartTab, setFavoritesChartTab] = useState('category');
 
   const timeframeLabel = useMemo(() => {
     switch (timeframe) {
@@ -591,121 +592,195 @@ export default function FavoritesAnalytics({ favorites: initialFavorites = [] })
         </div>
 
         {/* Chart 2: Journey Conversion & Category Hub */}
-        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-xs border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-4 sm:p-5 flex flex-col justify-between">
+        <div className="bg-[var(--color-white)] dark:bg-[var(--color-bg-dark)] rounded-md shadow-sm border border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] p-5 flex flex-col justify-between h-full">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-3 border-b border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
               <div>
                 <h3 className="font-semibold text-sm md:text-base text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] flex items-center gap-2">
                   <Compass className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Journey Conversion & Category Hub</span>
                 </h3>
-                <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] mt-0.5">
-                  Traveler conversion rate and destination wishlist share
+                <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                  Wishlist breakdown by category and trip completion status
                 </p>
               </div>
-              <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-md border shrink-0 ${conversionStatus.color}`}>
-                Conversion {visitedPct}% • {conversionStatus.label}
-              </span>
+              <div className="flex items-center gap-1 bg-gray-100 dark:bg-zinc-800/80 p-0.5 rounded-md border border-gray-200/50 dark:border-zinc-700/50 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setFavoritesChartTab('category')}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-sm transition-all cursor-pointer ${
+                    favoritesChartTab === 'category'
+                      ? 'bg-[var(--color-white)] dark:bg-zinc-900 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-xs'
+                      : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  By Category
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFavoritesChartTab('journey')}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-sm transition-all cursor-pointer ${
+                    favoritesChartTab === 'journey'
+                      ? 'bg-[var(--color-white)] dark:bg-zinc-900 text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] shadow-xs'
+                      : 'text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  Journey Status
+                </button>
+              </div>
             </div>
 
-            {/* Split Panel: Donut on Left, Category Matrix on Right */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-              {/* Left Column: Donut Conversion Gauge */}
-              <div className="sm:col-span-5 flex flex-col items-center justify-center">
-                <div className="relative w-full h-[160px] flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={journeyData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={46}
-                        outerRadius={68}
-                        paddingAngle={3}
-                        dataKey="value"
-                        isAnimationActive={true}
-                        animationDuration={800}
-                      >
-                        {journeyData.map((entry, index) => (
-                          <Cell key={`donut-cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2 rounded-md shadow-md text-xs space-y-0.5">
-                                <p className="font-semibold text-gray-900 dark:text-zinc-100">{data.name}</p>
-                                <p className="text-gray-600 dark:text-zinc-400">{data.value} places ({data.percentage}%)</p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  {/* Center Metric */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] tracking-tight">
-                      {visitedPct}%
+            {/* Donut Chart Container (Modeled identically to CategoryDistribution) */}
+            <div className="relative h-[250px] w-full flex items-center justify-center my-1">
+              {total === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-gray-400 text-xs">
+                  <Compass className="w-8 h-8 mb-2 stroke-1 text-gray-300 dark:text-zinc-600" />
+                  <p>No favorites recorded yet</p>
+                </div>
+              ) : (
+                <>
+                  {/* Center Donut Label */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                    <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100">
+                      {favoritesChartTab === 'category' ? total.toLocaleString() : `${visitedPct}%`}
                     </span>
-                    <span className="text-[10px] font-semibold uppercase text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] tracking-wider">
-                      Conversion
+                    <span className="text-[11px] text-gray-500 dark:text-zinc-400 font-medium">
+                      {favoritesChartTab === 'category' ? 'Total Favorites' : 'Conversion Rate'}
                     </span>
                   </div>
-                </div>
 
-                <div className="text-center mt-1">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-[#003E83] dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
-                    Active Travelers: {uniqueUsers}
-                  </span>
-                </div>
-              </div>
-
-              {/* Right Column: Category Breakdown Matrix */}
-              <div className="sm:col-span-7 flex flex-col justify-center space-y-2">
-                {categoryData.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-6">No category records found</p>
-                ) : (
-                  categoryData.slice(0, 5).map((item) => (
-                    <div key={item.name} className="flex items-center gap-2 text-xs">
-                      <span className="w-24 font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate shrink-0" title={item.name}>
-                        {item.name}
-                      </span>
-                      <div className="flex-1 bg-gray-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-700 ease-out"
-                          style={{
-                            width: `${item.percentage}%`,
-                            backgroundColor: item.fillColor
+                  <div className="w-full h-full relative z-10">
+                    <ResponsiveContainer width="100%" height="100%" key={`fav-dist-${favoritesChartTab}`}>
+                      <PieChart>
+                        <Pie
+                          data={
+                            favoritesChartTab === 'category'
+                              ? (categoryData.length > 0 ? categoryData : [{ name: 'No Category', count: 1, percentage: 0, fillColor: '#9CA3AF' }]).map(c => ({
+                                  name: c.name,
+                                  fullName: c.name,
+                                  count: Number(c.count) || 0,
+                                  percentage: c.percentage || 0,
+                                  fill: c.fillColor || '#003E83'
+                                }))
+                              : journeyData.map(j => ({
+                                  name: j.name,
+                                  fullName: j.name,
+                                  count: Number(j.value) || 0,
+                                  percentage: j.percentage || 0,
+                                  fill: j.color || '#10B981'
+                                }))
+                          }
+                          dataKey="count"
+                          nameKey="fullName"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={65}
+                          outerRadius={100}
+                          paddingAngle={3}
+                          stroke="none"
+                          isAnimationActive={true}
+                          animationDuration={600}
+                          animationEasing="ease-out"
+                        >
+                          {(favoritesChartTab === 'category'
+                            ? (categoryData.length > 0 ? categoryData.map(c => c.fillColor || '#003E83') : ['#9CA3AF'])
+                            : journeyData.map(j => j.color || '#10B981')
+                          ).map((color, index) => (
+                            <Cell key={`cell-${index}`} fill={color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          wrapperStyle={{ zIndex: 50, pointerEvents: 'none' }}
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-[var(--color-white)] dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 p-2.5 rounded-md shadow-md text-xs space-y-1">
+                                  <p className="font-semibold text-gray-900 dark:text-zinc-100 flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: data.fill }} />
+                                    {data.fullName || data.name}
+                                  </p>
+                                  <div className="flex items-center gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
+                                    <span className="text-gray-900 dark:text-zinc-100 font-bold">
+                                      {data.count.toLocaleString()} {data.count === 1 ? 'place' : 'places'}
+                                    </span>
+                                    <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                                      ({data.percentage}%)
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
                           }}
                         />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Legend / Breakdown Grid (CategoryDistribution design) */}
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2 pt-2 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+              {favoritesChartTab === 'category' ? (
+                <>
+                  {categoryData.slice(0, 6).map((item) => (
+                    <div key={item.name} className="flex items-center justify-between text-xs min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.fillColor }} />
+                        <span className="text-gray-700 dark:text-zinc-300 font-medium truncate text-[11px]">
+                          {item.name}
+                        </span>
                       </div>
-                      <span className="w-14 text-right font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] text-[11px] shrink-0">
-                        {item.count} ({item.percentage}%)
+                      <span className="text-gray-500 dark:text-zinc-400 text-[10px] font-semibold shrink-0">
+                        {item.percentage}% <span className="font-normal text-gray-400">({item.count})</span>
                       </span>
                     </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Symmetrical 3-Card Metrics Footer */}
-          <div className="mt-3 pt-2.5 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)] grid grid-cols-3 gap-2 text-center">
-            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-success-bg)] dark:bg-[var(--color-success-dark-bg)] border border-[var(--color-success-border)] dark:border-[var(--color-success-dark-border)]">
-              <p className="text-xs sm:text-sm font-bold text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)]">{visitedCount}</p>
-              <p className="text-[10px] sm:text-[11px] text-[var(--color-success-text)] dark:text-[var(--color-success-dark-text)] truncate">Visited ({visitedPct}%)</p>
-            </div>
-            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-info-bg)] dark:bg-[var(--color-info-dark-bg)] border border-[var(--color-info-border)] dark:border-[var(--color-info-dark-border)]">
-              <p className="text-xs sm:text-sm font-bold text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)]">{plannedCount}</p>
-              <p className="text-[10px] sm:text-[11px] text-[var(--color-info-text)] dark:text-[var(--color-info-dark-text)] truncate">To Visit ({plannedPct}%)</p>
-            </div>
-            <div className="p-1.5 sm:p-2 rounded-md bg-[var(--color-purple-badge-bg)] dark:bg-[var(--color-purple-badge-dark-bg)] border border-[var(--color-purple-badge-border)] dark:border-[var(--color-purple-badge-dark-border)]">
-              <p className="text-xs sm:text-sm font-bold text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)]">{uniqueUsers}</p>
-              <p className="text-[10px] sm:text-[11px] text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] truncate">Travelers</p>
+                  ))}
+                  {categoryData.length === 0 && (
+                    <p className="text-xs text-gray-400 col-span-2 text-center py-2">No category records found</p>
+                  )}
+                </>
+              ) : (
+                <>
+                  {journeyData.map((item) => (
+                    <div key={item.name} className="flex items-center justify-between text-xs min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="text-gray-700 dark:text-zinc-300 font-medium truncate text-[11px]">
+                          {item.name}
+                        </span>
+                      </div>
+                      <span className="text-gray-500 dark:text-zinc-400 text-[10px] font-semibold shrink-0">
+                        {item.percentage}% <span className="font-normal text-gray-400">({item.value})</span>
+                      </span>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between text-xs min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-purple-500" />
+                      <span className="text-gray-700 dark:text-zinc-300 font-medium truncate text-[11px]">
+                        Active Travelers
+                      </span>
+                    </div>
+                    <span className="text-purple-600 dark:text-purple-400 text-[10px] font-semibold shrink-0">
+                      {uniqueUsers} <span className="font-normal text-gray-400">(Wishlists)</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-amber-500" />
+                      <span className="text-gray-700 dark:text-zinc-300 font-medium truncate text-[11px]">
+                        Avg Rating
+                      </span>
+                    </div>
+                    <span className="text-amber-600 dark:text-amber-400 text-[10px] font-semibold shrink-0">
+                      {avgRating} ★
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

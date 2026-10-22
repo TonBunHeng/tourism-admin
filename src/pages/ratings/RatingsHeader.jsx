@@ -20,7 +20,7 @@ export default function RatingsHeader() {
           className="flex items-center justify-center gap-1.5 md:gap-2 px-4 py-2 text-xs md:text-sm font-medium rounded-md bg-[#003E83] hover:bg-[#002e62] text-white transition-colors shrink-0 w-full sm:w-auto cursor-pointer"
         >
           <BarChart3 className="w-4 h-4 shrink-0" />
-          <span>Ratings Analytics</span>
+          <span>Analytics</span>
         </Link>
       </div>
     </div>
