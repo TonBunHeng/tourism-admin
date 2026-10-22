@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
-  Sparkles, Compass, CheckCircle, AlertCircle, Eye, Edit, Trash2,
+  Compass, CheckCircle, AlertCircle, Eye, Edit, Trash2,
   Plus, RefreshCw, Star, MapPin, Clock, Users, DollarSign, ChevronDown
 } from 'lucide-react';
 import tourService from '../../services/tourService';
@@ -19,7 +19,6 @@ export default function Tours() {
   const cachedTours = getPageCache('tours_data');
   const [tours, setTours] = useState(() => cachedTours || []);
   const [loading, setLoading] = useState(() => !cachedTours);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [destinationFilter, setDestinationFilter] = useState('All');
 
@@ -33,7 +32,6 @@ export default function Tours() {
   const itemsPerPage = 10;
 
   const fetchTours = async () => {
-    setIsRefreshing(true);
     try {
       const res = await tourService.getTours({ per_page: 100 });
       const data = res?.data || res;
@@ -61,7 +59,6 @@ export default function Tours() {
       console.warn('Backend tours fetch notice:', err);
       if (!cachedTours) setTours([]);
     } finally {
-      setIsRefreshing(false);
       setLoading(false);
     }
   };
@@ -322,34 +319,158 @@ export default function Tours() {
           </div>
         </div>
 
-        {/* Table View */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-[var(--color-border-light)] dark:divide-[var(--color-border-dark)]">
+        {/* Mobile & Tablet Card List View (Visible on screens below lg, no horizontal scroll) */}
+        <div className="lg:hidden divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)]">
+          {loading ? (
+            <div className="text-center py-12 text-[var(--color-text-muted-light)]">
+              <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#003E83]" />
+              Loading tour packages...
+            </div>
+          ) : paginatedTours.length === 0 ? (
+            <div className="text-center py-12 px-4">
+              <Compass className="w-12 h-12 text-[#003E83] mx-auto mb-2 opacity-80" />
+              <h3 className="text-base font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] mb-1">
+                No tour packages found
+              </h3>
+              <p className="text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                Try adjusting your destination or status filter
+              </p>
+            </div>
+          ) : (
+            paginatedTours.map((tour) => {
+              const isActive = tour.status === 'active';
+              return (
+                <div
+                  key={tour.id}
+                  onClick={() => setViewingTour(tour)}
+                  className="p-4 hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={tour.cover_image}
+                      alt={tour.title}
+                      className="w-12 h-12 rounded-md object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80';
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
+                            {tour.title}
+                          </p>
+                          <p className="text-xs text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] truncate">
+                            {tour.category}
+                          </p>
+                        </div>
+                        <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold border ${getStatusColor(isActive ? 'active' : 'draft')}`}>
+                          {isActive ? 'Published' : 'Draft'}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                        <span className="flex items-center gap-1 font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                          <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                          {tour.destination}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                          {tour.duration}
+                        </span>
+                        <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400 font-medium">
+                          <Users className="w-3.5 h-3.5 shrink-0" />
+                          Up to {tour.max_travelers}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-[var(--color-border-subtle-light)] dark:border-[var(--color-border-dark)]">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                            ${tour.price_per_person} <span className="text-[10px] font-normal text-[var(--color-text-muted-light)]">/ person</span>
+                          </span>
+                          <span className="flex items-center gap-1 text-xs font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                            {tour.rating}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={() => setViewingTour(tour)}
+                            className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setEditingTour(tour); setIsModalOpen(true); }}
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90"
+                            title="Edit Package"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStatus(tour)}
+                            className={`p-1.5 rounded-md transition-all active:scale-90 ${
+                              isActive
+                                ? 'text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30'
+                                : 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30'
+                            }`}
+                            title={isActive ? 'Move to Draft' : 'Publish Tour'}
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTour(tour)}
+                            className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90"
+                            title="Delete Package"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop Responsive Table View (Strictly 100% width with table-fixed, zero horizontal scrolling) */}
+        <div className="hidden lg:block w-full overflow-hidden">
+          <table className="w-full text-left divide-y divide-[var(--color-border-subtle-light)] dark:divide-[var(--color-border-dark)] table-fixed">
             <thead className="bg-[var(--color-surface-hover-light)]/50 dark:bg-[var(--color-surface-hover-dark)]/50">
               <tr>
-                <th className="pl-4 pr-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider w-10 text-center">
+                <th className="w-9 pl-3 pr-1 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider text-center font-mono">
                   #
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
-                  TOUR PACKAGE & CATEGORY
+                <th className="w-[26%] xl:w-[23%] px-3 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider">
+                  Tour Package & Category
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
-                  DESTINATION & DURATION
+                <th className="w-[18%] xl:w-[16%] px-2.5 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider">
+                  Destination & Duration
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
-                  GROUP CAPACITY
+                <th className="hidden xl:table-cell xl:w-[10%] px-2.5 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider">
+                  Capacity
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
-                  PRICE / PERSON
+                <th className="w-[10%] xl:w-[9%] px-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider">
+                  Price
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
-                  RATING
+                <th className="w-[10%] xl:w-[9%] px-2 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider">
+                  Rating
                 </th>
-                <th className="px-4 py-3.5 text-left text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
-                  STATUS
+                <th className="w-[16%] xl:w-[13%] px-2.5 py-3.5 text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider">
+                  Status
                 </th>
-                <th className="px-4 py-3.5 text-right text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider whitespace-nowrap">
-                  ACTIONS
+                <th className="w-36 lg:w-40 pl-1 pr-4 py-3.5 text-right text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] uppercase tracking-wider">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -379,23 +500,23 @@ export default function Tours() {
 
                   return (
                     <tr key={tour.id} className="hover:bg-[var(--color-surface-hover-light)] dark:hover:bg-[var(--color-surface-hover-dark)]/50 transition-colors">
-                      <td className="pl-4 pr-2 py-3.5 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
+                      <td className="pl-3 pr-1 py-3 whitespace-nowrap text-xs font-medium text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)] font-mono text-center">
                         {startIndex + index + 1}
                       </td>
 
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-3">
+                      <td className="px-3 py-3 min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0">
                           <img
                             src={tour.cover_image}
                             alt={tour.title}
-                            className="w-10 h-10 rounded-md object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
+                            className="w-9 h-9 rounded-md object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.src = 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80';
                             }}
                           />
-                          <div className="min-w-0 max-w-xs">
-                            <div className="text-xs md:text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs md:text-sm font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate" title={tour.title}>
                               {tour.title}
                             </div>
                             <div className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] truncate">
@@ -405,71 +526,77 @@ export default function Tours() {
                         </div>
                       </td>
 
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <div className="text-xs text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] font-medium flex items-center gap-1">
+                      <td className="px-2.5 py-3 min-w-0">
+                        <div className="text-xs text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] font-medium flex items-center gap-1 min-w-0">
                           <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                          <span>{tour.destination}</span>
+                          <span className="truncate">{tour.destination}</span>
                         </div>
-                        <div className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center gap-1 mt-0.5">
-                          <Clock className="w-3 h-3 shrink-0" />
-                          <span>{tour.duration}</span>
+                        <div className="text-[11px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] flex items-center gap-1 mt-0.5 min-w-0">
+                          <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span className="truncate">{tour.duration}</span>
+                          <span className="xl:hidden text-[10px] text-purple-600 dark:text-purple-400 font-medium shrink-0">
+                            · {tour.max_travelers} pax
+                          </span>
                         </div>
                       </td>
 
-                      <td className="px-4 py-3.5 whitespace-nowrap text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                        <div className="flex items-center gap-1 font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                      <td className="hidden xl:table-cell px-2.5 py-3 min-w-0 text-xs text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                        <div className="flex items-center gap-1 font-medium text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
                           <Users className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
-                          <span>Up to {tour.max_travelers}</span>
+                          <span className="truncate">Up to {tour.max_travelers}</span>
                         </div>
                       </td>
 
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <div className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                      <td className="px-2 py-3 min-w-0">
+                        <div className="text-xs font-bold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
                           ${tour.price_per_person}
                         </div>
-                        <div className="text-[10px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">
+                        <div className="text-[10px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] truncate">
                           per person
                         </div>
                       </td>
 
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <div className="flex items-center gap-1 text-xs font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)]">
+                      <td className="px-2 py-3 min-w-0">
+                        <div className="flex items-center gap-1 text-xs font-semibold text-[var(--color-text-primary-light)] dark:text-[var(--color-white)] truncate">
                           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
                           <span>{tour.rating}</span>
                         </div>
-                        <div className="text-[10px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)]">
+                        <div className="text-[10px] text-[var(--color-text-muted-light)] dark:text-[var(--color-text-secondary-dark)] truncate">
                           {tour.reviews_count} reviews
                         </div>
                       </td>
 
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border ${getStatusColor(isActive ? 'active' : 'draft')}`}>
-                          {isActive ? <CheckCircle className="w-3.5 h-3.5 mr-1" /> : <AlertCircle className="w-3.5 h-3.5 mr-1" />}
-                          {isActive ? 'Published' : 'Draft'}
+                      <td className="px-2.5 py-3 min-w-0">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getStatusColor(isActive ? 'active' : 'draft')} shrink-0`}>
+                          {isActive ? <CheckCircle className="w-3 h-3 mr-1 shrink-0" /> : <AlertCircle className="w-3 h-3 mr-1 shrink-0 text-amber-600 dark:text-amber-400" />}
+                          <span className="truncate">{isActive ? 'Published' : 'Draft'}</span>
                         </span>
                       </td>
 
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap text-xs">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="pl-1 pr-4 py-3 text-right text-xs">
+                        <div className="flex items-center justify-end gap-1.5 shrink-0">
                           <button
+                            type="button"
                             onClick={() => setViewingTour(tour)}
-                            className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            className="p-1.5 text-[var(--color-purple-badge-text)] dark:text-[var(--color-purple-badge-dark-text)] hover:bg-[var(--color-purple-badge-bg)] dark:hover:bg-[var(--color-purple-badge-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer shrink-0"
                             title="View Details"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
 
                           <button
+                            type="button"
                             onClick={() => { setEditingTour(tour); setIsModalOpen(true); }}
-                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer shrink-0"
                             title="Edit Package"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
 
                           <button
+                            type="button"
                             onClick={() => handleToggleStatus(tour)}
-                            className={`p-1.5 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer ${
+                            className={`p-1.5 rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer shrink-0 ${
                               isActive
                                 ? 'text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30'
                                 : 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30'
@@ -480,8 +607,9 @@ export default function Tours() {
                           </button>
 
                           <button
+                            type="button"
                             onClick={() => handleDeleteTour(tour)}
-                            className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer"
+                            className="p-1.5 text-[var(--color-danger-text)] dark:text-[var(--color-danger-dark-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-[var(--color-danger-dark-bg)] rounded-md transition-all active:scale-90 hover:scale-105 cursor-pointer shrink-0"
                             title="Delete Package"
                           >
                             <Trash2 className="w-4 h-4" />
